@@ -1,6 +1,7 @@
 name: Speaker
 
 on:
+  workflow_dispatch:
   push:
     paths-ignore:
       - '.idea/**'
