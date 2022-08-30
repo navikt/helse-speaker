@@ -30,7 +30,7 @@ class AktivitetRiver(rapidsConnection: RapidsConnection): River.PacketListener {
         val fødselsnummer = packet["fødselsnummer"].asText()
         val varsler = packet["aktiviteter"].filter { it["nivå"].asText() == "VARSEL" }
         if (varsler.isEmpty()) return
-        sikkerlogg.info("Publiserer ${varsler.size} varsler for {}. {}", keyValue("fødselsnummer", fødselsnummer), keyValue("Varsler", varsler))
+        sikkerlogg.info("Publiserer ${varsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
         publiserVarsler(fødselsnummer, varsler, context)
     }
 
