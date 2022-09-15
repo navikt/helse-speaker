@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 
 internal class AktivitetRiver(
     rapidsConnection: RapidsConnection,
-    private val varselRepository: VarselRepository = VarselRepository()
+    private val varselRepository: VarselRepository
 ): River.PacketListener {
 
     private companion object {

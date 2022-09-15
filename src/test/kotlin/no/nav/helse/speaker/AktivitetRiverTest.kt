@@ -1,5 +1,6 @@
 package no.nav.helse.speaker
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -15,7 +16,7 @@ class AktivitetRiverTest {
     @BeforeEach
     fun beforeEach() {
         rapid.reset()
-        AktivitetRiver(rapid)
+        AktivitetRiver(rapid, repo)
     }
 
     @Test
@@ -74,6 +75,18 @@ class AktivitetRiverTest {
         val melding = lesMelding("testmelding_uten_fnr.json")
         rapid.sendTestMessage(melding)
         assertEquals(0, rapid.inspektør.size)
+    }
+
+    private val repo = object : VarselRepository {
+        override fun opprett(
+            id: UUID,
+            kode: String,
+            melding: String,
+            kontekster: List<JsonNode>,
+            tidsstempel: LocalDateTime
+        ): Varsel {
+            return Varsel.gyldig(id, melding, kode, kontekster, tidsstempel, null, null, false)
+        }
     }
 
 
