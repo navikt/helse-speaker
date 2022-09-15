@@ -9,14 +9,14 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDateTime
 import java.util.*
 
-class AktivitetRiverTest {
+class VarselRiverTest {
 
     private val rapid = TestRapid()
 
     @BeforeEach
     fun beforeEach() {
         rapid.reset()
-        AktivitetRiver(rapid, repo)
+        VarselRiver(rapid, repo)
     }
 
     @Test
@@ -91,5 +91,5 @@ class AktivitetRiverTest {
 
 
     private fun lesMelding(filnavn: String) =
-        AktivitetRiverTest::class.java.classLoader.getResource("meldinger/$filnavn")!!.readText()
+        VarselRiverTest::class.java.classLoader.getResource("meldinger/$filnavn")!!.readText()
 }

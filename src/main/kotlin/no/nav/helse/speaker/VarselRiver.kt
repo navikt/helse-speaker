@@ -7,7 +7,7 @@ import no.nav.helse.speaker.Varsel.Companion.toJson
 import no.nav.helse.speaker.VarselRepository.Companion.varsler
 import org.slf4j.LoggerFactory
 
-internal class AktivitetRiver(
+internal class VarselRiver(
     rapidsConnection: RapidsConnection,
     private val varselRepository: VarselRepository
 ): River.PacketListener {

@@ -13,7 +13,7 @@ private fun createApp(env: Map<String, String>): RapidsConnection {
     val dataSourceBuilder = DataSourceBuilder(env)
     val dataSource by lazy { dataSourceBuilder.getDataSource() }
     return RapidApplication.create(env).apply {
-        AktivitetRiver(this, ActualVarselRepository { dataSource } )
+        VarselRiver(this, ActualVarselRepository { dataSource } )
         register(object: RapidsConnection.StatusListener {
             override fun onStartup(rapidsConnection: RapidsConnection) {
                 dataSourceBuilder.migrate()

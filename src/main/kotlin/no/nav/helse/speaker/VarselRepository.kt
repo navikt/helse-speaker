@@ -22,6 +22,9 @@ internal interface VarselRepository {
 internal class ActualVarselRepository(dataSource: () -> DataSource): VarselRepository {
     private val varselDao = VarselDao(dataSource())
 
-    override fun opprett(id: UUID, kode: String, melding: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime) =
-        Varsel.gyldig(id, melding, kode, kontekster, tidsstempel, null, null, deprecated = false)
+    override fun opprett(id: UUID, kode: String, melding: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime): Varsel {
+        if (!varselDao.valider(kode))
+            return Varsel.ugyldig(id, melding, kode, kontekster, tidsstempel, null, null, deprecated = false)
+        return Varsel.gyldig(id, melding, kode, kontekster, tidsstempel, null, null, deprecated = false)
+    }
 }
