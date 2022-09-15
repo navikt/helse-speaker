@@ -4,6 +4,9 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import java.time.LocalDateTime
+import java.util.*
 
 class AktivitetRiverTest {
 
@@ -24,16 +27,37 @@ class AktivitetRiverTest {
 
     @Test
     fun innhold() {
-        val melding = lesMelding("testmelding.json")
+        val melding = lesMelding("testmelding_innhold.json")
         rapid.sendTestMessage(melding)
+        val varsler = rapid.inspektør.message(0)["varsler"]
+        val varsel = varsler[0]
         assertEquals("aktivitetslogg_nye_varsler", rapid.inspektør.message(0)["@event_name"].asText())
         assertEquals("12345678910", rapid.inspektør.message(0)["fødselsnummer"].asText())
-        assertEquals(1, rapid.inspektør.message(0)["varsler"].size())
+        assertEquals(1, varsler.size())
+        assertEquals("A_BC_1", varsel["kode"].asText())
+        assertEquals("En melding", varsel["tittel"].asText())
+        assertDoesNotThrow { LocalDateTime.parse(varsel["tidsstempel"].asText()) }
+        assertDoesNotThrow { UUID.fromString(varsel["id"].asText()) }
+        assertEquals(2, varsel["kontekster"].size())
     }
 
     @Test
     fun `aktiviteter uten varsler medfører ikke melding på Kafka`() {
         val melding = lesMelding("testmelding_uten_varsler.json")
+        rapid.sendTestMessage(melding)
+        assertEquals(0, rapid.inspektør.size)
+    }
+
+    @Test
+    fun `varsel uten varselkode medfører ikke melding på kafka`() {
+        val melding = lesMelding("testmelding_varsel_uten_varselkode.json")
+        rapid.sendTestMessage(melding)
+        assertEquals(0, rapid.inspektør.size)
+    }
+
+    @Test
+    fun `varsel uten id medfører ikke melding på kafka`() {
+        val melding = lesMelding("testmelding_varsel_uten_id.json")
         rapid.sendTestMessage(melding)
         assertEquals(0, rapid.inspektør.size)
     }

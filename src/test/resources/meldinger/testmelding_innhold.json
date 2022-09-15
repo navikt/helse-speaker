@@ -1,0 +1,30 @@
+{
+  "@event_name": "aktivitetslogg_ny_aktivitet",
+  "fødselsnummer": "12345678910",
+  "aktiviteter": [
+    {
+      "id": "abf24a19-6510-4833-83ac-8a0a34957f73",
+      "nivå": "VARSEL",
+      "varselkode": "A_BC_1",
+      "melding": "En melding",
+      "tidsstempel": "2022-08-22T16:17:40.564",
+      "kontekster": [
+        {
+          "konteksttype": "Person",
+          "kontekstmap": {
+            "fødselsnummer": "12345678910",
+            "aktørId": "1234567891011"
+          }
+        },
+        {
+          "konteksttype": "Arbeidsgiver",
+          "kontekstmap": {
+            "organisasjonsnummer": "987654321"
+          }
+        }
+      ]
+    }
+  ],
+  "@id": "2891faac-5bf3-46f2-92af-6e8f509d137e",
+  "@opprettet": "2022-08-22T16:17:40.625910785"
+}
