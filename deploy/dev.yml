@@ -32,6 +32,13 @@ spec:
     path: /metrics
   kafka:
     pool: nav-dev
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        diskAutoresize: true
+        databases:
+          - name: speaker
+            envVarPrefix: DATABASE
   secureLogs:
     enabled: true
   env:
