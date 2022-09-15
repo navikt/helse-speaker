@@ -4,14 +4,21 @@ import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.rapids_rivers.*
 import no.nav.helse.speaker.Varsel.Companion.toJson
+import no.nav.helse.speaker.VarselRepository.Companion.varsler
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 
-internal class AktivitetRiver(rapidsConnection: RapidsConnection, private val varselRepository: VarselRepository = VarselRepository()): River.PacketListener {
+internal class AktivitetRiver(
+    rapidsConnection: RapidsConnection,
+    private val varselRepository: VarselRepository = VarselRepository()
+): River.PacketListener {
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        private fun List<JsonNode>.logg() {
+            forEach {
+                sikkerlogg.info("Varsel \"${it["melding"].asText()}\" med {} mangler kode", keyValue("id", it["id"].asText()))
+            }
+        }
     }
 
     init {
@@ -32,17 +39,14 @@ internal class AktivitetRiver(rapidsConnection: RapidsConnection, private val va
     }
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val fødselsnummer = packet["fødselsnummer"].asText()
-        val varsler = packet["aktiviteter"].filter { it["nivå"].asText() == "VARSEL" }.map {
-            val id = UUID.fromString(it["id"].asText())
-            val melding = it["melding"].asText()
-            val kontekster = it["kontekster"].toList()
-            val tidsstempel = LocalDateTime.parse(it["tidsstempel"].asText())
-            val kode = it["varselkode"]?.asText() ?: return
-            varselRepository.opprett(id, kode, melding, kontekster, tidsstempel)
-        }
-        if (varsler.isEmpty()) return
-        sikkerlogg.info("Publiserer ${varsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
-        publiserVarsler(fødselsnummer, varsler, context)
+        val (varslerMedKode, varslerUtenKode) = packet["aktiviteter"]
+            .filter { it["nivå"].asText() == "VARSEL" }
+            .partition { it["varselkode"]?.asText() != null }
+        varslerUtenKode.logg()
+
+        if (varslerMedKode.isEmpty()) return
+        sikkerlogg.info("Publiserer ${varslerMedKode.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
+        publiserVarsler(fødselsnummer, varslerMedKode.varsler(varselRepository), context)
     }
 
     private fun publiserVarsler(fødselsnummer: String, varsler: List<Varsel>, context: MessageContext) {
