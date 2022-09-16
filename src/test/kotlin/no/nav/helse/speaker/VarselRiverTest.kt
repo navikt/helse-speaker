@@ -9,7 +9,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDateTime
 import java.util.*
 
-class VarselRiverTest {
+internal class VarselRiverTest {
 
     private val rapid = TestRapid()
 

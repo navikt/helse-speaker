@@ -13,13 +13,16 @@ class Varsel private constructor(
     private val tidsstempel: LocalDateTime,
     private val forklaring: String?,
     private val handling: String?,
-    private val deprecated: Boolean
+    private val avviklet: Boolean
 ) {
-    private fun toJson(): Map<String, Any> {
+    private fun toJson(): Map<String, Any?> {
         return mapOf(
             "id" to id,
-            "tittel" to tittel,
             "kode" to kode,
+            "tittel" to tittel,
+            "forklaring" to forklaring,
+            "handling" to handling,
+            "avviklet" to avviklet,
             "tidsstempel" to tidsstempel,
             "kontekster" to kontekster
         )
@@ -28,7 +31,7 @@ class Varsel private constructor(
     internal fun erGyldig() = gyldigKode
 
     internal companion object {
-        internal fun List<Varsel>.toJson(): List<Map<String, Any>> = map { it.toJson() }
+        internal fun List<Varsel>.toJson(): List<Map<String, Any?>> = map { it.toJson() }
 
         internal fun gyldig(id: UUID, tittel: String, kode: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime, beskrivelse: String?, handling: String?, deprecated: Boolean): Varsel {
             return Varsel(id, tittel, kode, true, kontekster, tidsstempel, beskrivelse, handling, deprecated)

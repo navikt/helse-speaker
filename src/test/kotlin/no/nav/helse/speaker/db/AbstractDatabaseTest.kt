@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.testcontainers.containers.PostgreSQLContainer
 import javax.sql.DataSource
 
-abstract class AbstractDatabaseTest {
+internal abstract class AbstractDatabaseTest {
 
     companion object {
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
@@ -50,6 +50,45 @@ abstract class AbstractDatabaseTest {
     fun resetDatabase() {
         sessionOf(dataSource).use  {
             it.run(queryOf("SELECT truncate_tables()").asExecute)
+        }
+    }
+
+    protected fun opprettVarsel(kode: String) {
+        opprettKode(kode)
+        opprettTittel(kode, "EN TITTEL")
+        opprettForklaring(kode, "EN FORKLARING")
+        opprettHandling(kode, "EN HANDLING")
+    }
+
+    protected fun opprettKode(kode: String) {
+        sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val query = "INSERT INTO varselkode(kode, avviklet, opprettet, endret) VALUES (?, false, now(), null)"
+            it.run(queryOf(query, kode).asExecute)
+        }
+    }
+
+    private fun opprettTittel(kode: String, tittel: String) {
+        sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val query = "INSERT INTO varsel_tittel(varselkode_ref, tittel) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?)"
+            it.run(queryOf(query, kode, tittel).asExecute)
+        }
+    }
+
+    private fun opprettForklaring(kode: String, forklaring: String) {
+        sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val query = "INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?)"
+            it.run(queryOf(query, kode, forklaring).asExecute)
+        }
+    }
+
+    private fun opprettHandling(kode: String, handling: String) {
+        sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val query = "INSERT INTO varsel_handling(varselkode_ref, handling) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?)"
+            it.run(queryOf(query, kode, handling).asExecute)
         }
     }
 }
