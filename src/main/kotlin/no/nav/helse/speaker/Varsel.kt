@@ -11,7 +11,7 @@ class Varsel private constructor(
     private val gyldigKode: Boolean,
     private val kontekster: List<JsonNode>,
     private val tidsstempel: LocalDateTime,
-    private val beskrivelse: String?,
+    private val forklaring: String?,
     private val handling: String?,
     private val deprecated: Boolean
 ) {
@@ -33,8 +33,8 @@ class Varsel private constructor(
         internal fun gyldig(id: UUID, tittel: String, kode: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime, beskrivelse: String?, handling: String?, deprecated: Boolean): Varsel {
             return Varsel(id, tittel, kode, true, kontekster, tidsstempel, beskrivelse, handling, deprecated)
         }
-        internal fun ugyldig(id: UUID, tittel: String, kode: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime, beskrivelse: String?, handling: String?, deprecated: Boolean): Varsel {
-            return Varsel(id, tittel, kode, false, kontekster, tidsstempel, beskrivelse, handling, deprecated)
+        internal fun ugyldig(id: UUID, tittel: String, kode: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime): Varsel {
+            return Varsel(id, tittel, kode, false, kontekster, tidsstempel, null, null, false)
         }
 
         internal fun JsonNode.fromJson(repository: VarselRepository): Varsel {
