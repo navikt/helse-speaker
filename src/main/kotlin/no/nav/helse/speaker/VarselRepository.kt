@@ -2,6 +2,7 @@ package no.nav.helse.speaker
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.speaker.Varsel.Companion.fromJson
+import no.nav.helse.speaker.Varsel.Companion.loggUgyldig
 import no.nav.helse.speaker.db.VarselDao
 import java.time.LocalDateTime
 import java.util.*
@@ -14,6 +15,7 @@ internal interface VarselRepository {
         fun List<JsonNode>.varsler(repository: VarselRepository): List<Varsel> {
             //TODO: Slack-integrasjon for ikke-gyldige varselkoder
             val (gyldige, ikkeGyldige) = map { it.fromJson(repository) }.partition(Varsel::erGyldig)
+            ikkeGyldige.loggUgyldig()
             return gyldige
         }
     }
