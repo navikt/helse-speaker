@@ -45,8 +45,9 @@ internal class VarselRiver(
         varslerUtenKode.logg()
 
         if (varslerMedKode.isEmpty()) return
-        sikkerlogg.info("Publiserer ${varslerMedKode.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
-        publiserVarsler(fødselsnummer, varslerMedKode.varsler(varselRepository), context)
+        val gyldigeVarsler = varslerMedKode.varsler(varselRepository)
+        sikkerlogg.info("Publiserer ${gyldigeVarsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
+        publiserVarsler(fødselsnummer, gyldigeVarsler, context)
     }
 
     private fun publiserVarsler(fødselsnummer: String, varsler: List<Varsel>, context: MessageContext) {
