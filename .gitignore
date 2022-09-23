@@ -115,7 +115,7 @@ fabric.properties
 ### Gradle template
 .gradle
 **/build/
-!src/**/build/
+!speaker-backend/src/**/build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
