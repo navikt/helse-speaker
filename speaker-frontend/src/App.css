@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
+}
+
+html,
+body {
+  height: 100vh;
+}
+
+body {
+  background-color: var(--navds-semantic-color-canvas-background-light);
+  font-family: 'Source Sans Pro', Helvetica, sans-serif;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+:root {
+  --ekspandert-warning-background: #fffaf3;
+}
