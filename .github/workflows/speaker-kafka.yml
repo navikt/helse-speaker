@@ -1,13 +1,15 @@
-name: Speaker
+name: Speaker-kafka
 
 on:
   workflow_dispatch:
   push:
-    paths-ignore:
-      - '.idea/**'
-      - 'README.md'
-      - 'LICENSE'
-      - 'CODEOWNERS'
+    paths:
+      - 'deploy/dev-kafka.yml'
+      - 'speaker-kafka/**'
+      - 'speaker-database/**'
+      - 'build.gradle.kts'
+      - '.github/workflows/speaker-kafka.yml'
+      - 'Dockerfile-kafka'
     branches:
       - main
 
@@ -19,7 +21,7 @@ jobs:
       - name: create docker tag
         run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
     outputs:
-      image: ghcr.io/${{ github.repository }}/speaker:${{ env.TAG }}
+      image: ghcr.io/${{ github.repository }}/speaker-kafka:${{ env.TAG }}
 
   build:
     name: build docker image
@@ -33,9 +35,9 @@ jobs:
           java-version: '17.x'
           cache: 'gradle'
       - name: test and build
-        run: ./gradlew test build
+        run: ./gradlew :speaker-kafka:test :speaker-kafka:build
       - name: build docker image
-        run: docker build . --pull -t ${{ needs.set_version.outputs.image }}
+        run: docker build -f Dockerfile-kafka . --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
         run: |
           docker login ghcr.io --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }}
@@ -51,7 +53,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --project-name=speaker --org=tbd-ty7 --fail-on=all
+          args: --project-name=speaker-kafka --org=tbd-ty7 --fail-on=all
           command: monitor
 
   deployDev:
@@ -64,7 +66,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: deploy/dev.yml
+          RESOURCE: deploy/dev-kafka.yml
           IMAGE: ${{ needs.set_version.outputs.image }}
 
 #  deployProd:
@@ -77,5 +79,5 @@ jobs:
 #        env:
 #          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
 #          CLUSTER: prod-gcp
-#          RESOURCE: deploy/prod.yml
+#          RESOURCE: deploy/prod-kafka.yml
 #          IMAGE: ${{ needs.set_version.outputs.image }}
