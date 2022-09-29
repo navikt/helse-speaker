@@ -4,7 +4,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.speaker.db.DataSourceBuilder
 
-fun main() {
+internal fun main() {
     val app = createApp(System.getenv())
     app.start()
 }

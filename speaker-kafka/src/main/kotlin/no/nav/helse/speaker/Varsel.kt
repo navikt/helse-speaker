@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-class Varsel private constructor(
+internal class Varsel private constructor(
     private val id: UUID,
     private val tittel: String,
     private val kode: String,
