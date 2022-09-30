@@ -15,7 +15,8 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
     fun `kan opprette nytt varsel`() {
         val varselkode = "EN_KODE"
         varselDao.nyttVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
-        assertVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        assertVarsel(varselkode, listOf("EN_TITTEL"), listOf("EN_FORKLARING"), listOf("EN_HANDLING"), false)
+        assertEndretTidspunkt(varselkode, false)
     }
 
     @Test
@@ -27,7 +28,75 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
         }
     }
 
-    private fun assertVarsel(kode: String, tittel: String, forklaring: String?, handling: String, avviklet: Boolean) {
+    @Test
+    fun `oppdater avviklet`() {
+        val varselkode = "EN_KODE"
+        varselDao.nyttVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        varselDao.oppdaterVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", true)
+        assertVarsel(varselkode, listOf("EN_TITTEL"), listOf("EN_FORKLARING"), listOf("EN_HANDLING"), true)
+        assertEndretTidspunkt(varselkode, true)
+    }
+
+    @Test
+    fun `oppdater tittel`() {
+        val varselkode = "EN_KODE"
+        varselDao.nyttVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        varselDao.oppdaterVarsel(varselkode, "EN_ANNEN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        assertVarsel(varselkode, listOf("EN_TITTEL", "EN_ANNEN_TITTEL"), listOf("EN_FORKLARING"), listOf("EN_HANDLING"), false)
+    }
+
+    @Test
+    fun `oppdater forklaring`() {
+        val varselkode = "EN_KODE"
+        varselDao.nyttVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        varselDao.oppdaterVarsel(varselkode, "EN_TITTEL", "EN_ANNEN_FORKLARING", "EN_HANDLING", false)
+        assertVarsel(varselkode, listOf("EN_TITTEL"), listOf("EN_FORKLARING", "EN_ANNEN_FORKLARING"), listOf("EN_HANDLING"), false)
+    }
+
+    @Test
+    fun `oppdater handling`() {
+        val varselkode = "EN_KODE"
+        varselDao.nyttVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        varselDao.oppdaterVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_ANNEN_HANDLING", false)
+        assertVarsel(varselkode, listOf("EN_TITTEL"), listOf("EN_FORKLARING"), listOf("EN_HANDLING", "EN_ANNEN_HANDLING"), false)
+    }
+
+    @Test
+    fun `fjern forklaring`() {
+        val varselkode = "EN_KODE"
+        varselDao.nyttVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        varselDao.oppdaterVarsel(varselkode, "EN_TITTEL", null, "EN_HANDLING", false)
+        assertVarsel(varselkode, listOf("EN_TITTEL"), listOf("EN_FORKLARING", null), listOf("EN_HANDLING"), false)
+    }
+
+    @Test
+    fun `ingen forklaring - deretter forklaring - deretter fjernes denne igjen`() {
+        val varselkode = "EN_KODE"
+        varselDao.nyttVarsel(varselkode, "EN_TITTEL", null, "EN_HANDLING", false)
+        varselDao.oppdaterVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        varselDao.oppdaterVarsel(varselkode, "EN_TITTEL", null, "EN_HANDLING", false)
+        assertVarsel(varselkode, listOf("EN_TITTEL"), listOf(null, "EN_FORKLARING", null), listOf("EN_HANDLING"), false)
+    }
+
+    @Test
+    fun `ingen handling - deretter handling - deretter fjernes denne igjen`() {
+        val varselkode = "EN_KODE"
+        varselDao.nyttVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", null, false)
+        varselDao.oppdaterVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        varselDao.oppdaterVarsel(varselkode, "EN_TITTEL", "EN_FORKLARING", null, false)
+        assertVarsel(varselkode, listOf("EN_TITTEL"), listOf("EN_FORKLARING"), listOf(null, "EN_HANDLING", null), false)
+    }
+
+    private fun assertEndretTidspunkt(kode: String, erSatt: Boolean) {
+        @Language("PostgreSQL")
+        val query = "SELECT endret FROM varselkode WHERE kode = ?"
+        val endretFinnes = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, kode).map { it.localDateTimeOrNull(1) }.asSingle)
+        }
+        assertEquals(erSatt, endretFinnes != null)
+    }
+
+    private fun assertVarsel(kode: String, tittel: List<String>, forklaring: List<String?>, handling: List<String?>, avviklet: Boolean) {
         assertTrue(finnVarselkode(kode))
         assertEquals(avviklet, finnAvviklet(kode))
         assertEquals(tittel, finnVarseltittel(kode))
@@ -51,27 +120,27 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
         }
     }
 
-    private fun finnVarseltittel(kode: String): String {
+    private fun finnVarseltittel(kode: String): List<String> {
         @Language("PostgreSQL")
-        val query = "SELECT tittel FROM varsel_tittel INNER JOIN varselkode v on v.id = varsel_tittel.varselkode_ref WHERE v.kode = ?"
+        val query = "SELECT tittel FROM varsel_tittel vt INNER JOIN varselkode v on v.id = vt.varselkode_ref WHERE v.kode = ?"
         return sessionOf(dataSource).use { session ->
-            requireNotNull(session.run(queryOf(query, kode).map { it.string(1) }.asSingle)) { "Fant ikke tittel for varselkode $kode" }
+            requireNotNull(session.run(queryOf(query, kode).map { it.string(1) }.asList)) { "Fant ikke tittel for varselkode $kode" }
         }
     }
 
-    private fun finnVarselforklaring(kode: String): String? {
+    private fun finnVarselforklaring(kode: String): List<String?> {
         @Language("PostgreSQL")
-        val query = "SELECT forklaring FROM varsel_forklaring INNER JOIN varselkode v on v.id = varsel_forklaring.varselkode_ref WHERE v.kode = ?"
+        val query = "SELECT vf.id, forklaring FROM varsel_forklaring vf INNER JOIN varselkode v on v.id = vf.varselkode_ref WHERE v.kode = ?"
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, kode).map { it.string(1) }.asSingle)
+            session.run(queryOf(query, kode).map { it.long(1) to it.stringOrNull(2) }.asList).map { it.second }
         }
     }
 
-    private fun finnVarselhandling(kode: String): String? {
+    private fun finnVarselhandling(kode: String): List<String?> {
         @Language("PostgreSQL")
-        val query = "SELECT handling FROM varsel_handling INNER JOIN varselkode v on v.id = varsel_handling.varselkode_ref WHERE v.kode = ?"
+        val query = "SELECT vh.id, handling FROM varsel_handling vh INNER JOIN varselkode v on v.id = vh.varselkode_ref WHERE v.kode = ?"
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, kode).map { it.string(1) }.asSingle)
+            session.run(queryOf(query, kode).map { it.long(1) to it.stringOrNull(2) }.asList).map { it.second }
         }
     }
 }

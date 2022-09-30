@@ -4,16 +4,6 @@
     <option name="dataSources">
       <list>
         <State>
-          <option name="id" value="f21d009a-4fd7-49d1-a354-de1156e6943b" />
-          <option name="name" value="DDL data source" />
-          <option name="languageId" value="PostgreSQL" />
-          <option name="urls">
-            <array>
-              <option value="file://$PROJECT_DIR$/src/main/resources/db/migration" />
-            </array>
-          </option>
-        </State>
-        <State>
           <option name="id" value="0139c41a-ecc2-4127-9ec7-999df6929671" />
           <option name="name" value="DDL data source" />
           <option name="languageId" value="PostgreSQL" />

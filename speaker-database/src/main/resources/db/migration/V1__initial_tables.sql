@@ -17,7 +17,7 @@ CREATE TABLE varsel_tittel(
 CREATE TABLE varsel_forklaring(
     id SERIAL NOT NULL PRIMARY KEY,
     varselkode_ref INT NOT NULL REFERENCES varselkode(id),
-    forklaring VARCHAR NOT NULL,
+    forklaring VARCHAR,
     opprettet timestamptz NOT NULL default now(),
     UNIQUE (varselkode_ref, forklaring)
 );
@@ -25,7 +25,7 @@ CREATE TABLE varsel_forklaring(
 CREATE TABLE varsel_handling(
     id SERIAL NOT NULL PRIMARY KEY,
     varselkode_ref INT NOT NULL REFERENCES varselkode(id),
-    handling VARCHAR NOT NULL,
+    handling VARCHAR,
     opprettet timestamptz NOT NULL default now(),
     UNIQUE (varselkode_ref, handling)
 );

@@ -14,8 +14,20 @@ internal class VarselDao(private val dataSource: DataSource) {
             it.transaction { tx ->
                 val kodeRef = tx.nyVarselkode(kode, avviklet) ?: throw VarselException.KodeEksisterer(kode)
                 tx.nyVarseltittel(kodeRef, tittel)
-                forklaring?.also { tx.nyVarselforklaring(kodeRef, forklaring) }
-                handling?.also { tx.nyVarselhandling(kodeRef, handling) }
+                tx.nyVarselforklaring(kodeRef, forklaring)
+                tx.nyVarselhandling(kodeRef, handling)
+            }
+        }
+    }
+
+    internal fun oppdaterVarsel(kode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean) {
+        sessionOf(dataSource).use {
+            it.transaction { tx ->
+                val kodeRef = tx.finnVarselRef(kode)
+                tx.oppdatertAvviklet(kode, avviklet)
+                tx.nyVarseltittel(kodeRef, tittel)
+                tx.nyVarselforklaring(kodeRef, forklaring)
+                tx.nyVarselhandling(kodeRef, handling)
             }
         }
     }
@@ -26,22 +38,34 @@ internal class VarselDao(private val dataSource: DataSource) {
         return run(queryOf(query, kode, avviklet).asUpdateAndReturnGeneratedKey)
     }
 
-    private fun TransactionalSession.nyVarseltittel(kodeRef: Long, tittel: String): Long? {
+    private fun TransactionalSession.oppdatertAvviklet(kode: String, avviklet: Boolean) {
+        @Language("PostgreSQL")
+        val query = "UPDATE varselkode SET endret = now(), avviklet = ? WHERE kode = ? AND avviklet != ?"
+        run(queryOf(query, avviklet, kode, avviklet).asExecute)
+    }
+
+    private fun TransactionalSession.finnVarselRef(kode: String): Long {
+        @Language("PostgreSQL")
+        val query = "SELECT id FROM varselkode WHERE kode = ?"
+        return requireNotNull(run(queryOf(query, kode).map { it.long(1) }.asSingle)) {"Finner ikke kode=${kode}"}
+    }
+
+    private fun TransactionalSession.nyVarseltittel(kodeRef: Long, tittel: String) {
         @Language("PostgreSQL")
         val query = "INSERT INTO varsel_tittel(varselkode_ref, tittel) VALUES (?, ?) ON CONFLICT(varselkode_ref, tittel) DO NOTHING"
-        return run(queryOf(query, kodeRef, tittel).asUpdateAndReturnGeneratedKey)
+        run(queryOf(query, kodeRef, tittel).asExecute)
     }
 
-    private fun TransactionalSession.nyVarselforklaring(kodeRef: Long, forklaring: String?): Long? {
+    private fun TransactionalSession.nyVarselforklaring(kodeRef: Long, forklaring: String?) {
         @Language("PostgreSQL")
         val query = "INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES (?, ?) ON CONFLICT(varselkode_ref, forklaring) DO NOTHING"
-        return run(queryOf(query, kodeRef, forklaring).asUpdateAndReturnGeneratedKey)
+        run(queryOf(query, kodeRef, forklaring).asExecute)
     }
 
-    private fun TransactionalSession.nyVarselhandling(kodeRef: Long, handling: String?): Long? {
+    private fun TransactionalSession.nyVarselhandling(kodeRef: Long, handling: String?){
         @Language("PostgreSQL")
         val query = "INSERT INTO varsel_handling(varselkode_ref, handling) VALUES (?, ?) ON CONFLICT(varselkode_ref, handling) DO NOTHING"
-        return run(queryOf(query, kodeRef, handling).asUpdateAndReturnGeneratedKey)
+        run(queryOf(query, kodeRef, handling).asExecute)
     }
 }
 
