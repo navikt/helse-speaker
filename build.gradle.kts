@@ -24,6 +24,10 @@ subprojects {
         set("hikariVersion", hikariVersion)
         set("kotliqueryVersion", kotliqueryVersion)
     }
+    repositories {
+        maven("https://jitpack.io")
+        mavenCentral()
+    }
 }
 //tasks.assemble {
 //    dependsOn("npm_run_build")

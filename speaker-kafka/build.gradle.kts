@@ -16,11 +16,6 @@ plugins {
     kotlin("jvm") apply true
 }
 
-repositories {
-    maven("https://jitpack.io")
-    mavenCentral()
-}
-
 dependencies {
     implementation("org.postgresql:postgresql:$postgresqlVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -35,10 +30,10 @@ dependencies {
 
     testImplementation(project(":speaker-database"))
     testImplementation("org.flywaydb:flyway-core:$flywayVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testImplementation("org.testcontainers:postgresql:$testcontainersPostgresqlVersion") {
         exclude("com.fasterxml.jackson.core")
     }
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
 

@@ -13,6 +13,16 @@
             </array>
           </option>
         </State>
+        <State>
+          <option name="id" value="0139c41a-ecc2-4127-9ec7-999df6929671" />
+          <option name="name" value="DDL data source" />
+          <option name="languageId" value="PostgreSQL" />
+          <option name="urls">
+            <array>
+              <option value="file://$PROJECT_DIR$/speaker-database/src/main/resources/db/migration" />
+            </array>
+          </option>
+        </State>
       </list>
     </option>
   </component>

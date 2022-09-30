@@ -106,7 +106,7 @@ INSERT INTO varsel_tittel(varselkode_ref, tittel) VALUES
     ((SELECT id FROM varselkode WHERE kode = 'RV_OS_2'), 'Utbetalingens fra og med-dato er endret. Kontroller simuleringen'),
     ((SELECT id FROM varselkode WHERE kode = 'RV_OS_3'), 'Endrer tidligere oppdrag. Kontroller simuleringen.'),
     ((SELECT id FROM varselkode WHERE kode = 'RV_RV_1'), 'Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden')
-ON CONFLICT(tittel) DO NOTHING;
+ON CONFLICT(varselkode_ref, tittel) DO NOTHING;
 
 INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES
     ((SELECT id FROM varselkode WHERE kode = 'RV_SØ_1'), 'Bruker har oppgitt permittering på søknad om sykepenger'),
@@ -145,7 +145,7 @@ INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES
     ((SELECT id FROM varselkode WHERE kode = 'RV_AY_8'), 'Det er utbetalt opplæringspenger i Infotrygd etter at perioden ble godkjent i Speil.'),
     ((SELECT id FROM varselkode WHERE kode = 'RV_AY_9'), 'Vi henter inn opplysninger om institusjonsopphold. Det har kommet informasjon om at den sykmeldte oppholdt seg i institusjon (sykehus eller fengsel) i perioden.'),
     ((SELECT id FROM varselkode WHERE kode = 'RV_OS_3'), 'Det er opphørt en tidligere linje i Oppdrag. Dette skjer dersom en FOM-dato på en linje endrer seg.')
-ON CONFLICT(forklaring) DO NOTHING;
+ON CONFLICT(varselkode_ref, forklaring) DO NOTHING;
 
 INSERT INTO varsel_handling(varselkode_ref, handling) VALUES
     ((SELECT id FROM varselkode WHERE kode = 'RV_SØ_1'), 'Kontrollér at permitteringen ikke påvirker sykepengerettighetene'),
@@ -184,4 +184,4 @@ INSERT INTO varsel_handling(varselkode_ref, handling) VALUES
     ((SELECT id FROM varselkode WHERE kode = 'RV_AY_8'), 'Undersøk hvilken ytelse som er riktig. Hvis utbetalingene i Speil må avslås på grunn av andre ytelser må du annullere og behandle i Infotrygd.'),
     ((SELECT id FROM varselkode WHERE kode = 'RV_AY_9'), 'Undersøk om institusjonsoppholdet er forenlig med å motta sykepenger. Dersom en periode skal avslås på grunn av institusjonsopphold må saken annulleres og behandles i Infotrygd.'),
     ((SELECT id FROM varselkode WHERE kode = 'RV_OS_3'), 'Undersøk om perioden blir riktig simulert, og ta en sjekk på oppdraget i ettertid')
-ON CONFLICT(handling) DO NOTHING;
+ON CONFLICT(varselkode_ref, handling) DO NOTHING;
