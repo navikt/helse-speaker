@@ -4,6 +4,7 @@ import io.ktor.http.HttpStatusCode
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.speaker.Varsel
 import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 
@@ -28,6 +29,25 @@ internal class VarselDao(private val dataSource: DataSource) {
                 tx.nyVarseltittel(kodeRef, tittel)
                 tx.nyVarselforklaring(kodeRef, forklaring)
                 tx.nyVarselhandling(kodeRef, handling)
+            }
+        }
+    }
+
+    internal fun finnVarsler(): List<Varsel> {
+        return sessionOf(dataSource).use {
+            it.transaction { tx ->
+                @Language("PostgreSQL")
+                val query = """
+                    SELECT  vk.kode, vt.tittel, vk.avviklet FROM varselkode vk INNER JOIN (
+                        SELECT id, MAX(opprettet) maxTimestamp 
+                        FROM varsel_tittel 
+                        GROUP BY id
+                    ) MaxTimestamps ON vk.id = MaxTimestamps.id 
+                    INNER JOIN varsel_tittel vt on vt.id = MaxTimestamps.id
+                    AND MaxTimestamps.maxTimestamp = vt.opprettet
+                """
+
+                tx.run(queryOf(query).map { row -> Varsel(row.string(1), row.string(2), null, null, row.boolean(3)) }.asList)
             }
         }
     }

@@ -1,5 +1,8 @@
 package no.nav.helse.speaker
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 internal data class Varsel(
     private val varselkode: String,
     private val tittel: String,

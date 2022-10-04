@@ -10,14 +10,18 @@ import org.junit.jupiter.api.BeforeEach
 import org.testcontainers.containers.PostgreSQLContainer
 import javax.sql.DataSource
 
-internal abstract class AbstractDatabaseTest {
+internal abstract class AbstractDatabaseTest(private val doTruncate: Boolean = true) {
 
     companion object {
+        internal val port: String
+        internal const val host: String = "localhost"
+        internal const val database: String = "test"
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
             withReuse(true)
             withLabel("app-navn", "speaker")
             start()
-            println("🎩 Databasen er startet opp, portnummer: $firstMappedPort, jdbcUrl: jdbc:postgresql://localhost:$firstMappedPort/test, credentials: test og test")
+            port = firstMappedPort.toString()
+            println("🎩 Databasen er startet opp, portnummer: $firstMappedPort, jdbcUrl: jdbc:postgresql://$host:$firstMappedPort/$database, credentials: test og test")
         }
 
         val dataSource =
@@ -48,8 +52,10 @@ internal abstract class AbstractDatabaseTest {
 
     @BeforeEach
     fun resetDatabase() {
-        sessionOf(dataSource).use  {
-            it.run(queryOf("SELECT truncate_tables()").asExecute)
+        if (doTruncate) {
+            sessionOf(dataSource).use  {
+                it.run(queryOf("SELECT truncate_tables()").asExecute)
+            }
         }
     }
 

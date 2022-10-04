@@ -15,13 +15,11 @@ plugins {
     application
     kotlin("jvm") apply true
     id("io.ktor.plugin") version "2.1.1"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
 }
 
 application {
     mainClass.set("no.nav.helse.speaker.ApplicationKt")
-
-    val isDevelopment: Boolean = project.ext.has("development")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
 dependencies {
@@ -29,6 +27,8 @@ dependencies {
     implementation("io.micrometer:micrometer-core:$micrometerVersion")
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
     implementation(project(":speaker-database"))
     implementation("org.postgresql:postgresql:$postgresqlVersion")
