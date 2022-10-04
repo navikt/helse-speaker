@@ -2,50 +2,30 @@ import './App.css'
 import "@navikt/ds-css";
 import "@navikt/ds-css-internal";
 import {Header} from "@navikt/ds-react-internal";
-import {Button, Search, TextField} from '@navikt/ds-react';
+import {Button, Loader, Search, TextField} from '@navikt/ds-react';
 import {EkspanderbartVarsel} from "./components/EkspanderbartVarsel";
+import {useEffect, useState} from "react";
 
 export declare type Varsel = {
-    kode: string;
+    varselkode: string;
     tittel: string;
     forklaring?: string;
     handling?: string;
 }
 
-function App() {
+const App = () => {
+    const [varsler, setVarsler] = useState<Varsel[]>([])
+    const [loading, setLoading] = useState(false);
 
-    const varsler: Varsel[] = [
-        {
-            kode: "RV_SY_1",
-            tittel: "En tittel",
-            forklaring: "En forklaring",
-            handling: "En handling"
-        },
-        {
-            kode: "RV_SY_1",
-            tittel: "En tittel",
-            forklaring: "En forklaring",
-            handling: "En handling"
-        },
-        {
-            kode: "RV_SY_1",
-            tittel: "En tittel",
-            forklaring: "En forklaring",
-            handling: "En handling"
-        },
-        {
-            kode: "RV_SY_1",
-            tittel: "En tittel",
-            forklaring: "En forklaring",
-            handling: "En handling"
-        },
-        {
-            kode: "RV_SY_1",
-            tittel: "En tittel",
-            forklaring: "En forklaring",
-            handling: "En handling"
-        },
-    ]
+    useEffect(() => {
+        setLoading(true);
+        fetch('/api/varsler')
+            .then((response) => response.json())
+            .then((data) => {
+                setVarsler(data);
+                setLoading(false);
+            })
+    }, [])
 
     return (
         <>
@@ -68,24 +48,26 @@ function App() {
                 <Header.User name={"Hen Norhen"} description={"En ident"}/>
             </Header>
             <div className={'p-4'}>
-                {
-                    varsler.map((varsel) => <EkspanderbartVarsel label={varsel.tittel}>
+                { loading && <Loader size={'3xlarge'} title={'Laster varsler'}/> }
+                { varsler.length > 0 &&
+                    varsler.map((varsel) => <EkspanderbartVarsel key={varsel.varselkode} label={varsel.tittel}>
                         <TextField
                             label="Tittel"
                             size="medium"
                             value={varsel.tittel}
+                            onChange={(it) => alert(`endret til ${it.target.value}`)}
                             className={'py-5'}
                         />
                         <TextField
                             label="Forklaring"
                             size="medium"
-                            value={varsel.forklaring}
+                            value={varsel.forklaring ?? ''}
                             className={'pb-5'}
                         />
                         <TextField
                             label="Hva gjør man?"
                             size="medium"
-                            value={varsel.handling}
+                            value={varsel.handling ?? ''}
                             className={'pb-5'}
                         />
                         <div className={'flex flex-row gap-4 pb-5'}>
