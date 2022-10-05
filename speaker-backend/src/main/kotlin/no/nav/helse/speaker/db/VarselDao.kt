@@ -38,16 +38,38 @@ internal class VarselDao(private val dataSource: DataSource) {
             it.transaction { tx ->
                 @Language("PostgreSQL")
                 val query = """
-                    SELECT  vk.kode, vt.tittel, vk.avviklet FROM varselkode vk INNER JOIN (
-                        SELECT id, MAX(opprettet) maxTimestamp 
+                    SELECT  vk.kode, vt.tittel, vf.forklaring, vh.handling, vk.avviklet FROM varselkode vk 
+                    INNER JOIN (
+                        SELECT id, varselkode_ref, MAX(opprettet) maxTimestamp 
                         FROM varsel_tittel 
-                        GROUP BY id
-                    ) MaxTimestamps ON vk.id = MaxTimestamps.id 
-                    INNER JOIN varsel_tittel vt on vt.id = MaxTimestamps.id
-                    AND MaxTimestamps.maxTimestamp = vt.opprettet
+                        GROUP BY varselkode_ref, id
+                    ) vtMax ON vk.id = vtMax.varselkode_ref 
+                    INNER JOIN (
+                        SELECT id, varselkode_ref, MAX(opprettet) maxTimestamp
+                        FROM varsel_forklaring
+                        GROUP BY varselkode_ref, id
+                    ) vfMax ON vk.id = vfMax.varselkode_ref
+                    INNER JOIN (
+                        SELECT id, varselkode_ref, MAX(opprettet) maxTimestamp
+                        FROM varsel_handling
+                        GROUP BY varselkode_ref, id
+                    ) vhMax ON vk.id = vhMax.varselkode_ref
+                    INNER JOIN varsel_tittel vt on vt.id = vtMax.id
+                    INNER JOIN varsel_forklaring vf on vf.id = vfMax.id
+                    INNER JOIN varsel_handling vh on vh.id = vhMax.id
+                    AND vtMax.maxTimestamp = vt.opprettet
+                    AND vfMax.maxTimestamp = vf.opprettet
+                    AND vhMax.maxTimestamp = vh.opprettet
                 """
 
-                tx.run(queryOf(query).map { row -> Varsel(row.string(1), row.string(2), null, null, row.boolean(3)) }.asList)
+                tx.run(queryOf(query).map { row ->
+                    Varsel(
+                        row.string(1),
+                        row.string(2),
+                        row.stringOrNull(3),
+                        row.stringOrNull(4),
+                        row.boolean(5)
+                    ) }.asList)
             }
         }
     }

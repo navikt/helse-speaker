@@ -2,6 +2,7 @@ package no.nav.helse.speaker.db
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.speaker.Varsel
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -90,8 +91,13 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
     @Test
     fun `finner varsler`() {
         varselDao.nyttVarsel("EN_KODE", "EN_TITTEL", "EN_FORKLARING", null, false)
-        varselDao.nyttVarsel("EN_ANNEN_KODE", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", null, false)
-        assertEquals(2, varselDao.finnVarsler().size)
+        varselDao.nyttVarsel("EN_ANNEN_KODE", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", "EN_HANDLING", false)
+        val varsler = varselDao.finnVarsler()
+        assertEquals(2, varsler.size)
+        assertEquals(listOf(
+            Varsel("EN_ANNEN_KODE", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", "EN_HANDLING", false),
+            Varsel("EN_KODE", "EN_TITTEL", "EN_FORKLARING", null, false)
+        ), varsler)
     }
 
     private fun assertEndretTidspunkt(kode: String, erSatt: Boolean) {
