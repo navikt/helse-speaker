@@ -58,7 +58,6 @@ const App = () => {
                             minRows={1}
                             maxRows={5}
                             value={varsel.tittel}
-                            onChange={(it) => alert(`endret til ${it.target.value}`)}
                             className={'py-5'}
                         />
                         <Textarea
