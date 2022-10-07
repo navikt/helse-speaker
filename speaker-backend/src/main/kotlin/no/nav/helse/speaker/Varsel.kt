@@ -13,4 +13,8 @@ internal data class Varsel(
     internal fun lagre(varselRepository: VarselRepository) {
         varselRepository.nytt(varselkode, tittel, forklaring, handling)
     }
+
+    internal fun oppdater(varselRepository: VarselRepository) {
+        varselRepository.oppdater(varselkode, tittel, forklaring, handling, avviklet)
+    }
 }

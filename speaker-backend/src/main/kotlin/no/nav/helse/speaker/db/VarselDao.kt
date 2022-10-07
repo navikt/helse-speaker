@@ -22,13 +22,15 @@ internal class VarselDao(private val dataSource: DataSource) {
     }
 
     internal fun oppdaterVarsel(kode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean) {
-        sessionOf(dataSource).use {
+        sessionOf(dataSource, returnGeneratedKey = true).use {
             it.transaction { tx ->
-                val kodeRef = tx.finnVarselRef(kode)
-                tx.oppdatertAvviklet(kode, avviklet)
-                tx.nyVarseltittel(kodeRef, tittel)
-                tx.nyVarselforklaring(kodeRef, forklaring)
-                tx.nyVarselhandling(kodeRef, handling)
+                val kodeRef = tx.finnVarselRef(kode) ?: throw VarselException.KodeFinnesIkke(kode)
+                val oppdatertAvviklet = tx.oppdaterAvviklet(kode, avviklet)
+                val oppdatertTittel = tx.nyVarseltittel(kodeRef, tittel)
+                val oppdatertForklaring = tx.nyVarselforklaring(kodeRef, forklaring)
+                val oppdatertHandling = tx.nyVarselhandling(kodeRef, handling)
+                if (!oppdatertForklaring && !oppdatertAvviklet && !oppdatertTittel && !oppdatertHandling)
+                    throw VarselException.IngenEndring(kode)
             }
         }
     }
@@ -80,41 +82,49 @@ internal class VarselDao(private val dataSource: DataSource) {
         return run(queryOf(query, kode, avviklet).asUpdateAndReturnGeneratedKey)
     }
 
-    private fun TransactionalSession.oppdatertAvviklet(kode: String, avviklet: Boolean) {
+    private fun TransactionalSession.oppdaterAvviklet(kode: String, avviklet: Boolean): Boolean {
         @Language("PostgreSQL")
         val query = "UPDATE varselkode SET endret = now(), avviklet = ? WHERE kode = ? AND avviklet != ?"
-        run(queryOf(query, avviklet, kode, avviklet).asExecute)
+        return run(queryOf(query, avviklet, kode, avviklet).asUpdate) != 0
     }
 
-    private fun TransactionalSession.finnVarselRef(kode: String): Long {
+    private fun TransactionalSession.finnVarselRef(kode: String): Long? {
         @Language("PostgreSQL")
         val query = "SELECT id FROM varselkode WHERE kode = ?"
-        return requireNotNull(run(queryOf(query, kode).map { it.long(1) }.asSingle)) {"Finner ikke kode=${kode}"}
+        return run(queryOf(query, kode).map { it.long(1) }.asSingle)
     }
 
-    private fun TransactionalSession.nyVarseltittel(kodeRef: Long, tittel: String) {
+    private fun TransactionalSession.nyVarseltittel(kodeRef: Long, tittel: String): Boolean {
         @Language("PostgreSQL")
         val query = "INSERT INTO varsel_tittel(varselkode_ref, tittel) VALUES (?, ?) ON CONFLICT(varselkode_ref, tittel) DO NOTHING"
-        run(queryOf(query, kodeRef, tittel).asExecute)
+        return run(queryOf(query, kodeRef, tittel).asUpdateAndReturnGeneratedKey) != null
     }
 
-    private fun TransactionalSession.nyVarselforklaring(kodeRef: Long, forklaring: String?) {
+    private fun TransactionalSession.nyVarselforklaring(kodeRef: Long, forklaring: String?): Boolean {
         @Language("PostgreSQL")
         val query = "INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES (?, ?) ON CONFLICT(varselkode_ref, forklaring) DO NOTHING"
-        run(queryOf(query, kodeRef, forklaring).asExecute)
+        return run(queryOf(query, kodeRef, forklaring).asUpdateAndReturnGeneratedKey) != null
     }
 
-    private fun TransactionalSession.nyVarselhandling(kodeRef: Long, handling: String?){
+    private fun TransactionalSession.nyVarselhandling(kodeRef: Long, handling: String?): Boolean {
         @Language("PostgreSQL")
         val query = "INSERT INTO varsel_handling(varselkode_ref, handling) VALUES (?, ?) ON CONFLICT(varselkode_ref, handling) DO NOTHING"
-        run(queryOf(query, kodeRef, handling).asExecute)
+        return run(queryOf(query, kodeRef, handling).asUpdateAndReturnGeneratedKey) != null
     }
 }
 
 internal sealed class VarselException(message: String): Exception(message) {
-    protected abstract val httpStatusCode: HttpStatusCode
+    internal abstract val httpStatusCode: HttpStatusCode
 
     internal class KodeEksisterer(kode: String): VarselException("Varselkode $kode eksisterer allerede") {
         override val httpStatusCode: HttpStatusCode = HttpStatusCode.Conflict
+    }
+
+    internal class KodeFinnesIkke(kode: String): VarselException("Varselkode $kode finnes ikke") {
+        override val httpStatusCode: HttpStatusCode = HttpStatusCode.NotFound
+    }
+
+    internal class IngenEndring(kode: String): VarselException("Varsel for varselkode $kode ikke endret, da det payload er lik det som finnes i databasen") {
+        override val httpStatusCode: HttpStatusCode = HttpStatusCode.NotModified
     }
 }
