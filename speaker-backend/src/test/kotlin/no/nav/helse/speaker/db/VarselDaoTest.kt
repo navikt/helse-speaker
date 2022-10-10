@@ -71,6 +71,15 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
     }
 
     @Test
+    fun `oppdater tittel - deretter oppdater tilbake til gammel verdi`() {
+        val varselkode = "EN_KODE"
+        varselDao.nyttVarsel(varselkode, "EN_TITTEL", null, null, false)
+        varselDao.oppdaterVarsel(varselkode, "EN_ANNEN_TITTEL", null, null, false)
+        varselDao.oppdaterVarsel(varselkode, "EN_TITTEL", null, null, false)
+        assertEquals(listOf(Varsel(varselkode, "EN_TITTEL", null, null, false)), varselDao.finnVarsler())
+    }
+
+    @Test
     fun `ingen forklaring - deretter forklaring - deretter fjernes denne igjen`() {
         val varselkode = "EN_KODE"
         varselDao.nyttVarsel(varselkode, "EN_TITTEL", null, "EN_HANDLING", false)
@@ -95,8 +104,8 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
         val varsler = varselDao.finnVarsler()
         assertEquals(2, varsler.size)
         assertEquals(listOf(
+            Varsel("EN_KODE", "EN_TITTEL", "EN_FORKLARING", null, false),
             Varsel("EN_ANNEN_KODE", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", "EN_HANDLING", false),
-            Varsel("EN_KODE", "EN_TITTEL", "EN_FORKLARING", null, false)
         ), varsler)
     }
 
@@ -143,7 +152,7 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
 
     private fun finnVarselforklaring(kode: String): List<String?> {
         @Language("PostgreSQL")
-        val query = "SELECT vf.id, forklaring FROM varsel_forklaring vf INNER JOIN varselkode v on v.id = vf.varselkode_ref WHERE v.kode = ?"
+        val query = "SELECT vk.id, forklaring FROM varselkode vk LEFT JOIN varsel_forklaring vf on vk.id = vf.varselkode_ref WHERE vk.kode = ?"
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, kode).map { it.long(1) to it.stringOrNull(2) }.asList).map { it.second }
         }
@@ -151,7 +160,7 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
 
     private fun finnVarselhandling(kode: String): List<String?> {
         @Language("PostgreSQL")
-        val query = "SELECT vh.id, handling FROM varsel_handling vh INNER JOIN varselkode v on v.id = vh.varselkode_ref WHERE v.kode = ?"
+        val query = "SELECT vk.id, handling FROM varselkode vk LEFT JOIN varsel_handling vh on vk.id = vh.varselkode_ref WHERE vk.kode = ?"
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, kode).map { it.long(1) to it.stringOrNull(2) }.asList).map { it.second }
         }

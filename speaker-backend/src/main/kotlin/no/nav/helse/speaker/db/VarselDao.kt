@@ -26,9 +26,9 @@ internal class VarselDao(private val dataSource: DataSource) {
             it.transaction { tx ->
                 val kodeRef = tx.finnVarselRef(kode) ?: throw VarselException.KodeFinnesIkke(kode)
                 val oppdatertAvviklet = tx.oppdaterAvviklet(kode, avviklet)
-                val oppdatertTittel = tx.nyVarseltittel(kodeRef, tittel)
-                val oppdatertForklaring = tx.nyVarselforklaring(kodeRef, forklaring)
-                val oppdatertHandling = tx.nyVarselhandling(kodeRef, handling)
+                val oppdatertTittel = tx.oppdaterTittel(kodeRef, tittel)
+                val oppdatertForklaring = tx.oppdaterForklaring(kodeRef, forklaring)
+                val oppdatertHandling = tx.oppdaterHandling(kodeRef, handling)
                 if (!oppdatertForklaring && !oppdatertAvviklet && !oppdatertTittel && !oppdatertHandling)
                     throw VarselException.IngenEndring(kode)
             }
@@ -40,36 +40,36 @@ internal class VarselDao(private val dataSource: DataSource) {
             it.transaction { tx ->
                 @Language("PostgreSQL")
                 val query = """
-                    SELECT vk.kode, vt.tittel, vf.forklaring, vh.handling, vk.avviklet
-                    FROM varselkode vk
-                             INNER JOIN LATERAL (
-                        SELECT forklaring
-                        FROM varsel_forklaring
-                        WHERE vk.id = varsel_forklaring.varselkode_ref
-                        ORDER BY varsel_forklaring.opprettet DESC
-                        LIMIT 1
-                        ) vf ON true
-                             INNER JOIN LATERAL (
-                        SELECT tittel
-                        FROM varsel_tittel
-                        WHERE vk.id = varsel_tittel.varselkode_ref
-                        ORDER BY varsel_tittel.opprettet DESC
-                        LIMIT 1
-                        ) vt ON true
-                            INNER JOIN LATERAL (
-                        SELECT handling
-                        FROM varsel_handling WHERE vk.id = varsel_handling.varselkode_ref
-                        ORDER BY varsel_handling.opprettet DESC LIMIT 1
-                        ) vh ON true;
+                SELECT vk.kode, vt.tittel, vf.forklaring, vh.handling, vk.avviklet
+                FROM varselkode vk
+                         INNER JOIN LATERAL (
+                    SELECT tittel
+                    FROM varsel_tittel
+                    WHERE vk.id = varsel_tittel.varselkode_ref
+                    ORDER BY varsel_tittel.opprettet DESC
+                    LIMIT 1
+                    ) vt ON true
+                         LEFT JOIN LATERAL (
+                    SELECT forklaring
+                    FROM varsel_forklaring
+                    WHERE vk.id = varsel_forklaring.varselkode_ref
+                    ORDER BY varsel_forklaring.opprettet DESC
+                    LIMIT 1
+                    ) vf ON true
+                         LEFT JOIN LATERAL (
+                    SELECT handling
+                    FROM varsel_handling WHERE vk.id = varsel_handling.varselkode_ref
+                    ORDER BY varsel_handling.opprettet DESC
+                    ) vh ON true;
                 """
 
                 tx.run(queryOf(query).map { row ->
                     Varsel(
-                        row.string(1),
-                        row.string(2),
-                        row.stringOrNull(3),
-                        row.stringOrNull(4),
-                        row.boolean(5)
+                        varselkode = row.string("kode"),
+                        tittel = row.string("tittel"),
+                        forklaring = row.stringOrNull("forklaring"),
+                        handling = row.stringOrNull("handling"),
+                        avviklet = row.boolean("avviklet")
                     ) }.asList)
             }
         }
@@ -111,22 +111,34 @@ internal class VarselDao(private val dataSource: DataSource) {
         return run(queryOf(query, kodeRef).map { it.stringOrNull(1) }.asSingle)
     }
 
-    private fun TransactionalSession.nyVarseltittel(kodeRef: Long, tittel: String): Boolean {
+    private fun TransactionalSession.oppdaterTittel(kodeRef: Long, tittel: String): Boolean {
         if (sisteTittel(kodeRef) == tittel) return false
+        return nyVarseltittel(kodeRef, tittel)
+    }
+
+    private fun TransactionalSession.oppdaterForklaring(kodeRef: Long, forklaring: String?): Boolean {
+        if (sisteForklaring(kodeRef) == forklaring) return false
+        return nyVarselforklaring(kodeRef, forklaring)
+    }
+
+    private fun TransactionalSession.oppdaterHandling(kodeRef: Long, handling: String?): Boolean {
+        if (sisteHandling(kodeRef) == handling) return false
+        return nyVarselhandling(kodeRef, handling)
+    }
+
+    private fun TransactionalSession.nyVarseltittel(kodeRef: Long, tittel: String): Boolean {
         @Language("PostgreSQL")
         val query = "INSERT INTO varsel_tittel(varselkode_ref, tittel) VALUES (?, ?)"
         return run(queryOf(query, kodeRef, tittel).asUpdateAndReturnGeneratedKey) != null
     }
 
     private fun TransactionalSession.nyVarselforklaring(kodeRef: Long, forklaring: String?): Boolean {
-        if (sisteForklaring(kodeRef) == forklaring) return false
         @Language("PostgreSQL")
         val query = "INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES (?, ?)"
         return run(queryOf(query, kodeRef, forklaring).asUpdateAndReturnGeneratedKey) != null
     }
 
     private fun TransactionalSession.nyVarselhandling(kodeRef: Long, handling: String?): Boolean {
-        if (sisteHandling(kodeRef) == handling) return false
         @Language("PostgreSQL")
         val query = "INSERT INTO varsel_handling(varselkode_ref, handling) VALUES (?, ?)"
         return run(queryOf(query, kodeRef, handling).asUpdateAndReturnGeneratedKey) != null

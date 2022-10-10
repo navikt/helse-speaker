@@ -28,7 +28,6 @@ internal fun Application.configureRestApi(varselRepository: VarselRepository) {
         post("/api/varsler/oppdater") {
             val varsel = call.receive<Varsel>()
             sikkerlogg.info("Oppdaterer {}", varsel)
-            println(varsel)
             try {
                 varselRepository.oppdater(varsel)
             } catch (e: VarselException) {
