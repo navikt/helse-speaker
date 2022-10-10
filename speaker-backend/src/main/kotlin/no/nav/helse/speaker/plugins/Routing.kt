@@ -14,8 +14,11 @@ import io.ktor.server.routing.routing
 import no.nav.helse.speaker.Varsel
 import no.nav.helse.speaker.VarselRepository
 import no.nav.helse.speaker.db.VarselException
+import org.slf4j.LoggerFactory
 
-internal fun Application.configureRouting(varselRepository: VarselRepository) {
+private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+
+internal fun Application.configureRestApi(varselRepository: VarselRepository) {
 
     // Starting point for a Ktor app:
     routing {
@@ -24,9 +27,11 @@ internal fun Application.configureRouting(varselRepository: VarselRepository) {
         }
         post("/api/varsler/oppdater") {
             val varsel = call.receive<Varsel>()
+            sikkerlogg.info("Oppdaterer {}", varsel)
+            println(varsel)
             try {
                 varselRepository.oppdater(varsel)
-            } catch (e: VarselException.KodeFinnesIkke) {
+            } catch (e: VarselException) {
                 return@post call.respond(message = e.message!!, status = e.httpStatusCode)
             }
             call.respond(HttpStatusCode.OK)

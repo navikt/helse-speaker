@@ -24,7 +24,7 @@ internal class RoutingTest {
     @Test
     fun `hent varsler`() = testApplication {
         application {
-            configureRouting(repository())
+            configureRestApi(repository())
             configureSerialization()
         }
 
@@ -36,7 +36,7 @@ internal class RoutingTest {
     @Test
     fun `oppdater varsel`() = testApplication {
         application {
-            configureRouting(repository())
+            configureRestApi(repository())
             configureSerialization()
         }
 
@@ -50,7 +50,7 @@ internal class RoutingTest {
     @Test
     fun `oppdater varsel når kode ikke finnes`() = testApplication {
         application {
-            configureRouting(repository(shouldThrowOnUpdate = true))
+            configureRestApi(repository(shouldThrowOnUpdate = true))
             configureSerialization()
         }
 
