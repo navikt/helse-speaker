@@ -118,7 +118,7 @@ INSERT INTO varsel_tittel(varselkode_ref, tittel) VALUES
                                                       ((SELECT id FROM varselkode WHERE kode = 'RV_OS_2'), 'Utbetalingens fra og med-dato er endret. Kontroller simuleringen'),
                                                       ((SELECT id FROM varselkode WHERE kode = 'RV_OS_3'), 'Endrer tidligere oppdrag. Kontroller simuleringen.'),
                                                       ((SELECT id FROM varselkode WHERE kode = 'RV_RV_1'), 'Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden')
-ON CONFLICT(varselkode_ref, tittel) DO NOTHING;
+;
 
 INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES
                                                               ((SELECT id FROM varselkode WHERE kode = 'RV_SØ_1'), 'Bruker har oppgitt permittering på søknad om sykepenger'),
@@ -179,7 +179,7 @@ INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES
                                                               ((SELECT id FROM varselkode WHERE kode = 'RV_OS_2'), null),
                                                               ((SELECT id FROM varselkode WHERE kode = 'RV_OS_3'), 'Det er opphørt en tidligere linje i Oppdrag. Dette skjer dersom en FOM-dato på en linje endrer seg.'),
                                                               ((SELECT id FROM varselkode WHERE kode = 'RV_RV_1'), null)
-ON CONFLICT(varselkode_ref, forklaring) DO NOTHING;
+;
 
 INSERT INTO varsel_handling(varselkode_ref, handling) VALUES
                                                           ((SELECT id FROM varselkode WHERE kode = 'RV_SØ_1'), 'Kontrollér at permitteringen ikke påvirker sykepengerettighetene'),
@@ -240,4 +240,4 @@ INSERT INTO varsel_handling(varselkode_ref, handling) VALUES
                                                           ((SELECT id FROM varselkode WHERE kode = 'RV_OS_2'), null),
                                                           ((SELECT id FROM varselkode WHERE kode = 'RV_OS_3'), 'Undersøk om perioden blir riktig simulert, og ta en sjekk på oppdraget i ettertid'),
                                                           ((SELECT id FROM varselkode WHERE kode = 'RV_RV_1'), null)
-ON CONFLICT(varselkode_ref, handling) DO NOTHING;
+;

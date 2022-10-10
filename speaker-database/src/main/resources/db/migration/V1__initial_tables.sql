@@ -10,22 +10,19 @@ CREATE TABLE varsel_tittel(
     id SERIAL NOT NULL PRIMARY KEY,
     varselkode_ref INT NOT NULL REFERENCES varselkode(id),
     tittel VARCHAR NOT NULL,
-    opprettet timestamptz NOT NULL default now(),
-    UNIQUE (varselkode_ref, tittel)
+    opprettet timestamptz NOT NULL default now()
 );
 
 CREATE TABLE varsel_forklaring(
     id SERIAL NOT NULL PRIMARY KEY,
     varselkode_ref INT NOT NULL REFERENCES varselkode(id),
     forklaring VARCHAR,
-    opprettet timestamptz NOT NULL default now(),
-    UNIQUE (varselkode_ref, forklaring)
+    opprettet timestamptz NOT NULL default now()
 );
 
 CREATE TABLE varsel_handling(
     id SERIAL NOT NULL PRIMARY KEY,
     varselkode_ref INT NOT NULL REFERENCES varselkode(id),
     handling VARCHAR,
-    opprettet timestamptz NOT NULL default now(),
-    UNIQUE (varselkode_ref, handling)
+    opprettet timestamptz NOT NULL default now()
 );

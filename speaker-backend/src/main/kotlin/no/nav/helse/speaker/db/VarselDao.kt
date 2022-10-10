@@ -40,28 +40,27 @@ internal class VarselDao(private val dataSource: DataSource) {
             it.transaction { tx ->
                 @Language("PostgreSQL")
                 val query = """
-                    SELECT  vk.kode, vt.tittel, vf.forklaring, vh.handling, vk.avviklet FROM varselkode vk 
-                    INNER JOIN (
-                        SELECT id, varselkode_ref, MAX(opprettet) maxTimestamp 
-                        FROM varsel_tittel 
-                        GROUP BY varselkode_ref, id
-                    ) vtMax ON vk.id = vtMax.varselkode_ref 
-                    INNER JOIN (
-                        SELECT id, varselkode_ref, MAX(opprettet) maxTimestamp
+                    SELECT vk.kode, vt.tittel, vf.forklaring, vh.handling, vk.avviklet
+                    FROM varselkode vk
+                             INNER JOIN LATERAL (
+                        SELECT forklaring
                         FROM varsel_forklaring
-                        GROUP BY varselkode_ref, id
-                    ) vfMax ON vk.id = vfMax.varselkode_ref
-                    INNER JOIN (
-                        SELECT id, varselkode_ref, MAX(opprettet) maxTimestamp
-                        FROM varsel_handling
-                        GROUP BY varselkode_ref, id
-                    ) vhMax ON vk.id = vhMax.varselkode_ref
-                    INNER JOIN varsel_tittel vt on vt.id = vtMax.id
-                    INNER JOIN varsel_forklaring vf on vf.id = vfMax.id
-                    INNER JOIN varsel_handling vh on vh.id = vhMax.id
-                    AND vtMax.maxTimestamp = vt.opprettet
-                    AND vfMax.maxTimestamp = vf.opprettet
-                    AND vhMax.maxTimestamp = vh.opprettet
+                        WHERE vk.id = varsel_forklaring.varselkode_ref
+                        ORDER BY varsel_forklaring.opprettet DESC
+                        LIMIT 1
+                        ) vf ON true
+                             INNER JOIN LATERAL (
+                        SELECT tittel
+                        FROM varsel_tittel
+                        WHERE vk.id = varsel_tittel.varselkode_ref
+                        ORDER BY varsel_tittel.opprettet DESC
+                        LIMIT 1
+                        ) vt ON true
+                            INNER JOIN LATERAL (
+                        SELECT handling
+                        FROM varsel_handling WHERE vk.id = varsel_handling.varselkode_ref
+                        ORDER BY varsel_handling.opprettet DESC LIMIT 1
+                        ) vh ON true;
                 """
 
                 tx.run(queryOf(query).map { row ->
@@ -94,21 +93,42 @@ internal class VarselDao(private val dataSource: DataSource) {
         return run(queryOf(query, kode).map { it.long(1) }.asSingle)
     }
 
-    private fun TransactionalSession.nyVarseltittel(kodeRef: Long, tittel: String): Boolean {
+    private fun TransactionalSession.sisteTittel(kodeRef: Long): String? {
         @Language("PostgreSQL")
-        val query = "INSERT INTO varsel_tittel(varselkode_ref, tittel) VALUES (?, ?) ON CONFLICT(varselkode_ref, tittel) DO NOTHING"
+        val query = "SELECT tittel FROM varsel_tittel WHERE varselkode_ref = ? ORDER BY opprettet DESC"
+        return run(queryOf(query, kodeRef).map { it.stringOrNull(1) }.asSingle)
+    }
+
+    private fun TransactionalSession.sisteForklaring(kodeRef: Long): String? {
+        @Language("PostgreSQL")
+        val query = "SELECT forklaring FROM varsel_forklaring WHERE varselkode_ref = ? ORDER BY opprettet DESC"
+        return run(queryOf(query, kodeRef).map { it.stringOrNull(1) }.asSingle)
+    }
+
+    private fun TransactionalSession.sisteHandling(kodeRef: Long): String? {
+        @Language("PostgreSQL")
+        val query = "SELECT handling FROM varsel_handling WHERE varselkode_ref = ? ORDER BY opprettet DESC"
+        return run(queryOf(query, kodeRef).map { it.stringOrNull(1) }.asSingle)
+    }
+
+    private fun TransactionalSession.nyVarseltittel(kodeRef: Long, tittel: String): Boolean {
+        if (sisteTittel(kodeRef) == tittel) return false
+        @Language("PostgreSQL")
+        val query = "INSERT INTO varsel_tittel(varselkode_ref, tittel) VALUES (?, ?)"
         return run(queryOf(query, kodeRef, tittel).asUpdateAndReturnGeneratedKey) != null
     }
 
     private fun TransactionalSession.nyVarselforklaring(kodeRef: Long, forklaring: String?): Boolean {
+        if (sisteForklaring(kodeRef) == forklaring) return false
         @Language("PostgreSQL")
-        val query = "INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES (?, ?) ON CONFLICT(varselkode_ref, forklaring) DO NOTHING"
+        val query = "INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES (?, ?)"
         return run(queryOf(query, kodeRef, forklaring).asUpdateAndReturnGeneratedKey) != null
     }
 
     private fun TransactionalSession.nyVarselhandling(kodeRef: Long, handling: String?): Boolean {
+        if (sisteHandling(kodeRef) == handling) return false
         @Language("PostgreSQL")
-        val query = "INSERT INTO varsel_handling(varselkode_ref, handling) VALUES (?, ?) ON CONFLICT(varselkode_ref, handling) DO NOTHING"
+        val query = "INSERT INTO varsel_handling(varselkode_ref, handling) VALUES (?, ?)"
         return run(queryOf(query, kodeRef, handling).asUpdateAndReturnGeneratedKey) != null
     }
 }
