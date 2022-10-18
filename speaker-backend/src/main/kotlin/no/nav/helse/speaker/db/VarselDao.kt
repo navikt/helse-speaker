@@ -40,27 +40,22 @@ internal class VarselDao(private val dataSource: DataSource) {
             it.transaction { tx ->
                 @Language("PostgreSQL")
                 val query = """
-                SELECT vk.kode, vt.tittel, vf.forklaring, vh.handling, vk.avviklet
-                FROM varselkode vk
-                         INNER JOIN LATERAL (
-                    SELECT tittel
-                    FROM varsel_tittel
-                    WHERE vk.id = varsel_tittel.varselkode_ref
-                    ORDER BY varsel_tittel.opprettet DESC
-                    LIMIT 1
-                    ) vt ON true
-                         LEFT JOIN LATERAL (
-                    SELECT forklaring
-                    FROM varsel_forklaring
-                    WHERE vk.id = varsel_forklaring.varselkode_ref
-                    ORDER BY varsel_forklaring.opprettet DESC
-                    LIMIT 1
-                    ) vf ON true
-                         LEFT JOIN LATERAL (
-                    SELECT handling
-                    FROM varsel_handling WHERE vk.id = varsel_handling.varselkode_ref
-                    ORDER BY varsel_handling.opprettet DESC
-                    ) vh ON true;
+                SELECT vk.kode, tittel, forklaring, handling, vk.avviklet
+                FROM varselkode vk INNER JOIN LATERAL (
+                    SELECT tittel, forklaring, handling, t.varselkode_ref FROM
+                        (
+                        SELECT tittel, varselkode_ref FROM varsel_tittel t
+                        WHERE vk.id = t.varselkode_ref ORDER BY t.opprettet DESC LIMIT 1
+                        ) t INNER JOIN
+                        (
+                        SELECT forklaring, varselkode_ref FROM varsel_forklaring f
+                        WHERE vk.id = f.varselkode_ref ORDER BY f.opprettet DESC LIMIT 1
+                        ) f ON f.varselkode_ref = vk.id INNER JOIN
+                        (
+                        SELECT handling, varselkode_ref FROM varsel_handling h
+                        WHERE vk.id = h.varselkode_ref ORDER BY h.opprettet DESC LIMIT 1
+                        ) h ON h.varselkode_ref = vk.id
+                ) rad ON rad.varselkode_ref = vk.id
                 """
 
                 tx.run(queryOf(query).map { row ->
@@ -156,7 +151,7 @@ internal sealed class VarselException(message: String): Exception(message) {
         override val httpStatusCode: HttpStatusCode = HttpStatusCode.NotFound
     }
 
-    internal class IngenEndring(kode: String): VarselException("Varsel for varselkode $kode ikke endret, da det payload er lik det som finnes i databasen") {
+    internal class IngenEndring(kode: String): VarselException("Varsel for varselkode $kode ikke endret, da payload er lik det som finnes i databasen") {
         override val httpStatusCode: HttpStatusCode = HttpStatusCode.NotModified
     }
 }

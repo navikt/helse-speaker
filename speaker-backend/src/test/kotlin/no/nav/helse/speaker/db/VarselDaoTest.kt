@@ -109,6 +109,20 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
         ), varsler)
     }
 
+    @Test
+    fun `finner kun siste utgave av et varsel`() {
+        varselDao.nyttVarsel("EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        varselDao.oppdaterVarsel("EN_KODE", "EN_TITTEL", "EN_ANNEN_FORKLARING", "EN_HANDLING", false)
+        varselDao.oppdaterVarsel("EN_KODE", "EN_TITTEL", "EN_ANNEN_FORKLARING", "EN_ANNEN_HANDLING", false)
+        val varsler = varselDao.finnVarsler()
+        assertEquals(
+            listOf(
+                Varsel("EN_KODE", "EN_TITTEL", "EN_ANNEN_FORKLARING", "EN_ANNEN_HANDLING", false)
+            ),
+            varsler
+        )
+    }
+
     private fun assertEndretTidspunkt(kode: String, erSatt: Boolean) {
         @Language("PostgreSQL")
         val query = "SELECT endret FROM varselkode WHERE kode = ?"
