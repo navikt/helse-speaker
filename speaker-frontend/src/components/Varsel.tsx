@@ -1,78 +1,93 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Varsel } from '../App';
 import { Button, Textarea } from '@navikt/ds-react';
 import { EkspanderbartVarsel } from './EkspanderbartVarsel';
+import { useForm } from 'react-hook-form';
+import { fetchVarsler, postOppdaterVarsel } from '../endepunkter';
+import { useSetRecoilState } from 'recoil';
+import { varslerState } from '../state/varselState';
 
 export interface VarselProps {
     varsel: Varsel;
 }
 
-const isSame = (varselA: Varsel, varselB: Varsel) => {
-    return JSON.stringify(varselA) === JSON.stringify(varselB);
-};
+interface VarselForm {
+    tittel: string;
+    forklaring: string | null;
+    handling: string | null;
+}
 
 export const VarselComponent = ({ varsel }: VarselProps) => {
-    const [temp, setTemp] = useState(varsel);
-    const [errors, setErrors] = useState<string[]>([]);
-
-    const update = (key: string, value: string) => {
-        setTemp({
-            ...temp,
-            [key]: value === '' ? null : value,
-        });
+    const setVarsler = useSetRecoilState(varslerState);
+    const defaultValues = {
+        tittel: varsel.tittel,
+        forklaring: varsel.forklaring ?? '',
+        handling: varsel.handling ?? '',
     };
 
-    const reset = () => setTemp(varsel);
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors, isValid, isDirty },
+    } = useForm({
+        mode: 'onChange',
+        defaultValues,
+    });
 
-    const validateTittel = (tittel?: string | undefined) => {
-        const feilmelding = 'Du må oppgi tittel for varselet';
-
-        if (tittel && tittel.trim().length !== 0) {
-            if (errors.includes(feilmelding)) setErrors([...errors.filter((it) => it !== feilmelding)]);
-            return '';
-        }
-        if (!errors.includes(feilmelding)) setErrors([...errors, feilmelding]);
-        return feilmelding;
+    const onSubmit = ({ tittel, forklaring, handling }: VarselForm) => {
+        postOppdaterVarsel({
+            varselkode: varsel.varselkode,
+            tittel: tittel,
+            forklaring: forklaring,
+            handling: handling,
+            avviklet: varsel.avviklet,
+        }).then((r) => {
+            if (r.status === 200) {
+                fetchVarsler().then((varsler) => {
+                    setVarsler(varsler);
+                });
+            }
+        });
     };
 
     return (
         <EkspanderbartVarsel key={varsel.varselkode} label={varsel.tittel}>
-            <Textarea
-                label="Tittel"
-                size="medium"
-                className={'py-5'}
-                minRows={1}
-                maxRows={5}
-                value={temp.tittel ?? ''}
-                error={validateTittel(temp.tittel)}
-                onChange={(event) => update('tittel', event.target.value)}
-            />
-            <Textarea
-                label="Forklaring"
-                size="medium"
-                minRows={1}
-                maxRows={5}
-                value={temp.forklaring ?? ''}
-                className={'pb-5'}
-                onChange={(event) => update('forklaring', event.target.value)}
-            />
-            <Textarea
-                label="Hva gjør man?"
-                size="medium"
-                minRows={1}
-                maxRows={5}
-                value={temp.handling ?? ''}
-                className={'pb-5'}
-                onChange={(event) => update('handling', event.target.value)}
-            />
-            <div className={'flex flex-row gap-4 pb-5'}>
-                <Button variant={'primary'} disabled={errors.length > 0 || isSame(varsel, temp)}>
-                    Lagre
-                </Button>
-                <Button variant={'secondary'} disabled={isSame(varsel, temp)} onClick={() => reset()}>
-                    Avbryt
-                </Button>
-            </div>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <Textarea
+                    label="Tittel"
+                    size="medium"
+                    className={'py-5'}
+                    minRows={1}
+                    maxRows={5}
+                    error={(errors.tittel?.message as string) ?? ''}
+                    {...register('tittel', { required: 'Tittel er påkrevd' })}
+                />
+                <Textarea
+                    label="Forklaring"
+                    size="medium"
+                    className={'pb-5'}
+                    minRows={1}
+                    maxRows={5}
+                    {...register('forklaring')}
+                />
+                <Textarea
+                    label="Hva gjør man?"
+                    size="medium"
+                    className={'pb-5'}
+                    minRows={1}
+                    maxRows={5}
+                    {...register('handling')}
+                />
+                <div className={'flex flex-row gap-4 pb-5'}>
+                    <Button type={'submit'} variant={'primary'} disabled={!isValid || !isDirty}>
+                        Lagre
+                    </Button>
+                    <Button variant={'secondary'} disabled={!isDirty} onClick={() => reset()}>
+                        Avbryt
+                    </Button>
+                </div>
+            </form>
         </EkspanderbartVarsel>
     );
 };

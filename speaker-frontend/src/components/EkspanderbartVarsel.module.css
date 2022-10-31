@@ -44,6 +44,10 @@
     fill: var(--navds-semantic-color-text);
 }
 
+.EkspanderbartVarsel {
+    max-width: 1275px;
+}
+
 .Alert {
     border-radius: 0;
     border: none;

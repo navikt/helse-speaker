@@ -2,9 +2,12 @@ import './App.css';
 import '@navikt/ds-css';
 import '@navikt/ds-css-internal';
 import { Header } from '@navikt/ds-react-internal';
-import { Loader, Search } from '@navikt/ds-react';
-import React, { useEffect, useState } from 'react';
-import { VarselComponent } from './components/Varsel';
+import { Search } from '@navikt/ds-react';
+import React from 'react';
+import { Separator } from './components/Separator';
+import { Clock, Dialog, Folder } from '@navikt/ds-icons';
+import { RecoilRoot } from 'recoil';
+import { Varsler } from './components/Varsler';
 
 export declare type Varsel = {
     varselkode: string;
@@ -15,21 +18,8 @@ export declare type Varsel = {
 };
 
 const App = () => {
-    const [varsler, setVarsler] = useState<Varsel[]>([]);
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        setLoading(true);
-        fetch('/api/varsler')
-            .then((response) => response.json())
-            .then((data) => {
-                setVarsler(data);
-                setLoading(false);
-            });
-    }, []);
-
     return (
-        <>
+        <RecoilRoot>
             <Header className={'flex w-full'}>
                 <Header.Title as={'h1'}>Speaker</Header.Title>
                 <form
@@ -43,11 +33,14 @@ const App = () => {
                 </form>
                 <Header.User name={'Hen Norhen'} description={'En ident'} />
             </Header>
-            <div className={'p-4'}>
-                {loading && <Loader size={'3xlarge'} title={'Laster varsler'} />}
-                {varsler.length > 0 && varsler.map((varsel) => <VarselComponent key={varsel.tittel} varsel={varsel} />)}
+            <div className={'flex flex-row py-4 pr-8 justify-end gap-16'}>
+                <Clock className={'w-[24px] h-[24px]'}></Clock>
+                <Dialog className={'w-[24px] h-[24px]'}></Dialog>
+                <Folder className={'w-[24px] h-[24px]'}></Folder>
             </div>
-        </>
+            <Separator />
+            <Varsler />
+        </RecoilRoot>
     );
 };
 
