@@ -1,7 +1,7 @@
 apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
-  name: speaker
+  name: speaker-kafka
   namespace: tbd
   labels:
     team: tbd
@@ -32,13 +32,6 @@ spec:
     path: /metrics
   kafka:
     pool: nav-dev
-  gcp:
-    sqlInstances:
-      - type: POSTGRES_14
-        diskAutoresize: true
-        databases:
-          - name: speaker
-            envVarPrefix: DATABASE
   secureLogs:
     enabled: true
   env:

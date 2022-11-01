@@ -15,8 +15,9 @@ internal fun createApp(env: Map<String, String>) {
     val dataSourceBuilder = DataSourceBuilder(env)
     val dao = VarselDao(dataSourceBuilder.getDataSource())
     val repository = ActualVarselRepository(dao)
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
-        configureSerialization()
-        configureRestApi(repository)
-    }.start(wait = true)
+    dataSourceBuilder.migrate()
+//    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+//        configureSerialization()
+//        configureRestApi(repository)
+//    }.start(wait = true)
 }

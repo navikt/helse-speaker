@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'deploy/dev-kafka.yml'
-      - 'deploy/prod-kafka.yml'
-      - 'speaker-kafka/**'
+      - 'deploy/dev-backend.yml'
+      - 'deploy/prod-backend.yml'
+      - 'speaker-backend/**'
       - 'speaker-database/**'
       - 'build.gradle.kts'
-      - '.github/workflows/speaker-kafka.yml'
-      - 'Dockerfile-kafka'
+      - '.github/workflows/speaker-backend.yml'
+      - 'Dockerfile-backend'
     branches:
       - main
 
@@ -22,7 +22,7 @@ jobs:
       - name: create docker tag
         run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
     outputs:
-      image: ghcr.io/${{ github.repository }}/speaker-kafka:${{ env.TAG }}
+      image: ghcr.io/${{ github.repository }}/speaker-backend:${{ env.TAG }}
 
   build:
     name: build docker image
@@ -36,9 +36,9 @@ jobs:
           java-version: '17.x'
           cache: 'gradle'
       - name: test and build
-        run: ./gradlew :speaker-kafka:test :speaker-kafka:build
+        run: ./gradlew :speaker-backend:test :speaker-backend:build
       - name: build docker image
-        run: docker build -f Dockerfile-kafka . --pull -t ${{ needs.set_version.outputs.image }}
+        run: docker build -f Dockerfile-backend . --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
         run: |
           docker login ghcr.io --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }}
@@ -54,7 +54,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --project-name=speaker-kafka --org=tbd-ty7 --fail-on=all
+          args: --project-name=speaker-backend --org=tbd-ty7 --fail-on=all
           command: monitor
 
   deployDev:
@@ -67,7 +67,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: deploy/dev-kafka.yml
+          RESOURCE: deploy/dev-backend.yml
           IMAGE: ${{ needs.set_version.outputs.image }}
 
 #  deployProd:
@@ -80,5 +80,5 @@ jobs:
 #        env:
 #          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
 #          CLUSTER: prod-gcp
-#          RESOURCE: deploy/prod-kafka.yml
+#          RESOURCE: deploy/prod-backend.yml
 #          IMAGE: ${{ needs.set_version.outputs.image }}
