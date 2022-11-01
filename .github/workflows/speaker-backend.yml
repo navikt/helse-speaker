@@ -1,4 +1,4 @@
-name: Speaker-kafka
+name: Speaker-backend
 
 on:
   workflow_dispatch:
