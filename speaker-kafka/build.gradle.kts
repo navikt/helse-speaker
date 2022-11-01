@@ -10,7 +10,8 @@ val logstashVersion: String by project
 val testcontainersPostgresqlVersion: String by project
 val hikariVersion: String by project
 val kotliqueryVersion: String by project
-val rapidsAndRiversVersion = "2022092314391663936769.9d5d33074875"
+val cloudSqlProxyVersion = "1.7.1"
+val rapidsAndRiversVersion = "2022100711511665136276.49acbaae4ed4"
 
 plugins {
     kotlin("jvm") apply true
@@ -26,7 +27,15 @@ dependencies {
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
 
-    api("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
+    implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlProxyVersion") {
+        exclude("commons-codec")
+    }
+    implementation("commons-codec:commons-codec:1.15")
+
+    api("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion") {
+        exclude("com.fasterxml.jackson.core")
+    }
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
 
     testImplementation(project(":speaker-database"))
     testImplementation("org.flywaydb:flyway-core:$flywayVersion")

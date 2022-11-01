@@ -32,6 +32,14 @@ spec:
     path: /metrics
   kafka:
     pool: nav-dev
+  gcp:
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+        role: roles/cloudsql.client
+  envFrom:
+    - secret: google-sql-speaker-backend-speaker-speaker-kafka-59ac85c8
   secureLogs:
     enabled: true
   env:
@@ -41,3 +49,9 @@ spec:
       value: tbd-speaker-v1
     - name: KAFKA_RESET_POLICY
       value: earliest
+    - name: DATABASE_REGION
+      value: "europe-north1"
+    - name: DATABASE_INSTANCE
+      value: "speaker"
+    - name: DATABASE_NAME
+      value: "speaker"
