@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+val mainClass = "no.nav.helse.speaker.ApplicationKt"
+
 val micrometerVersion = "1.9.4"
 val ktorVersion = "2.1.1"
 val logbackVersion: String by project
@@ -12,14 +14,8 @@ val hikariVersion: String by project
 val kotliqueryVersion: String by project
 
 plugins {
-    application
     kotlin("jvm") apply true
-    id("io.ktor.plugin") version "2.1.1"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
-}
-
-application {
-    mainClass.set("no.nav.helse.speaker.ApplicationKt")
 }
 
 dependencies {
@@ -53,5 +49,24 @@ tasks {
     }
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "17"
+    }
+
+    withType<Jar> {
+        archiveBaseName.set("app")
+
+        manifest {
+            attributes["Main-Class"] = mainClass
+            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                it.name
+            }
+        }
+
+        doLast {
+            configurations.runtimeClasspath.get().forEach {
+                val file = File("$buildDir/libs/${it.name}")
+                if (!file.exists())
+                    it.copyTo(file)
+            }
+        }
     }
 }
