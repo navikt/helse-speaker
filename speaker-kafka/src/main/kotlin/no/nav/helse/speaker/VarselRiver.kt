@@ -3,8 +3,7 @@ package no.nav.helse.speaker
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.rapids_rivers.*
-import no.nav.helse.speaker.Varsel.Companion.toJson
-import no.nav.helse.speaker.VarselRepository.Companion.varsler
+import no.nav.helse.speaker.VarselRepository.Companion.validerVarsler
 import org.slf4j.LoggerFactory
 
 internal class VarselRiver(
@@ -38,26 +37,10 @@ internal class VarselRiver(
         }.register(this)
     }
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val fødselsnummer = packet["fødselsnummer"].asText()
         val (varslerMedKode, varslerUtenKode) = packet["aktiviteter"]
             .filter { it["nivå"].asText() == "VARSEL" }
             .partition { it["varselkode"]?.asText() != null }
         varslerUtenKode.logg()
-
-        if (varslerMedKode.isEmpty()) return
-        val gyldigeVarsler = varslerMedKode.varsler(varselRepository)
-        sikkerlogg.info("Publiserer ${gyldigeVarsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
-        publiserVarsler(fødselsnummer, gyldigeVarsler, context)
-    }
-
-    private fun publiserVarsler(fødselsnummer: String, varsler: List<Varsel>, context: MessageContext) {
-        val melding = JsonMessage.newMessage(
-            "aktivitetslogg_nye_varsler",
-            mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "varsler" to varsler.toJson()
-            )
-        ).toJson()
-        context.publish(fødselsnummer, melding)
+        varslerMedKode.validerVarsler(varselRepository)
     }
 }

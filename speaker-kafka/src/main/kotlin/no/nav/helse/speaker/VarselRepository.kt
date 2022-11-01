@@ -12,11 +12,10 @@ internal interface VarselRepository {
     fun opprett(id: UUID, kode: String, melding: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime): Varsel
 
     companion object {
-        fun List<JsonNode>.varsler(repository: VarselRepository): List<Varsel> {
+        fun List<JsonNode>.validerVarsler(repository: VarselRepository) {
             //TODO: Slack-integrasjon for ikke-gyldige varselkoder
-            val (gyldige, ikkeGyldige) = map { it.fromJson(repository) }.partition(Varsel::erGyldig)
-            ikkeGyldige.loggUgyldig()
-            return gyldige
+            val ikkeGyldigeVarsler = map { it.fromJson(repository) }.filterNot(Varsel::erGyldig)
+            ikkeGyldigeVarsler.loggUgyldig()
         }
     }
 }
