@@ -1,10 +1,11 @@
 package no.nav.helse.speaker.db
 
-import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.speaker.Varsel
+import no.nav.helse.speaker.UgyldigVarsel
+import no.nav.helse.speaker.Varseldefinisjon
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.util.*
@@ -12,28 +13,19 @@ import javax.sql.DataSource
 
 internal class VarselDao(private val dataSource: DataSource) {
 
-    internal fun byggVarsel(
+    internal fun sjekkGyldighet(
         id: UUID,
         kode: String,
         melding: String,
-        kontekster: List<JsonNode>,
         tidsstempel: LocalDateTime
-    ): Varsel {
-        sessionOf(dataSource).use { session ->
-            session.transaction { tx ->
-                val gyldig = tx.valider(kode)
-                if (!gyldig) return Varsel.ugyldig(id, melding, kode, kontekster, tidsstempel)
-
-                val tittel = tx.finnTittel(kode)
-                val forklaring = tx.finnForklaring(kode)
-                val handling = tx.finnHandling(kode)
-                val avviklet = tx.finnAvviklet(kode)
-                return Varsel.gyldig(id, tittel, kode, kontekster, tidsstempel, forklaring, handling, avviklet)
-            }
+    ): UgyldigVarsel? {
+        return sessionOf(dataSource).use { session ->
+            if (!session.sjekkGyldighet(kode)) return UgyldigVarsel(id, tidsstempel, kode, melding)
+            null
         }
     }
 
-    private fun TransactionalSession.valider(kode: String): Boolean {
+    private fun Session.sjekkGyldighet(kode: String): Boolean {
         @Language("PostgreSQL")
         val query = "SELECT 1 FROM varselkode WHERE kode = ?"
         return this.run(queryOf(query, kode).map { it.boolean(1) }.asSingle) ?: false

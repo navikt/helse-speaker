@@ -1,9 +1,7 @@
 package no.nav.helse.speaker.db
 
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.*
 
@@ -14,22 +12,16 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
     @Test
     fun `gyldig varselkode`() {
         opprettVarsel("EN_KODE")
-        val varsel = dao.byggVarsel(UUID.randomUUID(), "EN_KODE", "EN_MELDING", emptyList(), LocalDateTime.now())
-        assertTrue(varsel.erGyldig())
+        val varsel = dao.sjekkGyldighet(UUID.randomUUID(), "EN_KODE", "EN_MELDING", LocalDateTime.now())
+        assertNull(varsel)
     }
 
     @Test
     fun `ugyldig varselkode medfører ugyldig varsel`() {
         opprettVarsel("EN_KODE")
-        val varsel = dao.byggVarsel(UUID.randomUUID(), "EN_ANNEN_KODE", "EN_MELDING", emptyList(), LocalDateTime.now())
-        assertFalse(varsel.erGyldig())
+        val varsel = dao.sjekkGyldighet(UUID.randomUUID(), "EN_ANNEN_KODE", "EN_MELDING", LocalDateTime.now())
+        assertNotNull(varsel)
     }
 
-    @Test
-    fun `mangler tittel for varsel`() {
-        opprettKode("EN_KODE")
-        assertThrows<IllegalArgumentException> {
-            dao.byggVarsel(UUID.randomUUID(), "EN_KODE", "EN_MELDING", emptyList(), LocalDateTime.now())
-        }
-    }
+
 }

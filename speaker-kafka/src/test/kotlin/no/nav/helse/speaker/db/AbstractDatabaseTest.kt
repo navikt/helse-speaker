@@ -60,7 +60,7 @@ internal abstract class AbstractDatabaseTest {
         opprettHandling(kode, "EN HANDLING")
     }
 
-    protected fun opprettKode(kode: String) {
+    private fun opprettKode(kode: String) {
         sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val query = "INSERT INTO varselkode(kode, avviklet, opprettet, endret) VALUES (?, false, now(), null)"
@@ -68,7 +68,7 @@ internal abstract class AbstractDatabaseTest {
         }
     }
 
-    private fun opprettTittel(kode: String, tittel: String) {
+    protected fun opprettTittel(kode: String, tittel: String) {
         sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val query = "INSERT INTO varsel_tittel(varselkode_ref, tittel) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?)"
@@ -76,7 +76,7 @@ internal abstract class AbstractDatabaseTest {
         }
     }
 
-    private fun opprettForklaring(kode: String, forklaring: String) {
+    protected fun opprettForklaring(kode: String, forklaring: String) {
         sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val query = "INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?)"
