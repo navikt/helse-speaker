@@ -23,5 +23,24 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
         assertNotNull(varsel)
     }
 
+    @Test
+    fun `finner definisjoner`() {
+        opprettVarsel("EN_KODE")
+        opprettVarsel("EN_ANNEN_KODE")
 
+        val definisjoner = dao.finnDefinisjoner()
+        assertEquals(2, definisjoner.size)
+    }
+
+    @Test
+    fun `finner alltid kun siste definisjon av et varsel`() {
+        val varselkode = "EN_KODE"
+        opprettVarsel(varselkode)
+        opprettForklaring(varselkode, "EN_NY_FORKLARING")
+        opprettTittel(varselkode, "EN_NY_TITTEL")
+        opprettForklaring(varselkode, "ENDA_EN_NY_FORKLARING")
+
+        val definisjoner = dao.finnDefinisjoner()
+        assertEquals(1, definisjoner.size)
+    }
 }

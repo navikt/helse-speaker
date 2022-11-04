@@ -11,6 +11,7 @@ import javax.sql.DataSource
 internal interface VarselRepository {
     fun sjekkGyldighet(id: UUID, kode: String, melding: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime): UgyldigVarsel?
 
+    fun definisjoner(): List<Varseldefinisjon>
 
     companion object {
         fun List<JsonNode>.validerVarsler(repository: VarselRepository) {
@@ -25,5 +26,9 @@ internal class ActualVarselRepository(dataSource: () -> DataSource): VarselRepos
 
     override fun sjekkGyldighet(id: UUID, kode: String, melding: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime): UgyldigVarsel? {
         return varselDao.sjekkGyldighet(id, kode, melding, tidsstempel)
+    }
+
+    override fun definisjoner(): List<Varseldefinisjon> {
+        return varselDao.finnDefinisjoner()
     }
 }

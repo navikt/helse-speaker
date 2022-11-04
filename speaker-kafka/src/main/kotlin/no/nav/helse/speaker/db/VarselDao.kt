@@ -1,7 +1,6 @@
 package no.nav.helse.speaker.db
 
 import kotliquery.Session
-import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.speaker.UgyldigVarsel
@@ -31,27 +30,39 @@ internal class VarselDao(private val dataSource: DataSource) {
         return this.run(queryOf(query, kode).map { it.boolean(1) }.asSingle) ?: false
     }
 
-    private fun TransactionalSession.finnTittel(kode: String): String {
-        @Language("PostgreSQL")
-        val query = "SELECT tittel FROM varsel_tittel vt INNER JOIN varselkode v on v.id = vt.varselkode_ref WHERE v.kode = ? ORDER BY vt.id DESC"
-        return requireNotNull(this.run(queryOf(query, kode).map { it.string(1) }.asSingle)) { "Fant ikke tittel for varsel med kode=$kode" }
-    }
+    internal fun finnDefinisjoner(): List<Varseldefinisjon> {
+        return sessionOf(dataSource).use {
+            it.transaction { tx ->
+                @Language("PostgreSQL")
+                val query = """
+                SELECT vk.kode, tittel, forklaring, handling, vk.avviklet, vk.opprettet
+                FROM varselkode vk INNER JOIN LATERAL (
+                    SELECT tittel, forklaring, handling, t.varselkode_ref, greatest(t.opprettet, f.opprettet, h.opprettet) as opprettet FROM
+                        (
+                        SELECT tittel, varselkode_ref, t.opprettet FROM varsel_tittel t
+                        WHERE vk.id = t.varselkode_ref ORDER BY t.opprettet DESC LIMIT 1
+                        ) t INNER JOIN
+                        (
+                        SELECT forklaring, varselkode_ref, f.opprettet FROM varsel_forklaring f
+                        WHERE vk.id = f.varselkode_ref ORDER BY f.opprettet DESC LIMIT 1
+                        ) f ON f.varselkode_ref = vk.id INNER JOIN
+                        (
+                        SELECT handling, varselkode_ref, h.opprettet FROM varsel_handling h
+                        WHERE vk.id = h.varselkode_ref ORDER BY h.opprettet DESC LIMIT 1
+                        ) h ON h.varselkode_ref = vk.id
+                ) rad ON rad.varselkode_ref = vk.id
+                """
 
-    private fun TransactionalSession.finnForklaring(kode: String): String? {
-        @Language("PostgreSQL")
-        val query = "SELECT forklaring FROM varsel_forklaring vf INNER JOIN varselkode v on v.id = vf.varselkode_ref WHERE v.kode = ? ORDER BY vf.id DESC"
-        return this.run(queryOf(query, kode).map { it.string(1) }.asSingle)
-    }
-
-    private fun TransactionalSession.finnHandling(kode: String): String? {
-        @Language("PostgreSQL")
-        val query = "SELECT handling FROM varsel_handling vh INNER JOIN varselkode v on v.id = vh.varselkode_ref WHERE v.kode = ? ORDER BY vh.id DESC"
-        return this.run(queryOf(query, kode).map { it.string(1) }.asSingle)
-    }
-
-    private fun TransactionalSession.finnAvviklet(kode: String): Boolean {
-        @Language("PostgreSQL")
-        val query = "SELECT avviklet FROM varselkode WHERE kode = ?"
-        return requireNotNull(this.run(queryOf(query, kode).map { it.boolean(1) }.asSingle)) { "Fant ikke informasjon om koden er avviklet for kode=$kode" }
+                tx.run(queryOf(query).map { row ->
+                    Varseldefinisjon(
+                        kode = row.string("kode"),
+                        tittel = row.string("tittel"),
+                        forklaring = row.stringOrNull("forklaring"),
+                        handling = row.stringOrNull("handling"),
+                        avviklet = row.boolean("avviklet"),
+                        opprettet = row.localDateTime("opprettet")
+                    ) }.asList)
+            }
+        }
     }
 }
