@@ -22,7 +22,7 @@ private fun createApp(env: Map<String, String>): RapidsConnection {
         val varselRepository = ActualVarselRepository { dataSource }
         VarselRiver(this, varselRepository)
         val definisjoner = JsonMessage.newMessage("varseldefinisjoner_endret", varselRepository.definisjoner().toJson())
-        val definisjonerJson = definisjoner.toString()
+        val definisjonerJson = definisjoner.toJson()
         this.publish(definisjonerJson)
         sikkerlogg.info("Publiserer definisjoner for varsler: {}", keyValue("definisjoner", definisjonerJson))
         register(object: RapidsConnection.StatusListener {
