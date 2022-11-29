@@ -37,19 +37,7 @@ internal class VarselDao(private val dataSource: DataSource) {
                 val query = """
                 SELECT vk.kode, tittel, forklaring, handling, vk.avviklet, vk.opprettet
                 FROM varselkode vk INNER JOIN LATERAL (
-                    SELECT tittel, forklaring, handling, t.varselkode_ref, greatest(t.opprettet, f.opprettet, h.opprettet) as opprettet FROM
-                        (
-                        SELECT tittel, varselkode_ref, t.opprettet FROM varsel_tittel t
-                        WHERE vk.id = t.varselkode_ref ORDER BY t.opprettet DESC LIMIT 1
-                        ) t INNER JOIN
-                        (
-                        SELECT forklaring, varselkode_ref, f.opprettet FROM varsel_forklaring f
-                        WHERE vk.id = f.varselkode_ref ORDER BY f.opprettet DESC LIMIT 1
-                        ) f ON f.varselkode_ref = vk.id INNER JOIN
-                        (
-                        SELECT handling, varselkode_ref, h.opprettet FROM varsel_handling h
-                        WHERE vk.id = h.varselkode_ref ORDER BY h.opprettet DESC LIMIT 1
-                        ) h ON h.varselkode_ref = vk.id
+                    SELECT tittel, forklaring, handling, varselkode_ref FROM varsel_definisjon vd WHERE vd.varselkode_ref = vk.id ORDER BY vd.id DESC LIMIT 1
                 ) rad ON rad.varselkode_ref = vk.id
                 """
 

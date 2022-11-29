@@ -21,7 +21,7 @@ internal abstract class AbstractDatabaseTest(private val doTruncate: Boolean = t
             withLabel("app-navn", "speaker")
             start()
             port = firstMappedPort.toString()
-            println("🎩 Databasen er startet opp, portnummer: $firstMappedPort, jdbcUrl: jdbc:postgresql://$host:$firstMappedPort/$database, credentials: test og test")
+            println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
         }
 
         val dataSource =
@@ -56,45 +56,6 @@ internal abstract class AbstractDatabaseTest(private val doTruncate: Boolean = t
             sessionOf(dataSource).use  {
                 it.run(queryOf("SELECT truncate_tables()").asExecute)
             }
-        }
-    }
-
-    protected fun opprettVarsel(kode: String) {
-        opprettKode(kode)
-        opprettTittel(kode, "EN TITTEL")
-        opprettForklaring(kode, "EN FORKLARING")
-        opprettHandling(kode, "EN HANDLING")
-    }
-
-    protected fun opprettKode(kode: String) {
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query = "INSERT INTO varselkode(kode, avviklet, opprettet, endret) VALUES (?, false, now(), null)"
-            it.run(queryOf(query, kode).asExecute)
-        }
-    }
-
-    private fun opprettTittel(kode: String, tittel: String) {
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query = "INSERT INTO varsel_tittel(varselkode_ref, tittel) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?)"
-            it.run(queryOf(query, kode, tittel).asExecute)
-        }
-    }
-
-    private fun opprettForklaring(kode: String, forklaring: String) {
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query = "INSERT INTO varsel_forklaring(varselkode_ref, forklaring) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?)"
-            it.run(queryOf(query, kode, forklaring).asExecute)
-        }
-    }
-
-    private fun opprettHandling(kode: String, handling: String) {
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query = "INSERT INTO varsel_handling(varselkode_ref, handling) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?)"
-            it.run(queryOf(query, kode, handling).asExecute)
         }
     }
 }

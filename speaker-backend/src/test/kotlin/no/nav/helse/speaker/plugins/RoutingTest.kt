@@ -12,14 +12,14 @@ import io.ktor.server.testing.testApplication
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import no.nav.helse.speaker.Varsel
+import no.nav.helse.speaker.Varseldefinisjon
 import no.nav.helse.speaker.VarselRepository
 import no.nav.helse.speaker.db.VarselException
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class RoutingTest {
-    private val varsel = Varsel("EN_VARSELKODE", "EN TITTEL", "EN FORKLARING", "EN HANDLING", false)
+    private val varseldefinisjon = Varseldefinisjon("EN_VARSELKODE", "EN TITTEL", "EN FORKLARING", "EN HANDLING", false)
 
     @Test
     fun `hent varsler`() = testApplication {
@@ -30,7 +30,7 @@ internal class RoutingTest {
 
         val response = client.get("/api/varsler")
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(listOf(varsel), Json.decodeFromString<List<Varsel>>(response.body()))
+        assertEquals(listOf(varseldefinisjon), Json.decodeFromString<List<Varseldefinisjon>>(response.body()))
     }
 
     @Test
@@ -42,7 +42,7 @@ internal class RoutingTest {
 
         val response = client.post("/api/varsler/oppdater") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
-            setBody(Json.encodeToString(varsel))
+            setBody(Json.encodeToString(varseldefinisjon))
         }
         assertEquals(HttpStatusCode.OK, response.status)
     }
@@ -56,13 +56,13 @@ internal class RoutingTest {
 
         val response = client.post("/api/varsler/oppdater") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
-            setBody(Json.encodeToString(varsel))
+            setBody(Json.encodeToString(varseldefinisjon))
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
 
-    private fun repository(varsler: List<Varsel> = listOf(varsel), shouldThrowOnUpdate: Boolean = false): VarselRepository = object : VarselRepository {
-        override fun nytt(varsel: Varsel): Boolean {
+    private fun repository(varsler: List<Varseldefinisjon> = listOf(varseldefinisjon), shouldThrowOnUpdate: Boolean = false): VarselRepository = object : VarselRepository {
+        override fun nytt(varseldefinisjon: Varseldefinisjon): Boolean {
             TODO("Not yet implemented")
         }
 
@@ -70,16 +70,16 @@ internal class RoutingTest {
             TODO("Not yet implemented")
         }
 
-        override fun finn(): List<Varsel> {
+        override fun finn(): List<Varseldefinisjon> {
             return varsler
         }
 
-        override fun oppdater(varsel: Varsel) {
-            if (shouldThrowOnUpdate) throw VarselException.KodeFinnesIkke("EN_VARSELKODE")
+        override fun finnGjeldendeDefinisjonFor(varselkode: String): Varseldefinisjon {
+            TODO("Not yet implemented")
         }
 
-        override fun oppdater(kode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean) {
-            TODO("Not yet implemented")
+        override fun oppdater(varseldefinisjon: Varseldefinisjon) {
+            if (shouldThrowOnUpdate) throw VarselException.KodeFinnesIkke("EN_VARSELKODE")
         }
     }
 

@@ -36,9 +36,9 @@ internal class VarselDaoTest: AbstractDatabaseTest() {
     fun `finner alltid kun siste definisjon av et varsel`() {
         val varselkode = "EN_KODE"
         opprettVarsel(varselkode)
-        opprettForklaring(varselkode, "EN_NY_FORKLARING")
-        opprettTittel(varselkode, "EN_NY_TITTEL")
-        opprettForklaring(varselkode, "ENDA_EN_NY_FORKLARING")
+        opprettDefinisjon(varselkode, "EN_TITTEL", "EN_NY_FORKLARING", "EN_HANDLING")
+        opprettDefinisjon(varselkode, "EN_NY_TITTEL", "EN_NY_FORKLARING", "EN_HANDLING")
+        opprettDefinisjon(varselkode, "EN_NY_TITTEL", "ENDA_EN_NY_FORKLARING", "EN_HANDLING")
 
         val definisjoner = dao.finnDefinisjoner()
         assertEquals(1, definisjoner.size)

@@ -11,7 +11,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import no.nav.helse.speaker.Varsel
+import no.nav.helse.speaker.Varseldefinisjon
 import no.nav.helse.speaker.VarselRepository
 import no.nav.helse.speaker.db.VarselException
 import org.slf4j.LoggerFactory
@@ -26,10 +26,10 @@ internal fun Application.configureRestApi(varselRepository: VarselRepository) {
             call.respond(HttpStatusCode.OK, varselRepository.finn())
         }
         post("/api/varsler/oppdater") {
-            val varsel = call.receive<Varsel>()
-            sikkerlogg.info("Oppdaterer {}", varsel)
+            val varseldefinisjon = call.receive<Varseldefinisjon>()
+            sikkerlogg.info("Oppdaterer {}", varseldefinisjon)
             try {
-                varselRepository.oppdater(varsel)
+                varselRepository.oppdater(varseldefinisjon)
             } catch (e: VarselException) {
                 return@post call.respond(message = e.message!!, status = e.httpStatusCode)
             }
