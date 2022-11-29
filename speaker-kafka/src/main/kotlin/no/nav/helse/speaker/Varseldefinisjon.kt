@@ -1,8 +1,10 @@
 package no.nav.helse.speaker
 
 import java.time.LocalDateTime
+import java.util.UUID
 
 internal class Varseldefinisjon(
+    private val unikId: UUID,
     private val kode: String,
     private val tittel: String,
     private val forklaring: String?,
@@ -15,6 +17,7 @@ internal class Varseldefinisjon(
             return mapOf(
                 "definisjoner" to map {
                     mapOf(
+                        "id" to it.unikId,
                         "kode" to it.kode,
                         "tittel" to it.tittel,
                         "forklaring" to it.forklaring,
