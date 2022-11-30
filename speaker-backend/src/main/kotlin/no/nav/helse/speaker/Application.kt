@@ -6,6 +6,7 @@ import no.nav.helse.speaker.db.DataSourceBuilder
 import no.nav.helse.speaker.db.VarseldefinisjonDao
 import no.nav.helse.speaker.plugins.configureRestApi
 import no.nav.helse.speaker.plugins.configureSerialization
+import kotlin.system.exitProcess
 
 internal fun main() {
     createApp(System.getenv())
@@ -16,6 +17,7 @@ internal fun createApp(env: Map<String, String>) {
     val dao = VarseldefinisjonDao(dataSourceBuilder.getDataSource())
     val repository = ActualVarselRepository(dao)
     dataSourceBuilder.migrate()
+    exitProcess(0)
 //    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
 //        configureSerialization()
 //        configureRestApi(repository)
