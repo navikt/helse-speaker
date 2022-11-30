@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'deploy/dev-backend.yml'
-      - 'deploy/prod-backend.yml'
+      - 'deploy/backend-dev.yml'
+      - 'deploy/backend-prod.yml'
       - 'speaker-backend/**'
       - 'speaker-database/**'
       - 'build.gradle.kts'
@@ -67,7 +67,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: deploy/dev-backend.yml
+          RESOURCE: deploy/backend-dev.yml
           IMAGE: ${{ needs.set_version.outputs.image }}
 
   deployProd:
@@ -80,5 +80,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: deploy/prod-backend.yml
+          RESOURCE: deploy/backend-prod.yml
           IMAGE: ${{ needs.set_version.outputs.image }}

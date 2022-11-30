@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'deploy/dev-kafka.yml'
-      - 'deploy/prod-kafka.yml'
+      - 'deploy/kafka-dev.yml'
+      - 'deploy/kafka-prod.yml'
       - 'speaker-kafka/**'
       - 'speaker-database/**'
       - 'build.gradle.kts'
@@ -56,29 +56,29 @@ jobs:
         with:
           args: --project-name=speaker-kafka --org=tbd-ty7 --fail-on=all
           command: monitor
-
-  deployDev:
-    name: deploy to dev
-    needs: [set_version, build, snyk]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: deploy/dev-kafka.yml
-          IMAGE: ${{ needs.set_version.outputs.image }}
-
-  deployProd:
-    name: deploy to prod
-    needs: [deployDev]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-gcp
-          RESOURCE: deploy/prod-kafka.yml
-          IMAGE: ${{ needs.set_version.outputs.image }}
+#
+#  deployDev:
+#    name: deploy to dev
+#    needs: [set_version, build, snyk]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: dev-gcp
+#          RESOURCE: deploy/kafka-dev.yml
+#          IMAGE: ${{ needs.set_version.outputs.image }}
+#
+#  deployProd:
+#    name: deploy to prod
+#    needs: [deployDev]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: prod-gcp
+#          RESOURCE: deploy/kafka-prod.yml
+#          IMAGE: ${{ needs.set_version.outputs.image }}
