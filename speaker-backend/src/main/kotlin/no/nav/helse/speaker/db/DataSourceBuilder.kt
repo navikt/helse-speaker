@@ -56,8 +56,6 @@ internal class DataSourceBuilder(env: Map<String, String>) {
     }
 
     internal fun migrate() {
-        val dataSource = HikariDataSource(hikariMigrationConfig)
-        runMigration(dataSource)
-        dataSource.close()
+        HikariDataSource(hikariMigrationConfig).use { runMigration(it) }
     }
 }

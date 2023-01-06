@@ -20,7 +20,7 @@ export const Varsler = () => {
     return (
         <div className={'p-4 pt-0.5'}>
             {loading && <Loader size={'3xlarge'} title={'Laster varsler'} />}
-            {varsler.length > 0 && varsler.map((varsel) => <VarselComponent key={varsel.tittel} varsel={varsel} />)}
+            {varsler.length > 0 && varsler.map((varsel) => <VarselComponent key={varsel.varselkode} varsel={varsel} />)}
         </div>
     );
 };
