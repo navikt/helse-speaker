@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { fetchVarsler, postOppdaterVarsel } from '../endepunkter';
 import { useSetRecoilState } from 'recoil';
 import { varslerState } from '../state/varselState';
+import styles from './Varsel.module.css';
 
 export interface VarselProps {
     varsel: Varsel;
@@ -55,6 +56,9 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
     return (
         <EkspanderbartVarsel key={varsel.varselkode} label={varsel.tittel}>
             <form onSubmit={handleSubmit(onSubmit)}>
+                <BodyShort className={'pt-5'}>
+                    <span className={styles.varselkode}>Varselkode:</span> {varsel.varselkode}
+                </BodyShort>
                 <Textarea
                     label="Tittel"
                     size="medium"
