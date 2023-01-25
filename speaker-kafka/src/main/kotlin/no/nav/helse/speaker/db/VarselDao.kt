@@ -35,9 +35,9 @@ internal class VarselDao(private val dataSource: DataSource) {
             it.transaction { tx ->
                 @Language("PostgreSQL")
                 val query = """
-                SELECT vk.kode, unik_id, tittel, forklaring, handling, vk.avviklet, vk.opprettet
+                SELECT vk.kode, unik_id, tittel, forklaring, handling, vk.avviklet, rad.opprettet
                 FROM varselkode vk INNER JOIN LATERAL (
-                    SELECT tittel, unik_id, forklaring, handling, varselkode_ref FROM varsel_definisjon vd WHERE vd.varselkode_ref = vk.id ORDER BY vd.id DESC LIMIT 1
+                    SELECT opprettet, tittel, unik_id, forklaring, handling, varselkode_ref FROM varsel_definisjon vd WHERE vd.varselkode_ref = vk.id ORDER BY vd.id DESC LIMIT 1
                 ) rad ON rad.varselkode_ref = vk.id
                 """
 
