@@ -9,7 +9,13 @@ import java.util.*
 import javax.sql.DataSource
 
 internal interface VarselRepository {
-    fun sjekkGyldighet(id: UUID, kode: String, melding: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime): UgyldigVarsel?
+    fun sjekkGyldighet(
+        id: UUID,
+        kode: String,
+        melding: String,
+        kontekster: List<JsonNode>,
+        tidsstempel: LocalDateTime
+    ): UgyldigVarsel?
 
     fun definisjoner(): List<Varseldefinisjon>
 
@@ -21,10 +27,16 @@ internal interface VarselRepository {
     }
 }
 
-internal class ActualVarselRepository(dataSource: () -> DataSource): VarselRepository {
+internal class ActualVarselRepository(dataSource: () -> DataSource) : VarselRepository {
     private val varselDao = VarselDao(dataSource())
 
-    override fun sjekkGyldighet(id: UUID, kode: String, melding: String, kontekster: List<JsonNode>, tidsstempel: LocalDateTime): UgyldigVarsel? {
+    override fun sjekkGyldighet(
+        id: UUID,
+        kode: String,
+        melding: String,
+        kontekster: List<JsonNode>,
+        tidsstempel: LocalDateTime
+    ): UgyldigVarsel? {
         return varselDao.sjekkGyldighet(id, kode, melding, tidsstempel)
     }
 

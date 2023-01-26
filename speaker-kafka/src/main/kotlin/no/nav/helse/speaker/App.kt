@@ -25,7 +25,7 @@ private fun createApp(env: Map<String, String>): RapidsConnection {
         val definisjonerJson = definisjoner.toJson()
         this.publish(definisjonerJson)
         sikkerlogg.info("Publiserer definisjoner for varsler: {}", keyValue("definisjoner", definisjonerJson))
-        register(object: RapidsConnection.StatusListener {
+        register(object : RapidsConnection.StatusListener {
             override fun onShutdown(rapidsConnection: RapidsConnection) {
                 dataSource.close()
             }
