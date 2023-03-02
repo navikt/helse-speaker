@@ -25,8 +25,8 @@ subprojects {
         set("kotliqueryVersion", kotliqueryVersion)
     }
     repositories {
-        maven("https://jitpack.io")
         mavenCentral()
+        maven("https://jitpack.io")
     }
 }
 //tasks.assemble {
