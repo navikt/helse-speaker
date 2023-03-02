@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
 val micrometerVersion = "1.9.4"
-val ktorVersion = "2.1.1"
+val ktorVersion = "2.2.3"
 val logbackVersion: String by project
 val postgresqlVersion: String by project
 val junitVersion: String by project
