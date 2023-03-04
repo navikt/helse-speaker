@@ -36,7 +36,7 @@ jobs:
           java-version: '17.x'
           cache: 'gradle'
       - name: test and build
-        run: ./gradlew :speaker-backend:test :speaker-backend:build
+        run: ./gradlew :speaker-frontend:build :speaker-backend:test :speaker-backend:build
       - name: build docker image
         run: docker build -f Dockerfile-backend . --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image

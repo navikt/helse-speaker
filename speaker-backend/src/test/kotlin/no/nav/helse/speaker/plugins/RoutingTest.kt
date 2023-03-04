@@ -2,7 +2,6 @@ package no.nav.helse.speaker.plugins
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.apache.Apache
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.request.get
@@ -151,7 +150,7 @@ internal class RoutingTest {
             "AZURE_APP_CLIENT_ID" to "some_client_id",
             "AZURE_APP_CLIENT_SECRET" to "some_secret",
             "AUTHORIZATION_URL" to oauthMock.authorizationEndpointUrl("default").toString(),
-            "DEVELOPMENT" to "true"
+            "LOCAL_DEVELOPMENT" to "true"
         )
 
         private val server: ApplicationEngine = embeddedServer(

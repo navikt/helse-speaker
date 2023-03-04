@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+#  ingresses:
+#    - https://speaker.intern.nav.no
   strategy:
     type: Recreate
   liveness:
@@ -27,6 +29,18 @@ spec:
     min: 1
     max: 1
     cpuThresholdPercentage: 90
+#  azure:
+#    application:
+#      tenant: nav.no
+#      enabled: true
+#      claims:
+#        extra:
+#          - "NAVident"
+#        groups:
+#          - id: "f787f900-6697-440d-a086-d5bb56e26a9c"
+#      replyURLs:
+#        - "https://speaker.intern.nav.no/oauth2/callback"
+#      allowAllUsers: false
   prometheus:
     enabled: true
     path: /metrics

@@ -7,8 +7,8 @@ tasks.assemble {
     dependsOn("npm_run_build")
 }
 
-//tasks.check {
-//    dependsOn("npm_run_test")
-//}
-//
+tasks.check {
+    dependsOn("npm_run_test")
+}
+
 project.buildDir = File("dist")

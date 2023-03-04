@@ -11,7 +11,7 @@ internal class LocalApp: AbstractDatabaseTest(doTruncate = false) {
         "DATABASE_DATABASE" to database,
         "DATABASE_USERNAME" to "test",
         "DATABASE_PASSWORD" to "test",
-        "DEVELOPMENT" to "true"
+        "LOCAL_DEVELOPMENT" to "true"
     ).apply {
         putAll(oauthMock.oauthConfig)
     }.toMap()

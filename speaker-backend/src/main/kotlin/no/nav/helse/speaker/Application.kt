@@ -42,21 +42,25 @@ internal fun createApp(env: Map<String, String>) {
 }
 
 internal fun Application.app(repository: VarselRepository, env: Map<String, String>) {
-    val isDevelopment = env["DEVELOPMENT"]?.toBooleanStrict() ?: false
+    val isLocalDevelopment = env["LOCAL_DEVELOPMENT"]?.toBooleanStrict() ?: false
     val azureAD = AzureAD.fromEnv(env)
     statusPages()
     configureUtilities()
     configureServerContentNegotiation()
-    configureAuthentication(azureAD, isDevelopment)
-    configureSessions(isDevelopment)
+    configureAuthentication(azureAD, isLocalDevelopment)
+    configureSessions(isLocalDevelopment)
     routing {
         nais()
-        authenticate("oauth") {
-            login(azureAD)
-            singlePageApplication {
-                react("speaker-frontend/dist")
+        if (erDev() || isLocalDevelopment) {
+            authenticate("oauth") {
+                login(azureAD)
+                singlePageApplication {
+                    react("speaker-frontend/dist")
+                }
+                speaker(repository, azureAD)
             }
-            speaker(repository, azureAD)
         }
     }
 }
+
+private fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
