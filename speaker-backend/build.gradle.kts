@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.nio.file.Paths
 
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
@@ -47,11 +47,18 @@ tasks {
     test {
         useJUnitPlatform()
     }
-    withType<KotlinCompile> {
+
+    compileKotlin {
+        kotlinOptions.jvmTarget = "17"
+    }
+
+    compileTestKotlin {
         kotlinOptions.jvmTarget = "17"
     }
 
     withType<Jar> {
+        mustRunAfter(":speaker-frontend:npm_run_build")
+
         archiveBaseName.set("app")
 
         manifest {
@@ -59,6 +66,10 @@ tasks {
             attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
                 it.name
             }
+        }
+
+        from({ Paths.get(project(":speaker-frontend").buildDir.path) }) {
+            into("static")
         }
 
         doLast {
