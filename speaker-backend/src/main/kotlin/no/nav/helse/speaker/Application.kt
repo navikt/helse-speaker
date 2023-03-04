@@ -5,6 +5,7 @@ import io.ktor.server.application.ServerReady
 import io.ktor.server.application.call
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
+import no.nav.helse.speaker.routes.nais
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.response.respond
@@ -24,18 +25,10 @@ internal fun createApp(env: Map<String, String>) {
     val dataSourceBuilder = DataSourceBuilder(env)
     val dao = VarseldefinisjonDao(dataSourceBuilder.getDataSource())
     val repository = ActualVarselRepository(dao)
-    val dings = embeddedServer(Netty, applicationEngineEnvironment {
+    val server = embeddedServer(Netty, applicationEngineEnvironment {
         module {
-            routing {
-                get("/isready") {
-                    call.respond(HttpStatusCode.OK)
-                }
-                get("/isalive") {
-                    call.respond(HttpStatusCode.OK)
-                }
-                //configureRestApi(repository)
-            }
-            environment.monitor.subscribe(ServerReady) { application ->
+            nais()
+            environment.monitor.subscribe(ServerReady) { _ ->
                 dataSourceBuilder.migrate()
             }
             //configureSerialization()
@@ -44,5 +37,5 @@ internal fun createApp(env: Map<String, String>) {
             port = 8080
         }
     })
-    dings.start(wait = true)
+    server.start(wait = true)
 }
