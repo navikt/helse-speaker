@@ -10,6 +10,8 @@ internal data class Varseldefinisjon(
     private val handling: String?,
     private val avviklet: Boolean
 ) {
+    internal fun kode() = varselkode
+
     internal fun lagre(varselRepository: VarselRepository) {
         varselRepository.nytt(varselkode, tittel, forklaring, handling)
     }
