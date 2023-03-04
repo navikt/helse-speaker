@@ -7,6 +7,7 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import no.nav.helse.speaker.routes.nais
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.http.content.ignoreFiles
 import io.ktor.server.http.content.react
 import io.ktor.server.http.content.singlePageApplication
 import io.ktor.server.netty.Netty
@@ -65,7 +66,9 @@ private fun Application.dev(repository: VarselRepository, env: Map<String, Strin
         authenticate("oauth") {
             login(azureAD)
             singlePageApplication {
+                useResources = !isLocalDevelopment
                 react("speaker-frontend/dist")
+                ignoreFiles { it.endsWith(".txt") }
             }
             speaker(repository, azureAD)
         }
