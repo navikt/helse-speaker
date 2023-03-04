@@ -13,8 +13,6 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.formUrlEncode
 import io.ktor.server.auth.OAuthServerSettings
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import no.nav.helse.speaker.plugins.SpeakerSession
 import no.nav.helse.speaker.plugins.configureClientContentNegotiation
@@ -35,7 +33,7 @@ class AzureAD private constructor(private val config: Config) {
     internal fun oauthSettings(): OAuthServerSettings.OAuth2ServerSettings {
         return OAuthServerSettings.OAuth2ServerSettings(
             name = "AAD",
-            authorizeUrl = config.authorizationUrl,
+            authorizeUrl = config.authorizationEndpoint,
             accessTokenUrl = config.tokenEndpoint,
             requestMethod = HttpMethod.Post,
             clientId = config.clientId,
@@ -80,7 +78,7 @@ class AzureAD private constructor(private val config: Config) {
                     discoveryUrl = env.getValue("AZURE_APP_WELL_KNOWN_URL"),
                     clientId = env.getValue("AZURE_APP_CLIENT_ID"),
                     clientSecret = env.getValue("AZURE_APP_CLIENT_SECRET"),
-                    authorizationUrl = env.getValue("AUTHORIZATION_URL")
+                    authorizationUrl = env["AUTHORIZATION_URL"]
                 )
             )
         }
@@ -90,11 +88,14 @@ class AzureAD private constructor(private val config: Config) {
         internal val discoveryUrl: String,
         internal val clientId: String,
         internal val clientSecret: String,
-        internal val authorizationUrl: String
+        authorizationUrl: String?
     ) {
         private val discovered = discoveryUrl.discover()
         internal val tokenEndpoint = discovered["token_endpoint"]?.textValue()
             ?: throw RuntimeException("Unable to discover token endpoint")
+
+        internal val authorizationEndpoint = authorizationUrl ?: discovered["authorization_endpoint"]?.textValue()
+        ?: throw RuntimeException("Unable to discover authorization endpoint")
 
         private companion object {
             private fun String.discover(): JsonNode {
