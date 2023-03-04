@@ -71,7 +71,7 @@ internal class RoutingTest {
     fun `hent varsler med gyldig token med flere scopes`() {
         val response = runBlocking {
             client.get("http://localhost:8080/api/varsler") {
-                header("Authorization", "Bearer ${accessToken(scopes = listOf("openid", "offline_access", "$issuerId/.default", "other_scope"))}")
+                header("Authorization", "Bearer ${accessToken()}")
             }
         }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -89,16 +89,6 @@ internal class RoutingTest {
         assertEquals(HttpStatusCode.OK, response.status)
         val body = runBlocking { response.body<String>() }
         assertEquals(listOf(varseldefinisjon), Json.decodeFromString<List<Varseldefinisjon>>(body))
-    }
-
-    @Test
-    fun `hent varsler uten gyldige scopes`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler") {
-                header("Authorization", "Bearer ${accessToken(scopes = listOf("openid", "offline_access"))}")
-            }
-        }
-        assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
     @Test
@@ -148,18 +138,16 @@ internal class RoutingTest {
     }
 
     private fun accessToken(
-        scopes: List<String> = listOf("openid", "offline_access", "$issuerId/.default"),
         harNavIdent: Boolean = true,
         grupper: List<String> = listOf("$groupId"),
         andreClaims: Map<String, String> = emptyMap()
     ): String {
-        val claims = mutableMapOf(
-            "scope" to scopes.joinToString(" "),
+        val claims: Map<String, Any> = mutableMapOf<String, Any>(
             "groups" to grupper
         ).apply {
             if (harNavIdent) put("NAVident", "EN_IDENT")
             putAll(andreClaims)
-        }.toMap()
+        }
         return oauthMock.issueToken(audience = issuerId.toString(), claims = claims).serialize()
     }
 
