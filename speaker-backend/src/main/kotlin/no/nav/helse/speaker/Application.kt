@@ -60,15 +60,13 @@ private fun Application.dev(repository: VarselRepository, env: Map<String, Strin
     configureAuthentication(azureAD, isLocalDevelopment)
     configureSessions(isLocalDevelopment)
     routing {
-        if (isLocalDevelopment) {
-            nais()
-            authenticate("oauth") {
-                login(azureAD)
-                singlePageApplication {
-                    react("speaker-frontend/dist")
-                }
-                speaker(repository, azureAD)
+        nais()
+        authenticate("oauth") {
+            login(azureAD)
+            singlePageApplication {
+                react("speaker-frontend/dist")
             }
+            speaker(repository, azureAD)
         }
     }
 }
