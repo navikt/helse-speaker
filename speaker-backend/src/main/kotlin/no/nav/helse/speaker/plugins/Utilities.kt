@@ -16,6 +16,7 @@ internal fun Application.configureUtilities() {
         }
     }
     install(CallLogging) {
+        disableDefaultColors()
         level = Level.INFO
         filter { call -> !call.request.path().startsWith("/internal") }
     }

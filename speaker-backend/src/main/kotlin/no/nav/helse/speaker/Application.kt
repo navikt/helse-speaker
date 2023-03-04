@@ -59,6 +59,7 @@ private fun Application.dev(repository: VarselRepository, env: Map<String, Strin
     val azureAD = AzureAD.fromEnv(env)
     configureAuthentication(azureAD, isLocalDevelopment)
     configureSessions(isLocalDevelopment)
+    metrics()
     routing {
         nais()
         authenticate("oauth") {

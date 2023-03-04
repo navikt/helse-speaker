@@ -43,7 +43,7 @@ spec:
 #      allowAllUsers: false
   prometheus:
     enabled: true
-    path: /metrics
+    path: /internal/metrics
   gcp:
     sqlInstances:
       - type: POSTGRES_14
