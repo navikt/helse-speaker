@@ -4,7 +4,7 @@ import io.ktor.http.HttpStatusCode
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.speaker.Varseldefinisjon
+import no.nav.helse.speaker.domene.Varseldefinisjon
 import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 

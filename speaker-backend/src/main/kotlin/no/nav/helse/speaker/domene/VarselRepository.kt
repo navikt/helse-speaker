@@ -1,4 +1,4 @@
-package no.nav.helse.speaker
+package no.nav.helse.speaker.domene
 
 import no.nav.helse.speaker.db.VarseldefinisjonDao
 import no.nav.helse.speaker.db.VarselException

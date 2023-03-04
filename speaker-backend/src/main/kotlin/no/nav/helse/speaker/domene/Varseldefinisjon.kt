@@ -1,4 +1,4 @@
-package no.nav.helse.speaker
+package no.nav.helse.speaker.domene
 
 import kotlinx.serialization.Serializable
 
@@ -36,20 +36,16 @@ internal data class Varseldefinisjon(
         return true
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Varseldefinisjon
-
-        if (varselkode != other.varselkode) return false
-        if (tittel != other.tittel) return false
-        if (forklaring != other.forklaring) return false
-        if (handling != other.handling) return false
-        if (avviklet != other.avviklet) return false
-
-        return true
-    }
+    override fun equals(other: Any?) =
+        this === other || (
+            other is Varseldefinisjon
+            && javaClass == other.javaClass
+            && varselkode == other.varselkode
+            && tittel == other.tittel
+            && forklaring == other.forklaring
+            && handling == other.handling
+            && avviklet == other.avviklet
+        )
 
     override fun hashCode(): Int {
         var result = varselkode.hashCode()
@@ -59,6 +55,4 @@ internal data class Varseldefinisjon(
         result = 31 * result + avviklet.hashCode()
         return result
     }
-
-
 }

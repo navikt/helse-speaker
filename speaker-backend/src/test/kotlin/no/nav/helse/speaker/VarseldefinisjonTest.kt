@@ -1,5 +1,6 @@
 package no.nav.helse.speaker
 
+import no.nav.helse.speaker.domene.Varseldefinisjon
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
