@@ -20,27 +20,18 @@ internal fun Application.configureAuthentication(azureAD: AzureAD) {
             ),
             additionalValidation = { ctx ->
                 val claims = ctx.getClaims(azureAD.issuer())
-                val scopes = claims
-                    ?.getStringClaim("scope")
-                    ?.split(" ")
-                    ?: emptyList()
 
                 val groups: List<String> = claims.getAsList("groups")
 
                 val hasValidClaims = azureAD.hasValidClaims(claims.allClaims.keys.toList())
-                val hasValidScopes = azureAD.hasValidScopes(scopes)
                 val hasValidGroup = azureAD.hasValidGroups(groups)
-                val validToken = hasValidClaims && hasValidScopes && hasValidGroup
+                val validToken = hasValidClaims && hasValidGroup
 
                 if (!validToken) {
                     sikkerlogg.info(
-                        "Har ikke gyldig token. {}, {}, {}",
+                        "Har ikke gyldig token. {}, {}",
                         kv("harGyldigeClaims", hasValidClaims),
-                        kv("harGyldigeScopes", hasValidScopes),
                         kv("harGyldigeGrupper", hasValidGroup),
-                    )
-                    sikkerlogg.info(
-                        "Har følgende scopes: ${scopes.joinToString()}"
                     )
                     sikkerlogg.info(
                         "Har følgende grupper: ${groups.joinToString()}"

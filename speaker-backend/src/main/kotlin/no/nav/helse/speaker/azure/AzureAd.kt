@@ -12,14 +12,8 @@ class AzureAD private constructor(private val config: Config) {
         acceptedAudience = listOf(config.clientId),
     )
     private val requiredClaims = listOf("NAVident")
-    private val requiredScopes = listOf(
-        "openid",
-        "offline_access",
-        "${config.clientId}/.default"
-    )
     private val requiredGroups = listOf(config.validGroupId)
 
-    internal fun hasValidScopes(scopes: List<String>) = requiredScopes.all { it in scopes }
     internal fun hasValidClaims(claims: List<String>) = requiredClaims.all { it in claims }
     internal fun hasValidGroups(groups: List<String>) = requiredGroups.any { it in groups }
 
