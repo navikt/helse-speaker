@@ -11,10 +11,10 @@ spec:
   strategy:
     type: Recreate
   liveness:
-    path: isalive
+    path: internal/isalive
     initialDelay: 5
   readiness:
-    path: isready
+    path: internal/isready
     initialDelay: 5
   resources:
     limits:
