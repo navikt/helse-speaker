@@ -6,6 +6,7 @@ on:
     paths:
       - 'deploy/backend-dev.yml'
       - 'deploy/backend-prod.yml'
+      - 'speaker-frontend/**'
       - 'speaker-backend/**'
       - 'speaker-database/**'
       - 'build.gradle.kts'

@@ -3,16 +3,12 @@ package no.nav.helse.speaker.plugins
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.OAuthAccessTokenResponse.OAuth2
 import io.ktor.server.auth.oauth
 import io.ktor.server.auth.principal
-import io.ktor.server.plugins.origin
-import io.ktor.server.request.host
-import io.ktor.server.request.port
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -25,7 +21,8 @@ import no.nav.helse.speaker.redirectUrl
 import org.slf4j.LoggerFactory
 
 internal fun Route.login(azureAD: AzureAD) {
-    val logg = LoggerFactory.getLogger("tjenestekall")
+    val logg = LoggerFactory.getLogger(Route::class.java)
+    val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     get("/login") { /* Redirects to 'authorizeUrl' automatically*/ }
     get("/oauth2/callback") {
         val principal = call.principal<OAuth2>() ?: throw IllegalStateException("Forventer å finne token")
@@ -36,9 +33,10 @@ internal fun Route.login(azureAD: AzureAD) {
         val expiry = principal.expiresIn
         val redirectUrl = azureAD.getRedirect(state)
         logg.info("Innlogging vellykket")
+        sikkerlogg.info("Innlogging vellykket")
         call.sessions.set(SpeakerSession(accessToken, refreshToken, idToken, expiry))
         redirectUrl?.also { url ->
-            logg.info("Omdirigerer til $url")
+            sikkerlogg.info("Omdirigerer til $url")
             call.respondRedirect(url)
         }
         call.respondRedirect("/")
