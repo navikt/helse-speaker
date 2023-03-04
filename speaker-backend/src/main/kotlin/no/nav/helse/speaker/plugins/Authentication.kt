@@ -27,6 +27,8 @@ internal fun Application.configureAuthentication(azureAD: AzureAD) {
                 val hasValidGroup = azureAD.hasValidGroups(groups)
                 val validToken = hasValidClaims && hasValidGroup
 
+                sikkerlogg.info("Claims: ${claims.allClaims.entries.joinToString {(k, v) -> "($k: $v)" }}")
+
                 if (!validToken) {
                     sikkerlogg.info(
                         "Har ikke gyldig token. {}, {}",
