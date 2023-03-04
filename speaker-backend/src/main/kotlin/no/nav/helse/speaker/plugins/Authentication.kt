@@ -39,6 +39,12 @@ internal fun Application.configureAuthentication(azureAD: AzureAD) {
                         kv("harGyldigeScopes", hasValidScopes),
                         kv("harGyldigeGrupper", hasValidGroup),
                     )
+                    sikkerlogg.info(
+                        "Har følgende scopes: ${scopes.joinToString()}"
+                    )
+                    sikkerlogg.info(
+                        "Har følgende grupper: ${groups.joinToString()}"
+                    )
                 }
 
                 validToken
