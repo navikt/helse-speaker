@@ -87,7 +87,7 @@ tasks {
         }
 
         from({ Paths.get(project(":speaker-frontend").buildDir.path) }) {
-            into("speaker-backend/dist")
+            into("speaker-frontend/dist")
         }
 
         doLast {
