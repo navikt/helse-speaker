@@ -43,15 +43,25 @@ internal fun createApp(env: Map<String, String>) {
 
 internal fun Application.app(repository: VarselRepository, env: Map<String, String>) {
     val isLocalDevelopment = env["LOCAL_DEVELOPMENT"]?.toBooleanStrict() ?: false
-    val azureAD = AzureAD.fromEnv(env)
     statusPages()
     configureUtilities()
     configureServerContentNegotiation()
+    if (erDev() || isLocalDevelopment) {
+        dev(repository, env, isLocalDevelopment)
+    } else {
+        routing {
+            nais()
+        }
+    }
+}
+
+private fun Application.dev(repository: VarselRepository, env: Map<String, String>, isLocalDevelopment: Boolean) {
+    val azureAD = AzureAD.fromEnv(env)
     configureAuthentication(azureAD, isLocalDevelopment)
     configureSessions(isLocalDevelopment)
     routing {
-        nais()
-        if (erDev() || isLocalDevelopment) {
+        if (isLocalDevelopment) {
+            nais()
             authenticate("oauth") {
                 login(azureAD)
                 singlePageApplication {
