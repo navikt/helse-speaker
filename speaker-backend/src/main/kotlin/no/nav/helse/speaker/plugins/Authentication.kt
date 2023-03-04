@@ -1,82 +1,48 @@
 package no.nav.helse.speaker.plugins
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
 import io.ktor.server.application.Application
-import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.OAuthAccessTokenResponse.OAuth2
-import io.ktor.server.auth.oauth
-import io.ktor.server.auth.principal
-import io.ktor.server.response.respondRedirect
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
-import io.ktor.server.sessions.*
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.speaker.azure.AzureAD
-import no.nav.helse.speaker.redirectUrl
+import no.nav.security.token.support.v2.TokenSupportConfig
+import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.LoggerFactory
 
-internal fun Route.login(azureAD: AzureAD) {
-    val logg = LoggerFactory.getLogger(Route::class.java)
-    val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    get("/login") { /* Redirects to 'authorizeUrl' automatically*/ }
-    get("/oauth2/callback") {
-        val principal = call.principal<OAuth2>() ?: throw IllegalStateException("Forventer å finne token")
-        val accessToken = principal.accessToken
-        val refreshToken = principal.refreshToken ?: throw IllegalStateException("Forventer å finne refreshToken")
-        val idToken = principal.extraParameters["id_token"] ?: throw IllegalStateException("Forventer å finne idToken")
-        val state = principal.state ?: throw IllegalStateException("Forventer å finne state")
-        val expiry = principal.expiresIn
-        val redirectUrl = azureAD.getRedirect(state)
-        logg.info("Innlogging vellykket")
-        sikkerlogg.info("Innlogging vellykket")
-        call.sessions.set(SpeakerSession(accessToken, refreshToken, idToken, expiry))
-        redirectUrl?.also { url ->
-            sikkerlogg.info("Omdirigerer til $url")
-            call.respondRedirect(url)
-        }
-        call.respondRedirect("/")
-    }
-}
+private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-internal fun Application.configureSessions(isDevelopment: Boolean) {
-    install(Sessions) {
-        cookie<SpeakerSession>("speaker", storage = SessionStorageMemory()) {
-            this.cookie.secure = !isDevelopment
-            cookie.extensions["SameSite"] = "strict"
-            serializer = object : SessionSerializer<SpeakerSession> {
-                override fun deserialize(text: String): SpeakerSession {
-                    return Json.decodeFromString(text)
-                }
-                override fun serialize(session: SpeakerSession): String {
-                    return Json.encodeToString(session)
-                }
-            }
-        }
-    }
-}
-
-
-internal fun Application.configureAuthentication(azureAD: AzureAD, isDevelopment: Boolean) {
+internal fun Application.configureAuthentication(azureAD: AzureAD) {
     install(Authentication) {
-        oauth("oauth") {
-            urlProvider = {
-                redirectUrl("/oauth2/callback", isDevelopment)
-            }
-            skipWhen { call ->
-                call.sessions.get<SpeakerSession>() != null
-            }
+        tokenValidationSupport(
+            name = "ValidToken",
+            config = TokenSupportConfig(
+                azureAD.issuerConfig(),
+            ),
+            additionalValidation = { ctx ->
+                val claims = ctx.getClaims(azureAD.issuer())
+                val scopes = claims
+                    ?.getStringClaim("scope")
+                    ?.split(" ")
+                    ?: emptyList()
 
-            providerLookup = {
-                azureAD.oauthSettings()
+                val groups: List<String> = claims.getAsList("groups")
+
+                val hasValidClaims = azureAD.hasValidClaims(claims.allClaims.keys.toList())
+                val hasValidScopes = azureAD.hasValidScopes(scopes)
+                val hasValidGroup = azureAD.hasValidGroups(groups)
+                val validToken = hasValidClaims && hasValidScopes && hasValidGroup
+
+                if (!validToken) {
+                    sikkerlogg.info(
+                        "Har ikke gyldig token. {}, {}, {}",
+                        kv("harGyldigeClaims", hasValidClaims),
+                        kv("harGyldigeScopes", hasValidScopes),
+                        kv("harGyldigeGrupper", hasValidGroup),
+                    )
+                }
+
+                validToken
             }
-            client = HttpClient(Apache) {
-                configureClientContentNegotiation()
-            }
-        }
+        )
     }
 }

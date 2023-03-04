@@ -30,6 +30,11 @@ spec:
     max: 1
     cpuThresholdPercentage: 90
   azure:
+    sidecar:
+      enabled: true
+      autoLogin: true
+      autoLoginIgnorePaths:
+        - /internal/*
     application:
       tenant: nav.no
       enabled: true
@@ -38,8 +43,6 @@ spec:
           - "NAVident"
         groups:
           - id: "f787f900-6697-440d-a086-d5bb56e26a9c"
-      replyURLs:
-        - "https://speaker.dev.intern.nav.no/oauth2/callback"
       allowAllUsers: false
   prometheus:
     enabled: true
@@ -56,3 +59,6 @@ spec:
               - name: speaker-kafka
   secureLogs:
     enabled: true
+  env:
+    - name: AZURE_VALID_GROUP_ID
+      value: "f787f900-6697-440d-a086-d5bb56e26a9c"

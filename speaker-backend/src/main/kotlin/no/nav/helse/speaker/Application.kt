@@ -58,19 +58,17 @@ internal fun Application.app(repository: VarselRepository, env: Map<String, Stri
 
 private fun Application.dev(repository: VarselRepository, env: Map<String, String>, isLocalDevelopment: Boolean) {
     val azureAD = AzureAD.fromEnv(env)
-    configureAuthentication(azureAD, isLocalDevelopment)
-    configureSessions(isLocalDevelopment)
+    configureAuthentication(azureAD)
     metrics()
     routing {
         nais()
-        authenticate("oauth") {
-            login(azureAD)
+        authenticate("ValidToken") {
             singlePageApplication {
                 useResources = !isLocalDevelopment
                 react("speaker-frontend/dist")
                 ignoreFiles { it.endsWith(".txt") }
             }
-            speaker(repository, azureAD)
+            speaker(repository)
         }
     }
 }

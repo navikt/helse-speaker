@@ -33,6 +33,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
+    implementation("no.nav.security:token-validation-ktor-v2:3.0.4")
 
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 

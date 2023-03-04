@@ -23,12 +23,12 @@ import no.nav.helse.speaker.db.VarselException
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class RoutingTest {
 
@@ -44,10 +44,11 @@ internal class RoutingTest {
     }
 
     @Test
-    fun `hent varsler`() {
-        login()
+    fun `hent varsler med gyldig token`() {
         val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler")
+            client.get("http://localhost:8080/api/varsler") {
+                header("Authorization", "Bearer ${accessToken()}")
+            }
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val body = runBlocking { response.body<String>() }
@@ -55,21 +56,11 @@ internal class RoutingTest {
     }
 
     @Test
-    fun `hent varsler uten sesjon er ikke lov`() {
+    fun `hent varsler med gyldig token med flere grupperider`() {
         val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler")
-        }
-        assertEquals(HttpStatusCode.Unauthorized, response.status)
-    }
-
-    @Test
-    fun `hent varsler uten gyldig sesjon`() {
-        oauthMock.enqueueCallback(
-            DefaultOAuth2TokenCallback(expiry = 1)
-        )
-        login()
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler")
+            client.get("http://localhost:8080/api/varsler") {
+                header("Authorization", "Bearer ${accessToken(grupper = listOf(groupId.toString(), "${UUID.randomUUID()}"))}")
+            }
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val body = runBlocking { response.body<String>() }
@@ -77,37 +68,65 @@ internal class RoutingTest {
     }
 
     @Test
-    fun `oppdater varsel`() {
-        login()
+    fun `hent varsler med gyldig token med flere scopes`() {
         val response = runBlocking {
-            client.post("http://localhost:8080/api/varsler/oppdater") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json)
-                setBody(Json.encodeToString(varseldefinisjon))
+            client.get("http://localhost:8080/api/varsler") {
+                header("Authorization", "Bearer ${accessToken(scopes = listOf("openid", "offline_access", "$issuerId/.default", "other_scope"))}")
             }
         }
         assertEquals(HttpStatusCode.OK, response.status)
+        val body = runBlocking { response.body<String>() }
+        assertEquals(listOf(varseldefinisjon), Json.decodeFromString<List<Varseldefinisjon>>(body))
     }
 
     @Test
-    fun `oppdater varsel uten sesjon`() {
+    fun `hent varsler med gyldig token med andre claims i tillegg`() {
         val response = runBlocking {
-            client.post("http://localhost:8080/api/varsler/oppdater") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json)
-                setBody(Json.encodeToString(varseldefinisjon))
+            client.get("http://localhost:8080/api/varsler") {
+                header("Authorization", "Bearer ${accessToken(andreClaims = mapOf("Some other claim" to "some value"))}")
+            }
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+        val body = runBlocking { response.body<String>() }
+        assertEquals(listOf(varseldefinisjon), Json.decodeFromString<List<Varseldefinisjon>>(body))
+    }
+
+    @Test
+    fun `hent varsler uten gyldige scopes`() {
+        val response = runBlocking {
+            client.get("http://localhost:8080/api/varsler") {
+                header("Authorization", "Bearer ${accessToken(scopes = listOf("openid", "offline_access"))}")
             }
         }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
     @Test
-    fun `oppdater varsel uten gyldig sesjon`() {
-        oauthMock.enqueueCallback(
-            DefaultOAuth2TokenCallback(expiry = 1)
-        )
-        login()
+    fun `hent varsler uten gyldige groups`() {
+        val response = runBlocking {
+            client.get("http://localhost:8080/api/varsler") {
+                header("Authorization", "Bearer ${accessToken(grupper = listOf("${UUID.randomUUID()}"))}")
+            }
+        }
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+    }
+
+    @Test
+    fun `hent varsler uten NAVident`() {
+        val response = runBlocking {
+            client.get("http://localhost:8080/api/varsler") {
+                header("Authorization", "Bearer ${accessToken(harNavIdent = false)}")
+            }
+        }
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+    }
+
+    @Test
+    fun `oppdater varsel med gyldig token`() {
         val response = runBlocking {
             client.post("http://localhost:8080/api/varsler/oppdater") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
+                header("Authorization", "Bearer ${accessToken()}")
                 setBody(Json.encodeToString(varseldefinisjon))
             }
         }
@@ -117,20 +136,31 @@ internal class RoutingTest {
     @Test
     fun `oppdater varsel når kode ikke finnes`() {
         shouldThrowOnUpdate = true
-        login()
+
         val response = runBlocking {
             client.post("http://localhost:8080/api/varsler/oppdater") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
+                header("Authorization", "Bearer ${accessToken()}")
                 setBody(Json.encodeToString(varseldefinisjon))
             }
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
 
-    private fun login() {
-        runBlocking {
-            client.get("http://localhost:8080/login") // logger inn
-        }
+    private fun accessToken(
+        scopes: List<String> = listOf("openid", "offline_access", "$issuerId/.default"),
+        harNavIdent: Boolean = true,
+        grupper: List<String> = listOf("$groupId"),
+        andreClaims: Map<String, String> = emptyMap()
+    ): String {
+        val claims = mutableMapOf(
+            "scope" to scopes.joinToString(" "),
+            "groups" to grupper
+        ).apply {
+            if (harNavIdent) put("NAVident", "EN_IDENT")
+            putAll(andreClaims)
+        }.toMap()
+        return oauthMock.issueToken(audience = issuerId.toString(), claims = claims).serialize()
     }
 
     private companion object {
@@ -139,6 +169,8 @@ internal class RoutingTest {
         private val oauthMock = MockOAuth2Server().also {
             it.start()
         }
+        private val issuerId = UUID.randomUUID()
+        private val groupId = UUID.randomUUID()
 
         private var shouldThrowOnUpdate: Boolean = false
         private fun setShouldThrowOnUpdate(): Boolean {
@@ -147,10 +179,11 @@ internal class RoutingTest {
 
         private val env = mapOf(
             "AZURE_APP_WELL_KNOWN_URL" to oauthMock.wellKnownUrl("default").toString(),
-            "AZURE_APP_CLIENT_ID" to "some_client_id",
+            "AZURE_APP_CLIENT_ID" to "$issuerId",
             "AZURE_APP_CLIENT_SECRET" to "some_secret",
             "AUTHORIZATION_URL" to oauthMock.authorizationEndpointUrl("default").toString(),
-            "LOCAL_DEVELOPMENT" to "true"
+            "LOCAL_DEVELOPMENT" to "true",
+            "AZURE_VALID_GROUP_ID" to "$groupId"
         )
 
         private val server: ApplicationEngine = embeddedServer(
