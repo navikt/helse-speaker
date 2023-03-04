@@ -2,11 +2,15 @@ package no.nav.helse.speaker
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.ServerReady
+import io.ktor.server.auth.authenticate
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import no.nav.helse.speaker.routes.nais
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.http.content.react
+import io.ktor.server.http.content.singlePageApplication
 import io.ktor.server.netty.Netty
+import io.ktor.server.routing.routing
 import no.nav.helse.speaker.azure.AzureAD
 import no.nav.helse.speaker.db.DataSourceBuilder
 import no.nav.helse.speaker.db.VarseldefinisjonDao
@@ -25,7 +29,6 @@ internal fun createApp(env: Map<String, String>) {
     val repository = ActualVarselRepository(dao)
     val server = embeddedServer(Netty, applicationEngineEnvironment {
         module {
-            nais()
             environment.monitor.subscribe(ServerReady) { _ ->
                 dataSourceBuilder.migrate()
             }
@@ -46,6 +49,14 @@ internal fun Application.app(repository: VarselRepository, env: Map<String, Stri
     configureServerContentNegotiation()
     configureAuthentication(azureAD, isDevelopment)
     configureSessions(isDevelopment)
-    nais()
-    speaker(repository, azureAD)
+    routing {
+        nais()
+        authenticate("oauth") {
+            login(azureAD)
+            singlePageApplication {
+                react("speaker-frontend/dist")
+            }
+            speaker(repository, azureAD)
+        }
+    }
 }
