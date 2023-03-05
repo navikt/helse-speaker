@@ -7,6 +7,9 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import no.nav.helse.speaker.routes.nais
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.http.content.ignoreFiles
+import io.ktor.server.http.content.react
+import io.ktor.server.http.content.singlePageApplication
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.routing
 import no.nav.helse.speaker.azure.AzureAD
@@ -60,7 +63,12 @@ private fun Application.dev(repository: VarselRepository, env: Map<String, Strin
     routing {
         nais()
         authenticate("ValidToken") {
-            speaker(azureAD, repository, isLocalDevelopment)
+            singlePageApplication {
+                useResources = !isLocalDevelopment
+                react("speaker-frontend/dist")
+                ignoreFiles { it.endsWith(".txt") }
+            }
+            speaker(azureAD, repository)
         }
     }
 }
