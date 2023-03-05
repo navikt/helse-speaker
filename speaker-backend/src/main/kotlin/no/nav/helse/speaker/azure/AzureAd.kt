@@ -25,7 +25,7 @@ class AzureAD private constructor(private val config: Config) {
             if (requiredClaims[key] == value) return@fold true
             false
         }
-    internal fun hasValidAppId(appId: String) = appId == config.clientId
+
     internal fun hasValidClaims(claims: List<String>) = requiredClaims.keys.all { it in claims }
     internal fun hasValidGroups(groups: List<String>) = requiredGroups.any { it in groups }
 
