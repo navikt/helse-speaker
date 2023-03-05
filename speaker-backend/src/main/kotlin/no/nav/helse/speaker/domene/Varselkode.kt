@@ -10,8 +10,8 @@ internal class Varselkode(kode: String) {
     private val nummer = oppdelt[2].toInt()
 
     internal companion object {
-        private val mønster = "^\\D{2}_\\D{2}_\\d{1,3}$".toRegex()
-        internal fun List<Varselkode>.finnNeste(prefix: String): String {
+        private val mønster = "^[A-ZÆØÅ]{2}_[A-ZÆØÅ]{2}_\\d{1,3}\$".toRegex()
+        internal fun Set<Varselkode>.finnNeste(prefix: String): String {
             val oppdelt = prefix.split("_")
             val domene = oppdelt[0]
             val kontekst = oppdelt[1]
@@ -24,4 +24,23 @@ internal class Varselkode(kode: String) {
             return prefix + "_" + nesteNummer
         }
     }
+
+    override fun equals(other: Any?) = this === other || (
+        other is Varselkode
+            && javaClass == other.javaClass
+            && oppdelt == other.oppdelt
+            && domene == other.domene
+            && kontekst == other.kontekst
+            && nummer == other.nummer
+        )
+
+    override fun hashCode(): Int {
+        var result = oppdelt.hashCode()
+        result = 31 * result + domene.hashCode()
+        result = 31 * result + kontekst.hashCode()
+        result = 31 * result + nummer
+        return result
+    }
+
+
 }

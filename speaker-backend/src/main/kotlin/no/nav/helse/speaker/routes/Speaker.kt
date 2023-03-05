@@ -34,6 +34,28 @@ internal fun Route.speaker(varselRepository: VarselRepository) {
         }
         call.respond(HttpStatusCode.OK)
     }
+
+    get("/api/varsler/generer-kode") {
+        val mønsterSomMåMatche = "^\\D{2}$".toRegex()
+        val subdomene = call.request.queryParameters["subdomene"]
+        val kontekst = call.request.queryParameters["kontekst"]
+
+        if (subdomene == null)
+            return@get call.respond(HttpStatusCode.BadRequest, "Mangler subdomene")
+
+        if (!subdomene.matches(mønsterSomMåMatche))
+            return@get call.respond(HttpStatusCode.BadRequest, "Subdomene er ikke på forventet format ${mønsterSomMåMatche.pattern}")
+
+        if (kontekst == null)
+            return@get call.respond(HttpStatusCode.BadRequest, "Mangler kontekst")
+
+        if (!kontekst.matches(mønsterSomMåMatche))
+            return@get call.respond(HttpStatusCode.BadRequest, "Kontekst er ikke på forventet format ${mønsterSomMåMatche.pattern}")
+
+        val prefix = "${subdomene}_${kontekst}"
+        val nesteVarselkode = varselRepository.finnNesteVarselkodeFor(prefix)
+        call.respond(HttpStatusCode.OK, nesteVarselkode)
+    }
 }
 
 

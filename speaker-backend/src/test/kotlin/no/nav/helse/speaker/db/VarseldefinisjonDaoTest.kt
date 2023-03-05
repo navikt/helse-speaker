@@ -3,6 +3,7 @@ package no.nav.helse.speaker.db
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.speaker.domene.Varseldefinisjon
+import no.nav.helse.speaker.domene.Varselkode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -174,6 +175,30 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
             ),
             definisjonDao.finnSisteDefinisjonFor("EN_KODE")
         )
+    }
+
+    @Test
+    fun `finner alle varselkoder`() {
+        definisjonDao.nyDefinisjon("RV_IM_1", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        definisjonDao.nyDefinisjon("SB_EX_1", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        definisjonDao.nyDefinisjon("SB_EX_2", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        definisjonDao.nyDefinisjon("SB_EX_3", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
+        val funnet = definisjonDao.finnVarselkoder()
+        assertEquals(
+            setOf(
+                Varselkode("RV_IM_1"),
+                Varselkode("SB_EX_1"),
+                Varselkode("SB_EX_2"),
+                Varselkode("SB_EX_3"),
+            ),
+            funnet
+        )
+    }
+
+    @Test
+    fun `finner ingen varselkoder dersom det ikke finnes noen`() {
+        val funnet = definisjonDao.finnVarselkoder()
+        assertEquals(emptySet<Varselkode>(), funnet)
     }
 
     private fun assertEndretTidspunkt(kode: String, erSatt: Boolean) {

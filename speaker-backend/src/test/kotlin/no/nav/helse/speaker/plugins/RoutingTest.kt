@@ -4,10 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.cookies.HttpCookies
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
+import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -138,6 +135,64 @@ internal class RoutingTest {
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
 
+    @Test
+    fun `validering av subdomene og kontekst før genering av ny varselkode`() {
+        val response = runBlocking {
+            client.get("http://localhost:8080/api/varsler/generer-kode") {
+                parameter("subdomene", "SB")
+                parameter("kontekst", "EX")
+                header("Authorization", "Bearer ${accessToken()}")
+            }
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    @Test
+    fun `validering av subdomene og kontekst før genering av ny varselkode ved manglende subdomene`() {
+        val response = runBlocking {
+            client.get("http://localhost:8080/api/varsler/generer-kode") {
+                parameter("kontekst", "EX")
+                header("Authorization", "Bearer ${accessToken()}")
+            }
+        }
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
+    fun `validering av subdomene og kontekst før genering av ny varselkode ved manglende kontekst`() {
+        val response = runBlocking {
+            client.get("http://localhost:8080/api/varsler/generer-kode") {
+                parameter("subdomene", "SB")
+                header("Authorization", "Bearer ${accessToken()}")
+            }
+        }
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
+    fun `validering av subdomene og kontekst før genering av ny varselkode ved ugyldig subdomene`() {
+        val response = runBlocking {
+            client.get("http://localhost:8080/api/varsler/generer-kode") {
+                parameter("subdomene", "S")
+                parameter("kontekst", "EX")
+                header("Authorization", "Bearer ${accessToken()}")
+            }
+        }
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
+    fun `validering av subdomene og kontekst før genering av ny varselkode ved ugyldig kontekst`() {
+        val response = runBlocking {
+            client.get("http://localhost:8080/api/varsler/generer-kode") {
+                parameter("subdomene", "SB")
+                parameter("kontekst", "E")
+                header("Authorization", "Bearer ${accessToken()}")
+            }
+        }
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
     private fun accessToken(
         harNavIdent: Boolean = true,
         grupper: List<String> = listOf("$groupId"),
@@ -217,6 +272,10 @@ internal class RoutingTest {
 
             override fun oppdater(varseldefinisjon: Varseldefinisjon) {
                 if (shouldThrowOnUpdate()) throw VarselException.KodeFinnesIkke("EN_VARSELKODE")
+            }
+
+            override fun finnNesteVarselkodeFor(prefix: String): String {
+                return "${prefix}_1"
             }
         }
 

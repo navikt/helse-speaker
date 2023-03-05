@@ -5,6 +5,7 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.speaker.domene.Varseldefinisjon
+import no.nav.helse.speaker.domene.Varselkode
 import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 
@@ -104,6 +105,15 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = "INSERT INTO varsel_definisjon(varselkode_ref, tittel, forklaring, handling) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?, ?, ?)"
         return run(queryOf(query, varselkode, tittel, forklaring, handling).asUpdateAndReturnGeneratedKey) != null
+    }
+
+
+    internal fun finnVarselkoder(): Set<Varselkode> {
+        @Language("PostgreSQL")
+        val query = "SELECT kode FROM varselkode"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query).map { Varselkode(it.string("kode")) }.asList)
+        }.toSet()
     }
 }
 

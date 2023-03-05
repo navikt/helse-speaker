@@ -3,6 +3,7 @@ package no.nav.helse.speaker.domene
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.speaker.db.VarseldefinisjonDao
 import no.nav.helse.speaker.db.VarselException
+import no.nav.helse.speaker.domene.Varselkode.Companion.finnNeste
 import org.slf4j.LoggerFactory
 
 internal interface VarselRepository {
@@ -11,6 +12,7 @@ internal interface VarselRepository {
     fun finn(): List<Varseldefinisjon>
     fun finnGjeldendeDefinisjonFor(varselkode: String): Varseldefinisjon
     fun oppdater(varseldefinisjon: Varseldefinisjon)
+    fun finnNesteVarselkodeFor(prefix: String): String
 }
 
 internal class ActualVarselRepository(private val dao: VarseldefinisjonDao): VarselRepository {
@@ -22,6 +24,11 @@ internal class ActualVarselRepository(private val dao: VarseldefinisjonDao): Var
     }
     override fun finn(): List<Varseldefinisjon> {
         return dao.finnDefinisjoner()
+    }
+
+    override fun finnNesteVarselkodeFor(prefix: String): String {
+        val koder = dao.finnVarselkoder()
+        return koder.finnNeste(prefix)
     }
     override fun oppdater(varseldefinisjon: Varseldefinisjon) {
         val gjeldendeDefinisjon = varseldefinisjon.finnGjeldendeDefinisjon(this)

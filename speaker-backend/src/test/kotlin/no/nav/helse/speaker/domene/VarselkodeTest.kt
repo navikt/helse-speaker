@@ -7,7 +7,7 @@ import org.junit.jupiter.api.assertThrows
 
 class VarselkodeTest {
 
-    private val varselkoder = listOf(
+    private val varselkoder = setOf(
         Varselkode("AA_BB_1"),
         Varselkode("MM_NN_1"),
     )
@@ -47,41 +47,28 @@ class VarselkodeTest {
 
     @Test
     fun `ugyldige varselkoder`() {
+        assertUgyldigVarselkode("EN_SB_RV_1")
+        assertUgyldigVarselkode("noe SB_RV_1")
+        assertUgyldigVarselkode("SB_RV_1_EN")
+        assertUgyldigVarselkode("SB_RV_1 noe")
+        assertUgyldigVarselkode("SBW_RV_1")
+        assertUgyldigVarselkode("SB_RVW_1")
+        assertUgyldigVarselkode("SB1_RV_1")
+        assertUgyldigVarselkode("SB_RV1_1")
+        assertUgyldigVarselkode("SB_RV_A1")
+        assertUgyldigVarselkode("SB_RV_1A")
+        assertUgyldigVarselkode("SBRV_1")
+        assertUgyldigVarselkode("SB_RV1")
+        assertUgyldigVarselkode("sB_RV_1")
+        assertUgyldigVarselkode("Sb_RV_1")
+        assertUgyldigVarselkode("SB_rV_1")
+        assertUgyldigVarselkode("SB_Vv_1")
+        assertUgyldigVarselkode("sb_rv_1")
+    }
+
+    private fun assertUgyldigVarselkode(kode: String) {
         assertThrows<IllegalArgumentException> {
-            Varselkode("EN_SB_RV_1")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("noe SB_RV_1")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("SB_RV_1_EN")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("SB_RV_1 noe")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("SBW_RV_1")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("SB_RVW_1")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("SB1_RV_1")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("SB_RV1_1")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("SB_RV_A1")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("SB_RV_1A")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("SBRV_1")
-        }
-        assertThrows<IllegalArgumentException> {
-            Varselkode("SB_RV1")
+            Varselkode(kode)
         }
     }
 }
