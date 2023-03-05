@@ -16,6 +16,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import no.nav.helse.speaker.app
 import no.nav.helse.speaker.db.VarselException
+import no.nav.helse.speaker.domene.Bruker
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -181,6 +182,31 @@ internal class RoutingTest {
             }
             assertEquals(HttpStatusCode.BadRequest, response.status)
         }
+
+    @Test
+    fun `Henter bruker`() = withTestApplication {
+        val response = client.get("/api/bruker") {
+            header("Authorization", "Bearer ${accessToken()}")
+        }
+        val bruker = response.body<String>().let { Json.decodeFromString<Bruker>(it) }
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(
+            Bruker(
+                epostadresse = "some_username",
+                navn = "some name",
+                ident = "EN_IDENT"
+            ),
+            bruker
+        )
+    }
+
+    @Test
+    fun `Forsøker å hente bruker uten autentisering`() {
+        withTestApplication {
+            val response = client.get("/api/bruker")
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+    }
 
     private fun accessToken(
         harNavIdent: Boolean = true,

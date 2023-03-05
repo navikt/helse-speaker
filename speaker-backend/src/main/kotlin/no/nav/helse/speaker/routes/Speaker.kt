@@ -1,60 +1,23 @@
 package no.nav.helse.speaker.routes
 
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
-import io.ktor.server.application.call
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
+import io.ktor.server.http.content.ignoreFiles
+import io.ktor.server.http.content.react
+import io.ktor.server.http.content.singlePageApplication
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
-import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.speaker.db.VarselException
+import io.ktor.server.routing.route
+import no.nav.helse.speaker.azure.AzureAD
 import no.nav.helse.speaker.domene.VarselRepository
-import no.nav.helse.speaker.domene.Varseldefinisjon
-import org.slf4j.LoggerFactory
 
-private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-internal fun Route.speaker(varselRepository: VarselRepository) {
-    val logg = LoggerFactory.getLogger(Application::class.java)
-    get("/api/varsler") {
-        logg.info("Henter varsler")
-        sikkerlogg.info("Henter varsler")
-        call.respond(HttpStatusCode.OK, varselRepository.finn())
-    }
-    post("/api/varsler/oppdater") {
-        val varseldefinisjon = call.receive<Varseldefinisjon>()
-        logg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
-        sikkerlogg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
-        try {
-            varselRepository.oppdater(varseldefinisjon)
-        } catch (e: VarselException) {
-            return@post call.respond(message = e.message!!, status = e.httpStatusCode)
+internal fun Route.speaker(azureAD: AzureAD, varselRepository: VarselRepository, isLocalDevelopment: Boolean) {
+    route("/api") {
+        singlePageApplication {
+            useResources = !isLocalDevelopment
+            react("speaker-frontend/dist")
+            ignoreFiles { it.endsWith(".txt") }
         }
-        call.respond(HttpStatusCode.OK)
-    }
-
-    get("/api/varsler/generer-kode") {
-        val mønsterSomMåMatche = "^\\D{2}$".toRegex()
-        val subdomene = call.request.queryParameters["subdomene"]
-        val kontekst = call.request.queryParameters["kontekst"]
-
-        if (subdomene == null)
-            return@get call.respond(HttpStatusCode.BadRequest, "Mangler subdomene")
-
-        if (!subdomene.matches(mønsterSomMåMatche))
-            return@get call.respond(HttpStatusCode.BadRequest, "Subdomene er ikke på forventet format ${mønsterSomMåMatche.pattern}")
-
-        if (kontekst == null)
-            return@get call.respond(HttpStatusCode.BadRequest, "Mangler kontekst")
-
-        if (!kontekst.matches(mønsterSomMåMatche))
-            return@get call.respond(HttpStatusCode.BadRequest, "Kontekst er ikke på forventet format ${mønsterSomMåMatche.pattern}")
-
-        val prefix = "${subdomene}_${kontekst}"
-        val nesteVarselkode = varselRepository.finnNesteVarselkodeFor(prefix)
-        call.respond(HttpStatusCode.OK, nesteVarselkode)
+        varselRoutes(varselRepository)
+        brukerRoutes(azureAD)
     }
 }
 
