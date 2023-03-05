@@ -8,9 +8,8 @@ import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -42,11 +41,22 @@ internal class RoutingTest {
     }
 
     @Test
-    fun `hent varsler med gyldig token`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler") {
-                header("Authorization", "Bearer ${accessToken()}")
-            }
+    fun `hent varsler med gyldig token`() = withTestApplication {
+        val response = client.get("/api/varsler") {
+            header("Authorization", "Bearer ${accessToken()}")
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+        val body = response.body<String>()
+        assertEquals(listOf(varseldefinisjon), Json.decodeFromString<List<Varseldefinisjon>>(body))
+    }
+
+    @Test
+    fun `hent varsler med gyldig token med flere grupperider`() = withTestApplication {
+        val response = client.get("/api/varsler") {
+            header(
+                "Authorization",
+                "Bearer ${accessToken(grupper = listOf(groupId.toString(), "${UUID.randomUUID()}"))}"
+            )
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val body = runBlocking { response.body<String>() }
@@ -54,11 +64,9 @@ internal class RoutingTest {
     }
 
     @Test
-    fun `hent varsler med gyldig token med flere grupperider`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler") {
-                header("Authorization", "Bearer ${accessToken(grupper = listOf(groupId.toString(), "${UUID.randomUUID()}"))}")
-            }
+    fun `hent varsler med gyldig token med flere scopes`() = withTestApplication {
+        val response = client.get("/api/varsler") {
+            header("Authorization", "Bearer ${accessToken()}")
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val body = runBlocking { response.body<String>() }
@@ -66,11 +74,9 @@ internal class RoutingTest {
     }
 
     @Test
-    fun `hent varsler med gyldig token med flere scopes`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler") {
-                header("Authorization", "Bearer ${accessToken()}")
-            }
+    fun `hent varsler med gyldig token med andre claims i tillegg`() = withTestApplication {
+        val response = client.get("/api/varsler") {
+            header("Authorization", "Bearer ${accessToken(andreClaims = mapOf("Some other claim" to "some value"))}")
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val body = runBlocking { response.body<String>() }
@@ -78,120 +84,103 @@ internal class RoutingTest {
     }
 
     @Test
-    fun `hent varsler med gyldig token med andre claims i tillegg`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler") {
-                header("Authorization", "Bearer ${accessToken(andreClaims = mapOf("Some other claim" to "some value"))}")
-            }
-        }
-        assertEquals(HttpStatusCode.OK, response.status)
-        val body = runBlocking { response.body<String>() }
-        assertEquals(listOf(varseldefinisjon), Json.decodeFromString<List<Varseldefinisjon>>(body))
-    }
-
-    @Test
-    fun `hent varsler uten gyldige groups`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler") {
-                header("Authorization", "Bearer ${accessToken(grupper = listOf("${UUID.randomUUID()}"))}")
-            }
+    fun `hent varsler uten gyldige groups`() = withTestApplication {
+        val response = client.get("/api/varsler") {
+            header("Authorization", "Bearer ${accessToken(grupper = listOf("${UUID.randomUUID()}"))}")
         }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
     @Test
-    fun `hent varsler uten NAVident`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler") {
-                header("Authorization", "Bearer ${accessToken(harNavIdent = false)}")
-            }
+    fun `hent varsler uten NAVident`() = withTestApplication {
+        val response = client.get("/api/varsler") {
+            header("Authorization", "Bearer ${accessToken(harNavIdent = false)}")
         }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
     @Test
-    fun `oppdater varsel med gyldig token`() {
-        val response = runBlocking {
-            client.post("http://localhost:8080/api/varsler/oppdater") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json)
-                header("Authorization", "Bearer ${accessToken()}")
-                setBody(Json.encodeToString(varseldefinisjon))
-            }
+    fun `oppdater varsel med gyldig token`() = withTestApplication {
+        val response = client.post("/api/varsler/oppdater") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            header("Authorization", "Bearer ${accessToken()}")
+            setBody(Json.encodeToString(varseldefinisjon))
         }
         assertEquals(HttpStatusCode.OK, response.status)
     }
 
     @Test
-    fun `oppdater varsel når kode ikke finnes`() {
+    fun `oppdater varsel når kode ikke finnes`() = withTestApplication {
         shouldThrowOnUpdate = true
 
-        val response = runBlocking {
-            client.post("http://localhost:8080/api/varsler/oppdater") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json)
-                header("Authorization", "Bearer ${accessToken()}")
-                setBody(Json.encodeToString(varseldefinisjon))
-            }
+        val response = client.post("/api/varsler/oppdater") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            header("Authorization", "Bearer ${accessToken()}")
+            setBody(Json.encodeToString(varseldefinisjon))
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
 
     @Test
-    fun `validering av subdomene og kontekst før genering av ny varselkode`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler/generer-kode") {
-                parameter("subdomene", "SB")
-                parameter("kontekst", "EX")
-                header("Authorization", "Bearer ${accessToken()}")
-            }
+    fun `får ikke hentet ny varselkode dersom man ikke er logget inn`() = withTestApplication {
+        val response = client.get("/api/varsler/generer-kode") {
+            parameter("subdomene", "SB")
+            parameter("kontekst", "EX")
+        }
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+    }
+
+    @Test
+    fun `validering av subdomene og kontekst før genering av ny varselkode`() = withTestApplication {
+        val response = client.get("/api/varsler/generer-kode") {
+            parameter("subdomene", "SB")
+            parameter("kontekst", "EX")
+            header("Authorization", "Bearer ${accessToken()}")
         }
         assertEquals(HttpStatusCode.OK, response.status)
     }
 
     @Test
-    fun `validering av subdomene og kontekst før genering av ny varselkode ved manglende subdomene`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler/generer-kode") {
+    fun `validering av subdomene og kontekst før genering av ny varselkode ved manglende subdomene`() =
+        withTestApplication {
+            val response = client.get("/api/varsler/generer-kode") {
                 parameter("kontekst", "EX")
                 header("Authorization", "Bearer ${accessToken()}")
             }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
-        assertEquals(HttpStatusCode.BadRequest, response.status)
-    }
 
     @Test
-    fun `validering av subdomene og kontekst før genering av ny varselkode ved manglende kontekst`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler/generer-kode") {
+    fun `validering av subdomene og kontekst før genering av ny varselkode ved manglende kontekst`() =
+        withTestApplication {
+            val response = client.get("/api/varsler/generer-kode") {
                 parameter("subdomene", "SB")
                 header("Authorization", "Bearer ${accessToken()}")
             }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
-        assertEquals(HttpStatusCode.BadRequest, response.status)
-    }
 
     @Test
-    fun `validering av subdomene og kontekst før genering av ny varselkode ved ugyldig subdomene`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler/generer-kode") {
+    fun `validering av subdomene og kontekst før genering av ny varselkode ved ugyldig subdomene`() =
+        withTestApplication {
+            val response = client.get("/api/varsler/generer-kode") {
                 parameter("subdomene", "S")
                 parameter("kontekst", "EX")
                 header("Authorization", "Bearer ${accessToken()}")
             }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
-        assertEquals(HttpStatusCode.BadRequest, response.status)
-    }
 
     @Test
-    fun `validering av subdomene og kontekst før genering av ny varselkode ved ugyldig kontekst`() {
-        val response = runBlocking {
-            client.get("http://localhost:8080/api/varsler/generer-kode") {
+    fun `validering av subdomene og kontekst før genering av ny varselkode ved ugyldig kontekst`() =
+        withTestApplication {
+            val response = client.get("/api/varsler/generer-kode") {
                 parameter("subdomene", "SB")
                 parameter("kontekst", "E")
                 header("Authorization", "Bearer ${accessToken()}")
             }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
-        assertEquals(HttpStatusCode.BadRequest, response.status)
-    }
 
     private fun accessToken(
         harNavIdent: Boolean = true,
@@ -221,6 +210,17 @@ internal class RoutingTest {
         ).serialize()
     }
 
+    private fun withTestApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
+        testApplication {
+            environment {
+                module {
+                    app(repository(shouldThrowOnUpdate = ::setShouldThrowOnUpdate), env)
+                }
+            }
+            block(this)
+        }
+    }
+
     private companion object {
         private val varseldefinisjon =
             Varseldefinisjon("EN_VARSELKODE", "EN TITTEL", "EN FORKLARING", "EN HANDLING", false)
@@ -241,13 +241,6 @@ internal class RoutingTest {
             "AZURE_APP_CLIENT_ID" to "$clientId",
             "LOCAL_DEVELOPMENT" to "true",
             "AZURE_VALID_GROUP_ID" to "$groupId"
-        )
-
-        private val server: ApplicationEngine = embeddedServer(
-            Netty,
-            port = 8080,
-            host = "localhost",
-            module = { app(repository(shouldThrowOnUpdate = ::setShouldThrowOnUpdate), env) }
         )
 
         private fun repository(
@@ -282,14 +275,12 @@ internal class RoutingTest {
         @BeforeAll
         @JvmStatic
         fun setupMock() {
-            server.start(wait = false)
         }
 
         @AfterAll
         @JvmStatic
         fun shutdownMock() {
             oauthMock.shutdown()
-            server.stop(100, 100)
         }
     }
 }
