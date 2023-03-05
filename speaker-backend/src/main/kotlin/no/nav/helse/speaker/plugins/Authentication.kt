@@ -20,27 +20,39 @@ internal fun Application.configureAuthentication(azureAD: AzureAD) {
             ),
             additionalValidation = { ctx ->
                 val claims = ctx.getClaims(azureAD.issuer())
+                val hasValidClaims = azureAD.hasValidClaims(claims.allClaims.keys.toList())
+
+                if (!hasValidClaims) {
+                    sikkerlogg.info("Mangler påkrevde claims")
+                    sikkerlogg.info("Claims: ${claims.allClaims.entries.joinToString {(k, v) -> "($k: $v)" }}")
+                    return@tokenValidationSupport false
+                }
 
                 val groups: List<String> = claims.getAsList("groups")
+                val appId = claims.getStringClaim("azp")
+                val audience = claims.getAsList("aud").toList()
 
-                val hasValidClaims = azureAD.hasValidClaims(claims.allClaims.keys.toList())
                 val hasValidGroup = azureAD.hasValidGroups(groups)
-                val validToken = hasValidClaims && hasValidGroup
-
-                sikkerlogg.info("Claims: ${claims.allClaims.entries.joinToString {(k, v) -> "($k: $v)" }}")
+                val hasValidClaimValues = azureAD.hasValidClaimValues(mapOf("aud" to audience, "azp" to appId))
+                val validToken = hasValidClaimValues && hasValidGroup
 
                 if (!validToken) {
                     sikkerlogg.info(
                         "Har ikke gyldig token. {}, {}",
-                        kv("harGyldigeClaims", hasValidClaims),
+                        kv("harGyldigAppId", hasValidClaimValues),
                         kv("harGyldigeGrupper", hasValidGroup),
                     )
                     sikkerlogg.info(
                         "Har følgende grupper: ${groups.joinToString()}"
                     )
+                    sikkerlogg.info(
+                        "Har følgende appId: $appId"
+                    )
+                    return@tokenValidationSupport false
                 }
 
-                validToken
+                sikkerlogg.info("Vellykket validering av token")
+                true
             }
         )
     }

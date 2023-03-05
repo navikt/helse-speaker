@@ -23,6 +23,7 @@ import no.nav.helse.speaker.db.VarselException
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -145,10 +146,24 @@ internal class RoutingTest {
         val claims: Map<String, Any> = mutableMapOf<String, Any>(
             "groups" to grupper
         ).apply {
-            if (harNavIdent) put("NAVident", "EN_IDENT")
+            if (harNavIdent) putAll(
+                mapOf(
+                    "NAVident" to "EN_IDENT",
+                    "preferred_username" to "some_username",
+                    "name" to "some name"
+                )
+            )
             putAll(andreClaims)
         }
-        return oauthMock.issueToken(audience = issuerId.toString(), claims = claims).serialize()
+        return oauthMock.issueToken(
+            issuerId = issuerId.toString(),
+            clientId = clientId.toString(),
+            tokenCallback = DefaultOAuth2TokenCallback(
+                issuerId = issuerId.toString(),
+                audience = listOf(clientId.toString()),
+                claims = claims,
+            )
+        ).serialize()
     }
 
     private companion object {
@@ -159,6 +174,7 @@ internal class RoutingTest {
         }
         private val issuerId = UUID.randomUUID()
         private val groupId = UUID.randomUUID()
+        private val clientId = UUID.randomUUID()
 
         private var shouldThrowOnUpdate: Boolean = false
         private fun setShouldThrowOnUpdate(): Boolean {
@@ -166,10 +182,8 @@ internal class RoutingTest {
         }
 
         private val env = mapOf(
-            "AZURE_APP_WELL_KNOWN_URL" to oauthMock.wellKnownUrl("default").toString(),
-            "AZURE_APP_CLIENT_ID" to "$issuerId",
-            "AZURE_APP_CLIENT_SECRET" to "some_secret",
-            "AUTHORIZATION_URL" to oauthMock.authorizationEndpointUrl("default").toString(),
+            "AZURE_APP_WELL_KNOWN_URL" to oauthMock.wellKnownUrl(issuerId.toString()).toString(),
+            "AZURE_APP_CLIENT_ID" to "$clientId",
             "LOCAL_DEVELOPMENT" to "true",
             "AZURE_VALID_GROUP_ID" to "$groupId"
         )

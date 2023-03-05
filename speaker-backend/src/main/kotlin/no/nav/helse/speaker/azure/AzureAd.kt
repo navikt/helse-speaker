@@ -11,10 +11,22 @@ class AzureAD private constructor(private val config: Config) {
         discoveryUrl = config.discoveryUrl,
         acceptedAudience = listOf(config.clientId),
     )
-    private val requiredClaims = listOf("NAVident")
+    private val requiredClaims = mapOf(
+        "NAVident" to null,
+        "preferred_username" to null,
+        "name" to null,
+        "azp" to config.clientId,
+        "aud" to listOf(config.clientId)
+    )
     private val requiredGroups = listOf(config.validGroupId)
 
-    internal fun hasValidClaims(claims: List<String>) = requiredClaims.all { it in claims }
+    internal fun hasValidClaimValues(claimsAndValues: Map<String, Any>) =
+        claimsAndValues.entries.fold(true) { _, (key, value) ->
+            if (requiredClaims[key] == value) return@fold true
+            false
+        }
+    internal fun hasValidAppId(appId: String) = appId == config.clientId
+    internal fun hasValidClaims(claims: List<String>) = requiredClaims.keys.all { it in claims }
     internal fun hasValidGroups(groups: List<String>) = requiredGroups.any { it in groups }
 
     internal companion object {
