@@ -1,8 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import tokenFile from '../testtoken.json';
+// eslint-disable-next-line import/no-unresolved
+const tokenfile: { token: string } | undefined = await import('../testtoken.json')
+    .then((it) => it)
+    .catch(() => {
+        /* Do nothing */
+    });
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -16,7 +22,7 @@ export default defineConfig({
                 configure: (proxy, options) => {
                     options.headers = {
                         ...options.headers,
-                        Authorization: `Bearer ${tokenFile.token}`,
+                        Authorization: `Bearer ${tokenfile?.token}`,
                     };
                 },
             },
