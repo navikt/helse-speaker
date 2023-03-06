@@ -47,21 +47,17 @@ internal fun Application.app(repository: VarselRepository, env: Map<String, Stri
     statusPages()
     configureUtilities()
     configureServerContentNegotiation()
+    metrics()
+    nais()
     if (erDev() || isLocalDevelopment) {
         dev(repository, env, isLocalDevelopment)
-    } else {
-        routing {
-            nais()
-        }
     }
 }
 
 private fun Application.dev(repository: VarselRepository, env: Map<String, String>, isLocalDevelopment: Boolean) {
     val azureAD = AzureAD.fromEnv(env)
     configureAuthentication(azureAD)
-    metrics()
     routing {
-        nais()
         authenticate("ValidToken") {
             singlePageApplication {
                 useResources = !isLocalDevelopment
