@@ -1,4 +1,4 @@
-import { Varsel } from './App';
+import { Bruker, Varsel } from './types';
 
 export const postOppdaterVarsel = (varsel: Varsel) =>
     fetch('/api/varsler/oppdater', {
@@ -13,3 +13,8 @@ export const fetchVarsler = () =>
     fetch('/api/varsler')
         .then((response) => response.json())
         .then((data) => data as Varsel[]);
+
+export const fetchUser = () =>
+    fetch('/api/bruker', {})
+        .then((response) => response.json())
+        .then((data) => data as Bruker);

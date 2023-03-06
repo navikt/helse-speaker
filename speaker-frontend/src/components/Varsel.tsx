@@ -1,12 +1,12 @@
 import React from 'react';
-import { Varsel } from '../App';
 import { BodyShort, Button, Textarea } from '@navikt/ds-react';
 import { EkspanderbartVarsel } from './EkspanderbartVarsel';
 import { useForm } from 'react-hook-form';
 import { fetchVarsler, postOppdaterVarsel } from '../endepunkter';
 import { useSetRecoilState } from 'recoil';
-import { varslerState } from '../state/varselState';
+import { varslerState } from '../state/state';
 import styles from './Varsel.module.css';
+import { Varsel } from '../types';
 
 export interface VarselProps {
     varsel: Varsel;
@@ -47,7 +47,7 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
             if (r.status === 200) {
                 fetchVarsler().then((varsler) => {
                     setVarsler(varsler);
-                    reset({tittel: tittel, forklaring: forklaring ?? '', handling: handling ?? ''})
+                    reset({ tittel: tittel, forklaring: forklaring ?? '', handling: handling ?? '' });
                 });
             }
         });

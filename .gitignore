@@ -1,6 +1,7 @@
 ### Java template
 # Compiled class file
 *.class
+testtoken.json
 
 # Log file
 *.log

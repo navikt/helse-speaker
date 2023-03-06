@@ -3,7 +3,7 @@ import { VarselComponent } from './Varsel';
 import { fetchVarsler } from '../endepunkter';
 import React, { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { varslerState } from '../state/varselState';
+import { varslerState } from '../state/state';
 
 export const Varsler = () => {
     const [varsler, setVarsler] = useRecoilState(varslerState);
