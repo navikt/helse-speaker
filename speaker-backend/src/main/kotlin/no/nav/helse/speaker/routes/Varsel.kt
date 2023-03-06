@@ -35,7 +35,6 @@ internal fun Route.varselRoutes(varselRepository: VarselRepository) {
             }
             call.respond(HttpStatusCode.OK)
         }
-
         get("/generer-kode") {
             val mønsterSomMåMatche = "^\\D{2}$".toRegex()
             val subdomene = call.request.queryParameters["subdomene"]
@@ -56,6 +55,9 @@ internal fun Route.varselRoutes(varselRepository: VarselRepository) {
             val prefix = "${subdomene}_${kontekst}"
             val nesteVarselkode = varselRepository.finnNesteVarselkodeFor(prefix)
             call.respond(HttpStatusCode.OK, nesteVarselkode)
+        }
+        get("/subdomener-og-kontekster") {
+            call.respond(HttpStatusCode.OK, varselRepository.finnSubdomenerOgKontekster())
         }
     }
 

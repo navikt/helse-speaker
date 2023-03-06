@@ -1,6 +1,7 @@
 package no.nav.helse.speaker.domene
 
 import no.nav.helse.speaker.domene.Varselkode.Companion.finnNeste
+import no.nav.helse.speaker.domene.Varselkode.Companion.finnSubdomenerOgKontekster
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -30,6 +31,25 @@ class VarselkodeTest {
         val kode2 = varselkoder.finnNeste("LL_NN")
         assertEquals("MM_OO_1", kode1)
         assertEquals("LL_NN_1", kode2)
+    }
+
+    @Test
+    fun `finner alle kontekster og domener`() {
+        val varselkoder = setOf(
+            Varselkode("AA_BB_1"),
+            Varselkode("MM_NN_1"),
+            Varselkode("XX_YY_1"),
+            Varselkode("XX_YY_2"),
+            Varselkode("XX_FF_1"),
+            Varselkode("ÆÆ_ØØ_1"),
+            Varselkode("ØØ_ÆÆ_1"),
+        ).finnSubdomenerOgKontekster()
+
+        assertEquals(setOf("BB"), varselkoder["AA"])
+        assertEquals(setOf("NN"), varselkoder["MM"])
+        assertEquals(setOf("YY", "FF"), varselkoder["XX"])
+        assertEquals(setOf("ØØ"), varselkoder["ÆÆ"])
+        assertEquals(setOf("ÆÆ"), varselkoder["ØØ"])
     }
 
     @Test

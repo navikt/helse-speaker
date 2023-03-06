@@ -23,6 +23,13 @@ internal class Varselkode(kode: String) {
 
             return prefix + "_" + nesteNummer
         }
+
+        internal fun Set<Varselkode>.finnSubdomenerOgKontekster(): Map<String, Set<String>> {
+            return groupBy { it.domene }
+                .mapValues { (_, varselkoder) ->
+                    varselkoder.map { it.kontekst }.toSet()
+                }
+        }
     }
 
     override fun equals(other: Any?) = this === other || (

@@ -208,6 +208,34 @@ internal class RoutingTest {
         }
     }
 
+    @Test
+    fun `Henter ut subdomener og kontekster`() {
+        withTestApplication {
+            val response = client.get("/api/varsler/subdomener-og-kontekster") {
+                header("Authorization", "Bearer ${accessToken()}")
+            }
+            val subdomenerOgKontekster = response.body<String>().let {
+                Json.decodeFromString<Map<String, Set<String>>>(it)
+            }
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(
+                mapOf(
+                    "AA" to setOf("BB", "CC")
+                ),
+                subdomenerOgKontekster
+            )
+        }
+    }
+
+    @Test
+    fun `Forsøker å ut subdomener og kontekster uten autentisering`() {
+        withTestApplication {
+            val response = client.get("/api/varsler/subdomener-og-kontekster") {
+            }
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+    }
+
     private fun accessToken(
         harNavIdent: Boolean = true,
         grupper: List<String> = listOf("$groupId"),
@@ -295,6 +323,12 @@ internal class RoutingTest {
 
             override fun finnNesteVarselkodeFor(prefix: String): String {
                 return "${prefix}_1"
+            }
+
+            override fun finnSubdomenerOgKontekster(): Map<String, Set<String>> {
+                return mapOf(
+                    "AA" to setOf("BB", "CC")
+                )
             }
         }
 
