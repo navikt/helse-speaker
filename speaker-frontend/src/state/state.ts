@@ -19,17 +19,17 @@ export const brukerState = atom<Bruker | undefined>({
 export const søkbareVarslerState = selector({
     key: 'søkbareVarslerState',
     get: ({ get }) => {
-        const filter = get(søkState);
+        const filter = get(søkState).toLowerCase();
         const list = get(varslerState);
 
         if (filter === '') return list;
 
         return list.filter((it) => {
             return (
-                it.varselkode.includes(filter) ||
-                it.tittel.includes(filter) ||
-                it.forklaring?.includes(filter) === true ||
-                it.handling?.includes(filter) === true
+                it.varselkode.toLowerCase().includes(filter) ||
+                it.tittel.toLowerCase().includes(filter) ||
+                it.forklaring?.toLowerCase().includes(filter) === true ||
+                it.handling?.toLowerCase().includes(filter) === true
             );
         });
     },

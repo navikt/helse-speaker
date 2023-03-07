@@ -7,6 +7,7 @@ import { Clock, Dialog, Folder } from '@navikt/ds-icons';
 import { RecoilRoot } from 'recoil';
 import { Varsler } from './components/Varsler';
 import { Header } from './components/Header';
+import { NyttVarsel } from './components/NyttVarsel';
 
 const App = () => {
     return (
@@ -18,7 +19,10 @@ const App = () => {
                 <Folder className={'w-[24px] h-[24px]'}></Folder>
             </div>
             <Separator />
-            <Varsler />
+            <div className={'max-w-[1275px]'}>
+                <NyttVarsel />
+                <Varsler />
+            </div>
         </RecoilRoot>
     );
 };

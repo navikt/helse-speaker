@@ -1,6 +1,6 @@
 import classNames from 'classnames';
-import React, {ReactNode, useState} from 'react';
-import {Accordion, Alert} from '@navikt/ds-react';
+import React, { ReactNode, useState } from 'react';
+import { Accordion, Alert } from '@navikt/ds-react';
 
 import styles from './EkspanderbartVarsel.module.css';
 
@@ -9,13 +9,18 @@ interface EkspanderbartVarselProps extends React.HTMLAttributes<HTMLDivElement> 
     children: ReactNode;
 }
 
-export const EkspanderbartVarsel: React.FC<EkspanderbartVarselProps> = ({label, children, className, ...divProps}) => {
+export const EkspanderbartVarsel: React.FC<EkspanderbartVarselProps> = ({
+    label,
+    children,
+    className,
+    ...divProps
+}) => {
     const [open, setOpen] = useState(false);
 
     return (
         <Accordion.Item
             defaultOpen={open}
-            className={classNames(styles.EkspanderbartVarsel, styles.warning, 'p-3', className)}
+            className={classNames(styles.EkspanderbartVarsel, styles.warning, 'py-3', className)}
             {...divProps}
         >
             <Accordion.Header onClick={() => setOpen(!open)}>
@@ -23,11 +28,9 @@ export const EkspanderbartVarsel: React.FC<EkspanderbartVarselProps> = ({label, 
                     {label}
                 </Alert>
             </Accordion.Header>
-            {open &&
-                <Accordion.Content className={classNames(styles.Content, styles.warning)}>
-                    {children}
-                </Accordion.Content>
-            }
+            {open && (
+                <Accordion.Content className={classNames(styles.Content, styles.warning)}>{children}</Accordion.Content>
+            )}
         </Accordion.Item>
     );
 };
