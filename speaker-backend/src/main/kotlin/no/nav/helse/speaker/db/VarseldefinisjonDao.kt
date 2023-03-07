@@ -11,8 +11,8 @@ import javax.sql.DataSource
 
 internal class VarseldefinisjonDao(private val dataSource: DataSource) {
 
-    internal fun nyDefinisjon(kode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean) {
-        sessionOf(dataSource, returnGeneratedKey = true).use {
+    internal fun nyDefinisjon(kode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean): Boolean {
+        return sessionOf(dataSource, returnGeneratedKey = true).use {
             it.transaction { tx ->
                 tx.nyVarselkode(kode, avviklet) ?: throw VarselException.KodeEksisterer(kode)
                 tx.nyDefinisjon(kode, tittel, forklaring, handling)

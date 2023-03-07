@@ -12,8 +12,8 @@ internal data class Varseldefinisjon(
 ) {
     internal fun kode() = varselkode
 
-    internal fun lagre(varselRepository: VarselRepository) {
-        varselRepository.nytt(varselkode, tittel, forklaring, handling)
+    internal fun lagre(varselRepository: VarselRepository): Boolean {
+        return varselRepository.ny(varselkode, tittel, forklaring, handling)
     }
 
     internal fun finnGjeldendeDefinisjon(varselRepository: VarselRepository): Varseldefinisjon {

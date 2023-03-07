@@ -8,8 +8,8 @@ import no.nav.helse.speaker.domene.Varselkode.Companion.finnSubdomenerOgKontekst
 import org.slf4j.LoggerFactory
 
 internal interface VarselRepository {
-    fun nytt(varseldefinisjon: Varseldefinisjon): Boolean
-    fun nytt(kode: String, tittel: String, forklaring: String?, handling: String?): Boolean
+    fun ny(varseldefinisjon: Varseldefinisjon): Boolean
+    fun ny(kode: String, tittel: String, forklaring: String?, handling: String?): Boolean
     fun finn(): List<Varseldefinisjon>
     fun finnGjeldendeDefinisjonFor(varselkode: String): Varseldefinisjon
     fun oppdater(varseldefinisjon: Varseldefinisjon)
@@ -18,11 +18,13 @@ internal interface VarselRepository {
 }
 
 internal class ActualVarselRepository(private val dao: VarseldefinisjonDao): VarselRepository {
-    override fun nytt(varseldefinisjon: Varseldefinisjon): Boolean {
-        TODO("Not yet implemented")
+    override fun ny(varseldefinisjon: Varseldefinisjon): Boolean {
+        val siste = dao.finnSisteDefinisjonFor(varseldefinisjon.kode())
+        if (siste != null) throw VarselException.KodeEksisterer(varseldefinisjon.kode())
+        return varseldefinisjon.lagre(this)
     }
-    override fun nytt(kode: String, tittel: String, forklaring: String?, handling: String?): Boolean {
-        TODO("Not yet implemented")
+    override fun ny(kode: String, tittel: String, forklaring: String?, handling: String?): Boolean {
+        return dao.nyDefinisjon(kode, tittel, forklaring, handling, false)
     }
     override fun finn(): List<Varseldefinisjon> {
         return dao.finnDefinisjoner()

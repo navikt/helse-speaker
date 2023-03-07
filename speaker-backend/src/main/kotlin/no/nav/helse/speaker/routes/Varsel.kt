@@ -8,7 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.speaker.db.VarselException
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
@@ -26,10 +26,21 @@ internal fun Route.varselRoutes(varselRepository: VarselRepository) {
         }
         post("/oppdater") {
             val varseldefinisjon = call.receive<Varseldefinisjon>()
-            logg.info("Oppdaterer {}", StructuredArguments.kv("varselkode", varseldefinisjon.kode()))
-            sikkerlogg.info("Oppdaterer {}", StructuredArguments.kv("varselkode", varseldefinisjon.kode()))
+            logg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
+            sikkerlogg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
             try {
                 varselRepository.oppdater(varseldefinisjon)
+            } catch (e: VarselException) {
+                return@post call.respond(message = e.message!!, status = e.httpStatusCode)
+            }
+            call.respond(HttpStatusCode.OK)
+        }
+        post("/opprett") {
+            val varseldefinisjon = call.receive<Varseldefinisjon>()
+            logg.info("Oppretter {}", kv("varselkode", varseldefinisjon.kode()))
+            sikkerlogg.info("Oppretter {}", kv("varselkode", varseldefinisjon.kode()))
+            try {
+                varselRepository.ny(varseldefinisjon)
             } catch (e: VarselException) {
                 return@post call.respond(message = e.message!!, status = e.httpStatusCode)
             }

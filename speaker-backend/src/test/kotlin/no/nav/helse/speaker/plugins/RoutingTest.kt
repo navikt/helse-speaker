@@ -236,6 +236,29 @@ internal class RoutingTest {
         }
     }
 
+    @Test
+    fun `Lagrer ny definisjon`() {
+        withTestApplication {
+            val response = client.post("/api/varsler/opprett") {
+                header("Authorization", "Bearer ${accessToken()}")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(Json.encodeToString(varseldefinisjon))
+            }
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
+    }
+
+    @Test
+    fun `Forsøker å lagre nytt varsel uten autentisering`() {
+        withTestApplication {
+            val response = client.post("/api/varsler/opprett") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(Json.encodeToString(varseldefinisjon))
+            }
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+    }
+
     private fun accessToken(
         harNavIdent: Boolean = true,
         grupper: List<String> = listOf("$groupId"),
@@ -301,11 +324,11 @@ internal class RoutingTest {
             varsler: List<Varseldefinisjon> = listOf(varseldefinisjon),
             shouldThrowOnUpdate: () -> Boolean = { false }
         ) = object : VarselRepository {
-            override fun nytt(varseldefinisjon: Varseldefinisjon): Boolean {
-                TODO("Not yet implemented")
+            override fun ny(varseldefinisjon: Varseldefinisjon): Boolean {
+                return true
             }
 
-            override fun nytt(kode: String, tittel: String, forklaring: String?, handling: String?): Boolean {
+            override fun ny(kode: String, tittel: String, forklaring: String?, handling: String?): Boolean {
                 TODO("Not yet implemented")
             }
 
@@ -314,7 +337,7 @@ internal class RoutingTest {
             }
 
             override fun finnGjeldendeDefinisjonFor(varselkode: String): Varseldefinisjon {
-                TODO("Not yet implemented")
+                return varseldefinisjon
             }
 
             override fun oppdater(varseldefinisjon: Varseldefinisjon) {
