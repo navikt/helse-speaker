@@ -38,6 +38,7 @@ private object OauthMock {
     private const val acceptedGroupId = "00000000-0000-0000-0000-000000000000"
     private const val issuerId = "00000000-0000-0000-0000-000000000000"
     private const val clientId = "00000000-0000-0000-0000-000000000000"
+    private const val oid = "00000000-0000-0000-0000-000000000000"
     private val server = MockOAuth2Server().also {
         it.start(0)
     }
@@ -59,7 +60,8 @@ private object OauthMock {
                 mapOf(
                     "NAVident" to "X999999",
                     "preferred_username" to "saksbehandler@nav.no",
-                    "name" to "En Saksbehandler"
+                    "name" to "En Saksbehandler",
+                    "oid" to oid
                 )
             )
             putAll(andreClaims)

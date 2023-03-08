@@ -185,8 +185,9 @@ internal class RoutingTest {
 
     @Test
     fun `Henter bruker`() = withTestApplication {
+        val userOid = UUID.randomUUID()
         val response = client.get("/api/bruker") {
-            header("Authorization", "Bearer ${accessToken()}")
+            header("Authorization", "Bearer ${accessToken(oid = userOid)}")
         }
         val bruker = response.body<String>().let { Json.decodeFromString<Bruker>(it) }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -194,7 +195,8 @@ internal class RoutingTest {
             Bruker(
                 epostadresse = "some_username",
                 navn = "some name",
-                ident = "EN_IDENT"
+                ident = "EN_IDENT",
+                oid = userOid
             ),
             bruker
         )
@@ -262,7 +264,8 @@ internal class RoutingTest {
     private fun accessToken(
         harNavIdent: Boolean = true,
         grupper: List<String> = listOf("$groupId"),
-        andreClaims: Map<String, String> = emptyMap()
+        andreClaims: Map<String, String> = emptyMap(),
+        oid: UUID = UUID.randomUUID()
     ): String {
         val claims: Map<String, Any> = mutableMapOf<String, Any>(
             "groups" to grupper
@@ -271,7 +274,8 @@ internal class RoutingTest {
                 mapOf(
                     "NAVident" to "EN_IDENT",
                     "preferred_username" to "some_username",
-                    "name" to "some name"
+                    "name" to "some name",
+                    "oid" to "$oid"
                 )
             )
             putAll(andreClaims)
@@ -300,7 +304,7 @@ internal class RoutingTest {
 
     private companion object {
         private val varseldefinisjon =
-            Varseldefinisjon("EN_VARSELKODE", "EN TITTEL", "EN FORKLARING", "EN HANDLING", false)
+            Varseldefinisjon("EN_VARSELKODE", "EN TITTEL", "EN FORKLARING", "EN HANDLING", false, emptyList())
         private val oauthMock = MockOAuth2Server().also {
             it.start()
         }

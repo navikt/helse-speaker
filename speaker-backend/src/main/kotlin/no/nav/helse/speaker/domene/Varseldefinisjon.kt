@@ -8,7 +8,8 @@ internal data class Varseldefinisjon(
     private val tittel: String,
     private val forklaring: String?,
     private val handling: String?,
-    private val avviklet: Boolean
+    private val avviklet: Boolean,
+    private val forfattere: List<Bruker>
 ) {
     internal fun kode() = varselkode
 

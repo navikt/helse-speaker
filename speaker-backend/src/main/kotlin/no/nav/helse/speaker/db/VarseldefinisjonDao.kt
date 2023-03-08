@@ -1,17 +1,26 @@
 package no.nav.helse.speaker.db
 
 import io.ktor.http.HttpStatusCode
+import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.speaker.domene.Bruker
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
 import org.intellij.lang.annotations.Language
+import java.util.*
 import javax.sql.DataSource
 
 internal class VarseldefinisjonDao(private val dataSource: DataSource) {
 
-    internal fun nyDefinisjon(kode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean): Boolean {
+    internal fun nyDefinisjon(
+        kode: String,
+        tittel: String,
+        forklaring: String?,
+        handling: String?,
+        avviklet: Boolean
+    ): Boolean {
         return sessionOf(dataSource, returnGeneratedKey = true).use {
             it.transaction { tx ->
                 tx.nyVarselkode(kode, avviklet) ?: throw VarselException.KodeEksisterer(kode)
@@ -28,7 +37,8 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
     ) {
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
-            val query = "INSERT INTO varsel_definisjon(varselkode_ref, tittel, forklaring, handling) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?, ?, ?)"
+            val query =
+                "INSERT INTO varsel_definisjon(varselkode_ref, tittel, forklaring, handling) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?, ?, ?)"
             session.run(queryOf(query, varselkode, tittel, forklaring, handling).asUpdate)
         }
     }
@@ -45,7 +55,7 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query =
             """
-                SELECT kode, tittel, forklaring, handling, avviklet 
+                SELECT kode, tittel, forklaring, handling, avviklet, unik_id
                 FROM varsel_definisjon vd 
                 INNER JOIN varselkode v ON vd.varselkode_ref = v.id 
                 WHERE v.kode = ? 
@@ -59,21 +69,41 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
                         it.string("tittel"),
                         it.stringOrNull("forklaring"),
                         it.stringOrNull("handling"),
-                        it.boolean("avviklet")
+                        it.boolean("avviklet"),
+                        session.finnForfattereFor(it.uuid("unik_id"))
                     )
                 }.asSingle
             )
         }
     }
 
+    private fun Session.finnForfattereFor(definisjonRef: UUID): List<Bruker> {
+        @Language("PostgreSQL")
+        val query = """
+           SELECT oid, navn, epostadresse, ident 
+           FROM bruker b 
+           INNER JOIN forfatter f on b.oid = f.bruker_ref
+           WHERE f.definisjon_ref = :definisjon_ref
+        """
+        return run(queryOf(query, mapOf(":definisjon_ref" to definisjonRef)).map { row ->
+            Bruker(
+                row.string("epostadresse"),
+                row.string("navn"),
+                row.string("ident"),
+                row.uuid("oid"),
+            )
+        }.asList)
+    }
+
+
     internal fun finnDefinisjoner(): List<Varseldefinisjon> {
-        return sessionOf(dataSource).use {
-            it.transaction { tx ->
+        return sessionOf(dataSource).use { session ->
+            session.transaction { tx ->
                 @Language("PostgreSQL")
                 val query = """
-                SELECT vk.kode, tittel, forklaring, handling, vk.avviklet
+                SELECT vk.kode, tittel, forklaring, handling, vk.avviklet, unik_id
                 FROM varselkode vk INNER JOIN LATERAL (
-                    SELECT tittel, forklaring, handling, varselkode_ref FROM varsel_definisjon vd WHERE vd.varselkode_ref = vk.id ORDER BY vd.id DESC LIMIT 1
+                    SELECT tittel, forklaring, handling, varselkode_ref, unik_id FROM varsel_definisjon vd WHERE vd.varselkode_ref = vk.id ORDER BY vd.id DESC LIMIT 1
                 ) rad ON rad.varselkode_ref = vk.id
                 """
 
@@ -83,7 +113,8 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
                         tittel = row.string("tittel"),
                         forklaring = row.stringOrNull("forklaring"),
                         handling = row.stringOrNull("handling"),
-                        avviklet = row.boolean("avviklet")
+                        avviklet = row.boolean("avviklet"),
+                        session.finnForfattereFor(row.uuid("unik_id"))
                     )
                 }.asList)
             }
@@ -103,7 +134,8 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
         handling: String?
     ): Boolean {
         @Language("PostgreSQL")
-        val query = "INSERT INTO varsel_definisjon(varselkode_ref, tittel, forklaring, handling) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?, ?, ?)"
+        val query =
+            "INSERT INTO varsel_definisjon(varselkode_ref, tittel, forklaring, handling) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?, ?, ?)"
         return run(queryOf(query, varselkode, tittel, forklaring, handling).asUpdateAndReturnGeneratedKey) != null
     }
 
