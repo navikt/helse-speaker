@@ -60,7 +60,7 @@ internal class Varselkode private constructor(
         }
 
         internal fun Set<Varselkode>.gjeldendeDefinisjoner(): List<Varseldefinisjon> {
-            return map { it.gjeldendeDefinisjon }
+            return sortedBy { it.kode }.map { it.gjeldendeDefinisjon }
         }
     }
 

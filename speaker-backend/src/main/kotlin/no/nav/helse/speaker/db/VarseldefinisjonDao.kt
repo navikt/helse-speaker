@@ -63,8 +63,7 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
                         forklaring = row.stringOrNull("forklaring"),
                         handling = row.stringOrNull("handling"),
                         avviklet = row.boolean("avviklet"),
-                        opprettet = row.localDateTime("opprettet"),
-                        forfattere = emptyList(),
+                        opprettet = row.localDateTime("opprettet")
                     )
                 }.asList)
             }

@@ -25,7 +25,7 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         val opprinneligVarselkode = varselkode("RV_IM_1")
         definisjonDao.opprett(opprinneligVarselkode)
         val oppdatertVarselkode = varselkode("RV_IM_1").also {
-            it.håndter(Varseldefinisjon("RV_IM_1", "EN NY TITTEL", null, null, false, now(), emptyList()))
+            it.håndter(Varseldefinisjon("RV_IM_1", "EN NY TITTEL", null, null, false))
         }
         definisjonDao.oppdater(oppdatertVarselkode)
         val funnet = definisjonDao.finnVarselkoder()
@@ -40,6 +40,6 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
     }
 
     private fun varselkode(kode: String): Varselkode {
-        return Varselkode(kode, listOf(Varseldefinisjon(kode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, now(), emptyList())), now())
+        return Varselkode(kode, listOf(Varseldefinisjon(kode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)), now())
     }
 }

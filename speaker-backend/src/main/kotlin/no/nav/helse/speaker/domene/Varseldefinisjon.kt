@@ -9,16 +9,26 @@ import java.time.LocalDateTime
 import javax.sql.DataSource
 
 @Serializable
-internal class Varseldefinisjon(
+internal class Varseldefinisjon private constructor(
     private val varselkode: String,
     private val tittel: String,
     private val forklaring: String?,
     private val handling: String?,
     private val avviklet: Boolean,
+    private val forfattere: List<Bruker>,
     @Serializable(with = LocalDateTimeSerializer::class)
-    private val opprettet: LocalDateTime,
-    private val forfattere: List<Bruker>
+    private val opprettet: LocalDateTime = LocalDateTime.now()
 ) {
+
+    internal constructor(
+        varselkode: String,
+        tittel: String,
+        forklaring: String?,
+        handling: String?,
+        avviklet: Boolean,
+        opprettet: LocalDateTime = LocalDateTime.now()
+    ): this(varselkode, tittel, forklaring, handling, avviklet, emptyList(), opprettet)
+
     internal fun kode() = varselkode
 
     internal fun erAvviklet() = avviklet

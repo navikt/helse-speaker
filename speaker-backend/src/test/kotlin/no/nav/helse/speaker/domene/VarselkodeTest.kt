@@ -54,7 +54,7 @@ class VarselkodeTest {
     }
 
     private fun varselkode(kode: String, tittel: String = "EN_TITTEL"): Varselkode {
-        return Varselkode(kode, listOf(Varseldefinisjon(kode, tittel, "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList())), LocalDateTime.now())
+        return Varselkode(kode, listOf(Varseldefinisjon(kode, tittel, "EN_FORKLARING", "EN_HANDLING", false)), LocalDateTime.now())
     }
 
     @Test

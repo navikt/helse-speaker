@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.*
 
 internal class RoutingTest {
@@ -307,7 +306,7 @@ internal class RoutingTest {
 
     private companion object {
         private fun varseldefinisjon(tittel: String = "EN TITTEL") =
-            Varseldefinisjon("SB_EX_1", tittel, "EN FORKLARING", "EN HANDLING", false, LocalDateTime.now(), emptyList())
+            Varseldefinisjon("SB_EX_1", tittel, "EN FORKLARING", "EN HANDLING", false)
         private val oauthMock = MockOAuth2Server().also {
             it.start()
         }
