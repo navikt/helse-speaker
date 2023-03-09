@@ -1,6 +1,8 @@
 package no.nav.helse.speaker.db
 
 import io.ktor.http.HttpStatusCode
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
@@ -55,7 +57,7 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query =
             """
-                SELECT kode, tittel, forklaring, handling, avviklet, unik_id
+                SELECT kode, tittel, forklaring, handling, avviklet, unik_id, vd.opprettet
                 FROM varsel_definisjon vd 
                 INNER JOIN varselkode v ON vd.varselkode_ref = v.id 
                 WHERE v.kode = ? 
@@ -70,6 +72,7 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
                         it.stringOrNull("forklaring"),
                         it.stringOrNull("handling"),
                         it.boolean("avviklet"),
+                        it.localDateTime("opprettet"),
                         session.finnForfattereFor(it.uuid("unik_id"))
                     )
                 }.asSingle
@@ -95,13 +98,46 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
         }.asList)
     }
 
+    internal fun lagre(kode: String, varselkode: Varselkode) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO varseldefinisjon(varselkode, json) VALUES (:kode, :json::json) ON CONFLICT DO NOTHING"
+        sessionOf(dataSource).use {
+            it.run(queryOf(query, mapOf(
+                "kode" to kode,
+                "json" to Json.encodeToString(varselkode)
+            )).asUpdate)
+        }
+    }
+
+    internal fun finnAlleDefinisjoner(): List<Varseldefinisjon> {
+        return sessionOf(dataSource).use { session ->
+            session.transaction { tx ->
+                @Language("PostgreSQL")
+                val query = """
+                SELECT vk.kode, tittel, forklaring, handling, vk.avviklet, unik_id, vd.opprettet
+                FROM varselkode vk INNER JOIN varsel_definisjon vd ON vk.id = vd.varselkode_ref ORDER BY vd.id"""
+
+                tx.run(queryOf(query).map { row ->
+                    Varseldefinisjon(
+                        varselkode = row.string("kode"),
+                        tittel = row.string("tittel"),
+                        forklaring = row.stringOrNull("forklaring"),
+                        handling = row.stringOrNull("handling"),
+                        avviklet = row.boolean("avviklet"),
+                        opprettet = row.localDateTime("opprettet"),
+                        forfattere = emptyList(),
+                    )
+                }.asList)
+            }
+        }
+    }
 
     internal fun finnDefinisjoner(): List<Varseldefinisjon> {
         return sessionOf(dataSource).use { session ->
             session.transaction { tx ->
                 @Language("PostgreSQL")
                 val query = """
-                SELECT vk.kode, tittel, forklaring, handling, vk.avviklet, unik_id
+                SELECT vk.kode, tittel, forklaring, handling, vk.avviklet, unik_id, opprettet
                 FROM varselkode vk INNER JOIN LATERAL (
                     SELECT tittel, forklaring, handling, varselkode_ref, unik_id FROM varsel_definisjon vd WHERE vd.varselkode_ref = vk.id ORDER BY vd.id DESC LIMIT 1
                 ) rad ON rad.varselkode_ref = vk.id
@@ -114,7 +150,8 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
                         forklaring = row.stringOrNull("forklaring"),
                         handling = row.stringOrNull("handling"),
                         avviklet = row.boolean("avviklet"),
-                        session.finnForfattereFor(row.uuid("unik_id"))
+                        opprettet = row.localDateTime("opprettet"),
+                        forfattere = session.finnForfattereFor(row.uuid("unik_id"))
                     )
                 }.asList)
             }
@@ -142,9 +179,9 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
 
     internal fun finnVarselkoder(): Set<Varselkode> {
         @Language("PostgreSQL")
-        val query = "SELECT kode FROM varselkode"
+        val query = "SELECT kode, opprettet FROM varselkode"
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query).map { Varselkode(it.string("kode")) }.asList)
+            session.run(queryOf(query).map { Varselkode(it.string("kode"), emptyList(), it.localDateTime("opprettet")) }.asList)
         }.toSet()
     }
 }

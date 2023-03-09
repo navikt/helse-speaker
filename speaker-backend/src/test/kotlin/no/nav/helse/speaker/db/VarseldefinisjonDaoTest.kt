@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
 import java.util.*
 
 internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
@@ -21,7 +22,7 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         definisjonDao.nyDefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)
         assertVarsel(
             varselkode,
-            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, emptyList())
+            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList())
         )
         assertEndretTidspunkt(varselkode, false)
     }
@@ -42,7 +43,7 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         definisjonDao.oppdaterAvviklet(varselkode, true)
         assertVarsel(
             varselkode,
-            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", true, emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", true, LocalDateTime.now(), emptyList()),
         )
         assertEndretTidspunkt(varselkode, true)
     }
@@ -54,8 +55,8 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         definisjonDao.oppdaterDefinisjon(varselkode, "EN_ANNEN_TITTEL", "EN_FORKLARING", "EN_HANDLING")
         assertVarsel(
             varselkode,
-            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, emptyList()),
-            Varseldefinisjon(varselkode, "EN_ANNEN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon(varselkode, "EN_ANNEN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
         )
     }
 
@@ -66,8 +67,8 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         definisjonDao.oppdaterDefinisjon(varselkode, "EN_TITTEL", "EN_ANNEN_FORKLARING", "EN_HANDLING")
         assertVarsel(
             varselkode,
-            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, emptyList()),
-            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_ANNEN_FORKLARING", "EN_HANDLING", false, emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_ANNEN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
         )
     }
 
@@ -78,8 +79,8 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         definisjonDao.oppdaterDefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_ANNEN_HANDLING")
         assertVarsel(
             varselkode,
-            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, emptyList()),
-            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_ANNEN_HANDLING", false, emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_ANNEN_HANDLING", false, LocalDateTime.now(), emptyList()),
         )
     }
 
@@ -90,8 +91,8 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         definisjonDao.oppdaterDefinisjon(varselkode, "EN_TITTEL", null, "EN_HANDLING")
         assertVarsel(
             varselkode,
-            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, emptyList()),
-            Varseldefinisjon(varselkode, "EN_TITTEL", null, "EN_HANDLING", false, emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", null, "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
         )
     }
 
@@ -103,9 +104,9 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         definisjonDao.oppdaterDefinisjon(varselkode, "EN_TITTEL", null, null)
         assertVarsel(
             varselkode,
-            Varseldefinisjon(varselkode, "EN_TITTEL", null, null, false, emptyList()),
-            Varseldefinisjon(varselkode, "EN_ANNEN_TITTEL", null, null, false, emptyList()),
-            Varseldefinisjon(varselkode, "EN_TITTEL", null, null, false, emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", null, null, false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon(varselkode, "EN_ANNEN_TITTEL", null, null, false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", null, null, false, LocalDateTime.now(), emptyList()),
         )
     }
 
@@ -117,9 +118,9 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         definisjonDao.oppdaterDefinisjon(varselkode, "EN_TITTEL", null, "EN_HANDLING")
         assertVarsel(
             varselkode,
-            Varseldefinisjon(varselkode, "EN_TITTEL", null, "EN_HANDLING", false, emptyList()),
-            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, emptyList()),
-            Varseldefinisjon(varselkode, "EN_TITTEL", null, "EN_HANDLING", false, emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", null, "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon(varselkode, "EN_TITTEL", null, "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
         )
     }
 
@@ -131,9 +132,9 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         definisjonDao.oppdaterDefinisjon(varselkode, "EN_TITTEL", "EN_FORKLARING", null)
         assertVarsel(
             varselkode,
-            Varseldefinisjon("EN_KODE", "EN_TITTEL", "EN_FORKLARING", null, false, emptyList()),
-            Varseldefinisjon("EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, emptyList()),
-            Varseldefinisjon("EN_KODE", "EN_TITTEL", "EN_FORKLARING", null, false, emptyList()),
+            Varseldefinisjon("EN_KODE", "EN_TITTEL", "EN_FORKLARING", null, false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon("EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon("EN_KODE", "EN_TITTEL", "EN_FORKLARING", null, false, LocalDateTime.now(), emptyList()),
         )
     }
 
@@ -144,8 +145,8 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         val definisjoner = definisjonDao.finnDefinisjoner()
         assertEquals(2, definisjoner.size)
         assertEquals(listOf(
-            Varseldefinisjon("EN_KODE", "EN_TITTEL", "EN_FORKLARING", null, false, emptyList()),
-            Varseldefinisjon("EN_ANNEN_KODE", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", "EN_HANDLING", false, emptyList()),
+            Varseldefinisjon("EN_KODE", "EN_TITTEL", "EN_FORKLARING", null, false, LocalDateTime.now(), emptyList()),
+            Varseldefinisjon("EN_ANNEN_KODE", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList()),
         ), definisjoner)
     }
 
@@ -157,7 +158,7 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         val definisjoner = definisjonDao.finnDefinisjoner()
         assertEquals(
             listOf(
-                Varseldefinisjon("EN_KODE", "EN_TITTEL", "EN_ANNEN_FORKLARING", "EN_ANNEN_HANDLING", false, emptyList())
+                Varseldefinisjon("EN_KODE", "EN_TITTEL", "EN_ANNEN_FORKLARING", "EN_ANNEN_HANDLING", false, LocalDateTime.now(), emptyList())
             ),
             definisjoner
         )
@@ -174,6 +175,7 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
                 "EN_ANNEN_FORKLARING",
                 "EN_HANDLING",
                 false,
+                LocalDateTime.now(),
                 emptyList()
             ),
             definisjonDao.finnSisteDefinisjonFor("EN_KODE")
@@ -189,10 +191,10 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         val funnet = definisjonDao.finnVarselkoder()
         assertEquals(
             setOf(
-                Varselkode("RV_IM_1"),
-                Varselkode("SB_EX_1"),
-                Varselkode("SB_EX_2"),
-                Varselkode("SB_EX_3"),
+                Varselkode("RV_IM_1", emptyList(), LocalDateTime.now()),
+                Varselkode("SB_EX_1", emptyList(), LocalDateTime.now()),
+                Varselkode("SB_EX_2", emptyList(), LocalDateTime.now()),
+                Varselkode("SB_EX_3", emptyList(), LocalDateTime.now()),
             ),
             funnet
         )
@@ -229,10 +231,10 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
 
     private fun finnDefinisjoner(kode: String): List<Varseldefinisjon> {
         @Language("PostgreSQL")
-        val query = "SELECT kode, tittel, forklaring, handling, avviklet, unik_id FROM varsel_definisjon vd INNER JOIN varselkode v on v.id = vd.varselkode_ref WHERE v.kode = ?"
+        val query = "SELECT kode, tittel, forklaring, handling, avviklet, unik_id, v.opprettet FROM varsel_definisjon vd INNER JOIN varselkode v on v.id = vd.varselkode_ref WHERE v.kode = ?"
         return sessionOf(dataSource).use { session ->
             requireNotNull(session.run(queryOf(query, kode).map {
-                Varseldefinisjon(it.string(1), it.string(2), it.stringOrNull(3), it.stringOrNull(4), it.boolean(5), finnForfattereFor(it.uuid("unik_id")))
+                Varseldefinisjon(it.string(1), it.string(2), it.stringOrNull(3), it.stringOrNull(4), it.boolean(5), it.localDateTime("opprettet"), finnForfattereFor(it.uuid("unik_id")))
             }.asList)) { "Fant ikke tittel for varselkode $kode" }
         }
     }

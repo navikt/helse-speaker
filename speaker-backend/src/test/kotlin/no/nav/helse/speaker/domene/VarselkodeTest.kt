@@ -2,15 +2,17 @@ package no.nav.helse.speaker.domene
 
 import no.nav.helse.speaker.domene.Varselkode.Companion.finnNeste
 import no.nav.helse.speaker.domene.Varselkode.Companion.finnSubdomenerOgKontekster
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
 
 class VarselkodeTest {
 
     private val varselkoder = setOf(
-        Varselkode("AA_BB_1"),
-        Varselkode("MM_NN_1"),
+        Varselkode("AA_BB_1", emptyList(), LocalDateTime.now()),
+        Varselkode("MM_NN_1", emptyList(), LocalDateTime.now()),
     )
 
     @Test
@@ -36,13 +38,13 @@ class VarselkodeTest {
     @Test
     fun `finner alle kontekster og domener`() {
         val varselkoder = setOf(
-            Varselkode("AA_BB_1"),
-            Varselkode("MM_NN_1"),
-            Varselkode("XX_YY_1"),
-            Varselkode("XX_YY_2"),
-            Varselkode("XX_FF_1"),
-            Varselkode("ÆÆ_ØØ_1"),
-            Varselkode("ØØ_ÆÆ_1"),
+            Varselkode("AA_BB_1", emptyList(), LocalDateTime.now()),
+            Varselkode("MM_NN_1", emptyList(), LocalDateTime.now()),
+            Varselkode("XX_YY_1", emptyList(), LocalDateTime.now()),
+            Varselkode("XX_YY_2", emptyList(), LocalDateTime.now()),
+            Varselkode("XX_FF_1", emptyList(), LocalDateTime.now()),
+            Varselkode("ÆÆ_ØØ_1", emptyList(), LocalDateTime.now()),
+            Varselkode("ØØ_ÆÆ_1", emptyList(), LocalDateTime.now()),
         ).finnSubdomenerOgKontekster()
 
         assertEquals(setOf("BB"), varselkoder["AA"])
@@ -55,13 +57,13 @@ class VarselkodeTest {
     @Test
     fun `gyldige varselkoder`() {
         assertDoesNotThrow {
-            Varselkode("SB_RV_1")
+            Varselkode("SB_RV_1", emptyList(), LocalDateTime.now())
         }
         assertDoesNotThrow {
-            Varselkode("SB_RV_12")
+            Varselkode("SB_RV_12", emptyList(), LocalDateTime.now())
         }
         assertDoesNotThrow {
-            Varselkode("SB_RV_123")
+            Varselkode("SB_RV_123", emptyList(), LocalDateTime.now())
         }
     }
 
@@ -88,7 +90,7 @@ class VarselkodeTest {
 
     private fun assertUgyldigVarselkode(kode: String) {
         assertThrows<IllegalArgumentException> {
-            Varselkode(kode)
+            Varselkode(kode, emptyList(), LocalDateTime.now())
         }
     }
 }

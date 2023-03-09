@@ -1,6 +1,16 @@
 package no.nav.helse.speaker.domene
 
-internal class Varselkode(kode: String) {
+import kotlinx.serialization.Serializable
+import no.nav.helse.speaker.LocalDateTimeSerializer
+import java.time.LocalDateTime
+
+@Serializable
+internal class Varselkode(
+    private val kode: String,
+    private val definisjoner: List<Varseldefinisjon>,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    private val opprettet: LocalDateTime
+) {
     init {
         require(kode.matches(mønster)) { "Ugyldig varselkode-format" }
     }
@@ -8,6 +18,9 @@ internal class Varselkode(kode: String) {
     private val domene = oppdelt[0]
     private val kontekst = oppdelt[1]
     private val nummer = oppdelt[2].toInt()
+    private val avviklet = definisjoner.lastOrNull()?.erAvviklet() ?: false
+
+    internal fun kode() = kode
 
     internal companion object {
         private val mønster = "^[A-ZÆØÅ]{2}_[A-ZÆØÅ]{2}_\\d{1,3}\$".toRegex()
@@ -30,6 +43,10 @@ internal class Varselkode(kode: String) {
                     varselkoder.map { it.kontekst }.toSet()
                 }
         }
+    }
+
+    override fun toString(): String {
+        return "$kode, antall definisjoner=${definisjoner.size}"
     }
 
     override fun equals(other: Any?) = this === other || (

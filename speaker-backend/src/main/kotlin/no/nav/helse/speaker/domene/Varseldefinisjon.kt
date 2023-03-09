@@ -1,17 +1,27 @@
 package no.nav.helse.speaker.domene
 
 import kotlinx.serialization.Serializable
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import no.nav.helse.speaker.LocalDateTimeSerializer
+import org.intellij.lang.annotations.Language
+import java.time.LocalDateTime
+import javax.sql.DataSource
 
 @Serializable
-internal data class Varseldefinisjon(
+internal class Varseldefinisjon(
     private val varselkode: String,
     private val tittel: String,
     private val forklaring: String?,
     private val handling: String?,
     private val avviklet: Boolean,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    private val opprettet: LocalDateTime,
     private val forfattere: List<Bruker>
 ) {
     internal fun kode() = varselkode
+
+    internal fun erAvviklet() = avviklet
 
     internal fun lagre(varselRepository: VarselRepository): Boolean {
         return varselRepository.ny(varselkode, tittel, forklaring, handling)
@@ -57,5 +67,22 @@ internal data class Varseldefinisjon(
         result = 31 * result + (handling?.hashCode() ?: 0)
         result = 31 * result + avviklet.hashCode()
         return result
+    }
+
+    internal companion object {
+        internal fun List<Varseldefinisjon>.konverterTilVarselkode(dataSource: DataSource): List<Varselkode> {
+            return groupBy { it.varselkode }.map {(varselkode, definisjoner) ->
+                val opprettet = finnOpprettetFor(varselkode, dataSource)
+                Varselkode(varselkode, definisjoner, opprettet)
+            }
+        }
+
+        private fun finnOpprettetFor(varselkode: String, dataSource: DataSource): LocalDateTime {
+            @Language("PostgreSQL")
+            val query = "SELECT opprettet FROM varselkode WHERE kode = :varselkode"
+            return requireNotNull(sessionOf(dataSource).use { session ->
+                session.run(queryOf(query, mapOf("varselkode" to varselkode)).map { it.localDateTime("opprettet") }.asSingle)
+            })
+        }
     }
 }

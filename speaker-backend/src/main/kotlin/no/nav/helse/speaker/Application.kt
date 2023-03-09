@@ -5,7 +5,6 @@ import io.ktor.server.application.ServerReady
 import io.ktor.server.auth.authenticate
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
-import no.nav.helse.speaker.routes.nais
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.http.content.ignoreFiles
 import io.ktor.server.http.content.react
@@ -17,7 +16,9 @@ import no.nav.helse.speaker.db.DataSourceBuilder
 import no.nav.helse.speaker.db.VarseldefinisjonDao
 import no.nav.helse.speaker.domene.ActualVarselRepository
 import no.nav.helse.speaker.domene.VarselRepository
+import no.nav.helse.speaker.domene.Varseldefinisjon.Companion.konverterTilVarselkode
 import no.nav.helse.speaker.plugins.*
+import no.nav.helse.speaker.routes.nais
 import no.nav.helse.speaker.routes.speaker
 
 internal fun main() {
@@ -39,6 +40,11 @@ internal fun createApp(env: Map<String, String>) {
             port = 8080
         }
     })
+    val varselkoder = dao.finnAlleDefinisjoner().konverterTilVarselkode(dataSourceBuilder.getDataSource())
+    varselkoder.forEach {
+        dao.lagre(it.kode(), it)
+    }
+
     server.start(wait = true)
 }
 
