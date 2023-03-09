@@ -2,8 +2,7 @@ package no.nav.helse.speaker.domene
 
 import no.nav.helse.speaker.domene.Varselkode.Companion.finnNeste
 import no.nav.helse.speaker.domene.Varselkode.Companion.finnSubdomenerOgKontekster
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
@@ -11,8 +10,8 @@ import java.time.LocalDateTime
 class VarselkodeTest {
 
     private val varselkoder = setOf(
-        Varselkode("AA_BB_1", emptyList(), LocalDateTime.now()),
-        Varselkode("MM_NN_1", emptyList(), LocalDateTime.now()),
+        varselkode("AA_BB_1"),
+        varselkode("MM_NN_1"),
     )
 
     @Test
@@ -38,13 +37,13 @@ class VarselkodeTest {
     @Test
     fun `finner alle kontekster og domener`() {
         val varselkoder = setOf(
-            Varselkode("AA_BB_1", emptyList(), LocalDateTime.now()),
-            Varselkode("MM_NN_1", emptyList(), LocalDateTime.now()),
-            Varselkode("XX_YY_1", emptyList(), LocalDateTime.now()),
-            Varselkode("XX_YY_2", emptyList(), LocalDateTime.now()),
-            Varselkode("XX_FF_1", emptyList(), LocalDateTime.now()),
-            Varselkode("ÆÆ_ØØ_1", emptyList(), LocalDateTime.now()),
-            Varselkode("ØØ_ÆÆ_1", emptyList(), LocalDateTime.now()),
+            varselkode("AA_BB_1"),
+            varselkode("MM_NN_1"),
+            varselkode("XX_YY_1"),
+            varselkode("XX_YY_2"),
+            varselkode("XX_FF_1"),
+            varselkode("ÆÆ_ØØ_1"),
+            varselkode("ØØ_ÆÆ_1"),
         ).finnSubdomenerOgKontekster()
 
         assertEquals(setOf("BB"), varselkoder["AA"])
@@ -54,16 +53,20 @@ class VarselkodeTest {
         assertEquals(setOf("ÆÆ"), varselkoder["ØØ"])
     }
 
+    private fun varselkode(kode: String, tittel: String = "EN_TITTEL"): Varselkode {
+        return Varselkode(kode, listOf(Varseldefinisjon(kode, tittel, "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now(), emptyList())), LocalDateTime.now())
+    }
+
     @Test
     fun `gyldige varselkoder`() {
         assertDoesNotThrow {
-            Varselkode("SB_RV_1", emptyList(), LocalDateTime.now())
+            varselkode("SB_RV_1")
         }
         assertDoesNotThrow {
-            Varselkode("SB_RV_12", emptyList(), LocalDateTime.now())
+            varselkode("SB_RV_12")
         }
         assertDoesNotThrow {
-            Varselkode("SB_RV_123", emptyList(), LocalDateTime.now())
+            varselkode("SB_RV_123")
         }
     }
 
@@ -88,9 +91,39 @@ class VarselkodeTest {
         assertUgyldigVarselkode("sb_rv_1")
     }
 
+    @Test
+    fun `referential equals`() {
+        val varselkode = varselkode("RV_IM_1")
+        assertEquals(varselkode, varselkode)
+    }
+
+    @Test
+    fun `structural equals`() {
+        val varselkode1 = varselkode("RV_IM_1")
+        val varselkode2 = varselkode("RV_IM_1")
+        assertEquals(varselkode1, varselkode2)
+        assertEquals(varselkode1.hashCode(), varselkode2.hashCode())
+    }
+
+    @Test
+    fun `not equals - kode`() {
+        val varselkode1 = varselkode("RV_IM_1")
+        val varselkode2 = varselkode("RV_IM_2")
+        assertNotEquals(varselkode1, varselkode2)
+        assertNotEquals(varselkode1.hashCode(), varselkode2.hashCode())
+    }
+
+    @Test
+    fun `not equals - definisjoner`() {
+        val varselkode1 = varselkode("RV_IM_1", "EN_TITTEL")
+        val varselkode2 = varselkode("RV_IM_1", "EN_ANNEN_TITTEL")
+        assertNotEquals(varselkode1, varselkode2)
+        assertNotEquals(varselkode1.hashCode(), varselkode2.hashCode())
+    }
+
     private fun assertUgyldigVarselkode(kode: String) {
         assertThrows<IllegalArgumentException> {
-            Varselkode(kode, emptyList(), LocalDateTime.now())
+            varselkode(kode)
         }
     }
 }

@@ -23,32 +23,6 @@ internal class Varseldefinisjon(
 
     internal fun erAvviklet() = avviklet
 
-    internal fun lagre(varselRepository: VarselRepository): Boolean {
-        return varselRepository.ny(varselkode, tittel, forklaring, handling)
-    }
-
-    internal fun finnGjeldendeDefinisjon(varselRepository: VarselRepository): Varseldefinisjon {
-        return varselRepository.finnGjeldendeDefinisjonFor(varselkode)
-    }
-
-    internal fun oppdaterDefinisjon(
-        nyDefinisjon: Varseldefinisjon,
-        oppdaterBlock: (varselkode: String, tittel: String, forklaring: String?, handling: String?) -> Unit
-    ): Boolean {
-        if (this.tittel == nyDefinisjon.tittel && this.forklaring == nyDefinisjon.forklaring && this.handling == nyDefinisjon.handling) return false
-        oppdaterBlock(varselkode, nyDefinisjon.tittel, nyDefinisjon.forklaring, nyDefinisjon.handling)
-        return true
-    }
-
-    internal fun oppdaterAvviklet(
-        nyDefinisjon: Varseldefinisjon,
-        oppdaterBlock: (varselkode: String, avviklet: Boolean) -> Unit
-    ): Boolean {
-        if (this.avviklet == nyDefinisjon.avviklet) return false
-        oppdaterBlock(varselkode, nyDefinisjon.avviklet)
-        return true
-    }
-
     override fun equals(other: Any?) =
         this === other || (
             other is Varseldefinisjon

@@ -15,10 +15,10 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import no.nav.helse.speaker.app
-import no.nav.helse.speaker.db.VarselException
 import no.nav.helse.speaker.domene.Bruker
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
+import no.nav.helse.speaker.domene.Varselkode
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import org.junit.jupiter.api.AfterAll
@@ -39,7 +39,7 @@ internal class RoutingTest {
             install(HttpCookies)
             configureClientContentNegotiation()
         }
-        shouldThrowOnUpdate = false
+        varselkodeFinnes = false
     }
 
     @Test
@@ -49,7 +49,7 @@ internal class RoutingTest {
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val body = response.body<String>()
-        assertEquals(listOf(varseldefinisjon), Json.decodeFromString<List<Varseldefinisjon>>(body))
+        assertEquals(listOf(varseldefinisjon()), Json.decodeFromString<List<Varseldefinisjon>>(body))
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class RoutingTest {
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val body = runBlocking { response.body<String>() }
-        assertEquals(listOf(varseldefinisjon), Json.decodeFromString<List<Varseldefinisjon>>(body))
+        assertEquals(listOf(varseldefinisjon()), Json.decodeFromString<List<Varseldefinisjon>>(body))
     }
 
     @Test
@@ -72,7 +72,7 @@ internal class RoutingTest {
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val body = runBlocking { response.body<String>() }
-        assertEquals(listOf(varseldefinisjon), Json.decodeFromString<List<Varseldefinisjon>>(body))
+        assertEquals(listOf(varseldefinisjon()), Json.decodeFromString<List<Varseldefinisjon>>(body))
     }
 
     @Test
@@ -82,7 +82,7 @@ internal class RoutingTest {
         }
         assertEquals(HttpStatusCode.OK, response.status)
         val body = runBlocking { response.body<String>() }
-        assertEquals(listOf(varseldefinisjon), Json.decodeFromString<List<Varseldefinisjon>>(body))
+        assertEquals(listOf(varseldefinisjon()), Json.decodeFromString<List<Varseldefinisjon>>(body))
     }
 
     @Test
@@ -103,22 +103,23 @@ internal class RoutingTest {
 
     @Test
     fun `oppdater varsel med gyldig token`() = withTestApplication {
+        varselkodeFinnes = true
         val response = client.post("/api/varsler/oppdater") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             header("Authorization", "Bearer ${accessToken()}")
-            setBody(Json.encodeToString(varseldefinisjon))
+            setBody(Json.encodeToString(varseldefinisjon(tittel = "NY TITTEL")))
         }
         assertEquals(HttpStatusCode.OK, response.status)
     }
 
     @Test
     fun `oppdater varsel når kode ikke finnes`() = withTestApplication {
-        shouldThrowOnUpdate = true
+        varselkodeFinnes = false
 
         val response = client.post("/api/varsler/oppdater") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             header("Authorization", "Bearer ${accessToken()}")
-            setBody(Json.encodeToString(varseldefinisjon))
+            setBody(Json.encodeToString(varseldefinisjon()))
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
@@ -241,11 +242,12 @@ internal class RoutingTest {
 
     @Test
     fun `Lagrer ny definisjon`() {
+        varselkodeFinnes = false
         withTestApplication {
             val response = client.post("/api/varsler/opprett") {
                 header("Authorization", "Bearer ${accessToken()}")
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
-                setBody(Json.encodeToString(varseldefinisjon))
+                setBody(Json.encodeToString(varseldefinisjon()))
             }
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -256,7 +258,7 @@ internal class RoutingTest {
         withTestApplication {
             val response = client.post("/api/varsler/opprett") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
-                setBody(Json.encodeToString(varseldefinisjon))
+                setBody(Json.encodeToString(varseldefinisjon()))
             }
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
@@ -296,7 +298,7 @@ internal class RoutingTest {
         testApplication {
             environment {
                 module {
-                    app(repository(shouldThrowOnUpdate = ::setShouldThrowOnUpdate), env)
+                    app(repository(varselkodeFinnes = ::settVarselkodeFinnes), env)
                 }
             }
             block(this)
@@ -304,8 +306,8 @@ internal class RoutingTest {
     }
 
     private companion object {
-        private val varseldefinisjon =
-            Varseldefinisjon("EN_VARSELKODE", "EN TITTEL", "EN FORKLARING", "EN HANDLING", false, LocalDateTime.now(), emptyList())
+        private fun varseldefinisjon(tittel: String = "EN TITTEL") =
+            Varseldefinisjon("SB_EX_1", tittel, "EN FORKLARING", "EN HANDLING", false, LocalDateTime.now(), emptyList())
         private val oauthMock = MockOAuth2Server().also {
             it.start()
         }
@@ -313,9 +315,9 @@ internal class RoutingTest {
         private val groupId = UUID.randomUUID()
         private val clientId = UUID.randomUUID()
 
-        private var shouldThrowOnUpdate: Boolean = false
-        private fun setShouldThrowOnUpdate(): Boolean {
-            return shouldThrowOnUpdate
+        private var varselkodeFinnes: Boolean = false
+        private fun settVarselkodeFinnes(): Boolean {
+            return varselkodeFinnes
         }
 
         private val env = mapOf(
@@ -326,28 +328,19 @@ internal class RoutingTest {
         )
 
         private fun repository(
-            varsler: List<Varseldefinisjon> = listOf(varseldefinisjon),
-            shouldThrowOnUpdate: () -> Boolean = { false }
+            varsler: List<Varseldefinisjon> = listOf(varseldefinisjon()),
+            varselkodeFinnes: () -> Boolean = { true }
         ) = object : VarselRepository {
-            override fun ny(varseldefinisjon: Varseldefinisjon): Boolean {
-                return true
-            }
-
-            override fun ny(kode: String, tittel: String, forklaring: String?, handling: String?): Boolean {
-                TODO("Not yet implemented")
-            }
-
-            override fun finn(): List<Varseldefinisjon> {
+            override fun finnGjeldendeDefinisjoner(): List<Varseldefinisjon> {
                 return varsler
             }
 
-            override fun finnGjeldendeDefinisjonFor(varselkode: String): Varseldefinisjon {
-                return varseldefinisjon
+            override fun finn(varselkode: String): Varselkode? {
+                if (!varselkodeFinnes()) return null
+                return Varselkode(varsler.first {it.kode() == varselkode})
             }
 
-            override fun oppdater(varseldefinisjon: Varseldefinisjon) {
-                if (shouldThrowOnUpdate()) throw VarselException.KodeFinnesIkke("EN_VARSELKODE")
-            }
+            override fun oppdater(varselkode: Varselkode) {}
 
             override fun finnNesteVarselkodeFor(prefix: String): String {
                 return "${prefix}_1"
@@ -358,6 +351,8 @@ internal class RoutingTest {
                     "AA" to setOf("BB", "CC")
                 )
             }
+
+            override fun opprett(varselkode: Varselkode) {}
         }
 
         @BeforeAll

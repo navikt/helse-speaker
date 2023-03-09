@@ -42,7 +42,7 @@ internal fun createApp(env: Map<String, String>) {
     })
     val varselkoder = dao.finnAlleDefinisjoner().konverterTilVarselkode(dataSourceBuilder.getDataSource())
     varselkoder.forEach {
-        dao.lagre(it.kode(), it)
+        dao.opprett(it)
     }
 
     server.start(wait = true)

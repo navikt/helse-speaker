@@ -12,6 +12,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.speaker.db.VarselException
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
+import no.nav.helse.speaker.domene.Varselkode
 import org.slf4j.LoggerFactory
 
 internal fun Route.varselRoutes(varselRepository: VarselRepository) {
@@ -22,14 +23,17 @@ internal fun Route.varselRoutes(varselRepository: VarselRepository) {
         get {
             logg.info("Henter varsler")
             sikkerlogg.info("Henter varsler")
-            call.respond(HttpStatusCode.OK, varselRepository.finn())
+            call.respond(HttpStatusCode.OK, varselRepository.finnGjeldendeDefinisjoner())
         }
         post("/oppdater") {
             val varseldefinisjon = call.receive<Varseldefinisjon>()
+            val varselkode = varselRepository.finn(varseldefinisjon.kode())
+                ?: return@post call.respond(HttpStatusCode.NotFound, message = "Finner ikke varselkode")
             logg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
             sikkerlogg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
             try {
-                varselRepository.oppdater(varseldefinisjon)
+                varselkode.håndter(varseldefinisjon)
+                varselRepository.oppdater(varselkode)
             } catch (e: VarselException) {
                 return@post call.respond(message = e.message!!, status = e.httpStatusCode)
             }
@@ -37,10 +41,14 @@ internal fun Route.varselRoutes(varselRepository: VarselRepository) {
         }
         post("/opprett") {
             val varseldefinisjon = call.receive<Varseldefinisjon>()
+            if (varselRepository.finn(varseldefinisjon.kode()) != null) {
+                return@post call.respond(HttpStatusCode.Conflict, "Varselkode finnes allerede")
+            }
             logg.info("Oppretter {}", kv("varselkode", varseldefinisjon.kode()))
             sikkerlogg.info("Oppretter {}", kv("varselkode", varseldefinisjon.kode()))
+            val varselkode = Varselkode(varseldefinisjon)
             try {
-                varselRepository.ny(varseldefinisjon)
+                varselRepository.opprett(varselkode)
             } catch (e: VarselException) {
                 return@post call.respond(message = e.message!!, status = e.httpStatusCode)
             }
