@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BodyShort, Button, Textarea } from '@navikt/ds-react';
 import { EkspanderbartVarsel } from './EkspanderbartVarsel';
 import { useForm } from 'react-hook-form';
 import { fetchVarsler, postOppdaterVarsel } from '../endepunkter';
-import { useSetRecoilState } from 'recoil';
-import { varslerState } from '../state/state';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { brukerState, varslerState } from '../state/state';
 import styles from './Varsel.module.css';
 import { Varsel } from '../types';
 
@@ -20,6 +20,8 @@ interface VarselForm {
 
 export const VarselComponent = ({ varsel }: VarselProps) => {
     const setVarsler = useSetRecoilState(varslerState);
+    const [bruker] = useRecoilState(brukerState);
+    const [isLoading, setIsLoading] = useState(false);
     const defaultValues = {
         tittel: varsel.tittel,
         forklaring: varsel.forklaring ?? '',
@@ -37,24 +39,36 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
     });
 
     const onSubmit = ({ tittel, forklaring, handling }: VarselForm) => {
+        if (!bruker) return;
+        setIsLoading(true);
         postOppdaterVarsel({
             varselkode: varsel.varselkode,
             tittel: tittel,
             forklaring: forklaring,
             handling: handling,
             avviklet: varsel.avviklet,
+            forfattere: [bruker],
         }).then((r) => {
             if (r.status === 200) {
-                fetchVarsler().then((varsler) => {
-                    setVarsler(varsler);
-                    reset({ tittel: tittel, forklaring: forklaring ?? '', handling: handling ?? '' });
-                });
+                fetchVarsler()
+                    .then((varsler) => {
+                        setVarsler(varsler);
+                        reset({ tittel: tittel, forklaring: forklaring ?? '', handling: handling ?? '' });
+                    })
+                    .finally(() => {
+                        setIsLoading(false);
+                    });
             }
         });
     };
 
     return (
-        <EkspanderbartVarsel key={varsel.varselkode} label={varsel.tittel}>
+        <EkspanderbartVarsel
+            key={varsel.varselkode}
+            label={varsel.tittel}
+            tidspunkt={varsel?.opprettet ?? ''}
+            forfattere={varsel.forfattere}
+        >
             <form onSubmit={handleSubmit(onSubmit)}>
                 <BodyShort className={'pt-5'}>
                     <span className={styles.varselkode}>Varselkode:</span> {varsel.varselkode}
@@ -85,7 +99,7 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
                     {...register('handling')}
                 />
                 <div className={'flex flex-row gap-4 pb-5'}>
-                    <Button type={'submit'} variant={'primary'} disabled={!isValid || !isDirty}>
+                    <Button type={'submit'} variant={'primary'} disabled={!isValid || !isDirty} loading={isLoading}>
                         Lagre
                     </Button>
                     <Button variant={'secondary'} disabled={!isDirty} onClick={() => reset()}>

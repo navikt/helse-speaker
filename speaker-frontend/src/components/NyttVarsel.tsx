@@ -6,7 +6,7 @@ import { fetchNesteVarselkode, fetchSubdomenerOgKontekster, fetchVarsler, postLa
 import classNames from 'classnames';
 import styles from './NyttVarsel.module.css';
 import { useRecoilState } from 'recoil';
-import { varslerState } from '../state/state';
+import { brukerState, varslerState } from '../state/state';
 
 interface NyttVarselForm {
     tittel: string;
@@ -21,6 +21,8 @@ export const NyttVarsel = () => {
     const [nesteVarselkode, setNesteVarselkode] = useState<string | undefined>(undefined);
     const [skalOppretteNyttVarsel, setSkalOppretteNyttVarsel] = useState(false);
     const [, setVarsler] = useRecoilState(varslerState);
+    const [bruker] = useRecoilState(brukerState);
+    const [isLoading, setIsLoading] = useState(false);
 
     const {
         register,
@@ -36,19 +38,24 @@ export const NyttVarsel = () => {
     const erDefaultKontekst = () => ['default', undefined].includes(selectedKontekst);
 
     const onSubmit = ({ tittel, forklaring, handling }: NyttVarselForm) => {
+        if (!bruker) return;
+        setIsLoading(true);
         postLagreVarsel({
             varselkode: nesteVarselkode ?? '',
             tittel: tittel,
             forklaring: forklaring,
             handling: handling,
             avviklet: false,
+            forfattere: [bruker],
         }).then((r) => {
             if (r.status === 200) {
-                fetchVarsler().then((varsler) => {
-                    setVarsler(varsler);
-                    setSkalOppretteNyttVarsel(false);
-                    reset();
-                });
+                fetchVarsler()
+                    .then((varsler) => {
+                        setVarsler(varsler);
+                        setSkalOppretteNyttVarsel(false);
+                        reset();
+                    })
+                    .finally(() => setIsLoading(false));
             }
         });
     };
@@ -149,7 +156,12 @@ export const NyttVarsel = () => {
                             {...register('handling')}
                         />
                         <div className={'flex flex-row gap-4 pb-5'}>
-                            <Button type={'submit'} variant={'primary'} disabled={!isValid || !isDirty}>
+                            <Button
+                                type={'submit'}
+                                variant={'primary'}
+                                disabled={!isValid || !isDirty}
+                                loading={isLoading}
+                            >
                                 Lagre
                             </Button>
                             <Button

@@ -1,6 +1,8 @@
 import { Bruker, Varsel } from './types';
 
-export const postOppdaterVarsel = (varsel: Varsel) =>
+type VarselPayload = Omit<Varsel, 'opprettet'>;
+
+export const postOppdaterVarsel = (varsel: VarselPayload) =>
     fetch('/api/varsler/oppdater', {
         method: 'POST',
         headers: {
@@ -23,7 +25,7 @@ export const fetchNesteVarselkode = (subdomene: string, kontekst: string) =>
         .then((response) => response.text())
         .then((data) => data as string);
 
-export const postLagreVarsel = (varsel: Varsel) =>
+export const postLagreVarsel = (varsel: VarselPayload) =>
     fetch('/api/varsler/opprett', {
         method: 'POST',
         headers: {
