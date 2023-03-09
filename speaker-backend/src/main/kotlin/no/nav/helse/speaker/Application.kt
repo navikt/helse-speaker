@@ -33,6 +33,10 @@ internal fun createApp(env: Map<String, String>) {
         module {
             environment.monitor.subscribe(ServerReady) { _ ->
                 dataSourceBuilder.migrate()
+                val varselkoder = dao.finnAlleDefinisjoner().konverterTilVarselkode(dataSourceBuilder.getDataSource())
+                varselkoder.forEach {
+                    dao.opprett(it)
+                }
             }
             app(repository, env)
         }
@@ -40,10 +44,6 @@ internal fun createApp(env: Map<String, String>) {
             port = 8080
         }
     })
-    val varselkoder = dao.finnAlleDefinisjoner().konverterTilVarselkode(dataSourceBuilder.getDataSource())
-    varselkoder.forEach {
-        dao.opprett(it)
-    }
 
     server.start(wait = true)
 }
