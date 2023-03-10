@@ -16,6 +16,7 @@ val rapidsAndRiversVersion = "2022100711511665136276.49acbaae4ed4"
 
 plugins {
     kotlin("jvm") apply true
+    kotlin("plugin.serialization") version "1.8.10"
 }
 
 dependencies {
@@ -37,8 +38,9 @@ dependencies {
         exclude("com.fasterxml.jackson.core")
     }
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation(project(":speaker-database"))
 
-    testImplementation(project(":speaker-database"))
     testImplementation("org.flywaydb:flyway-core:$flywayVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.testcontainers:postgresql:$testcontainersPostgresqlVersion") {

@@ -1,18 +1,19 @@
+@file:UseSerializers(UUIDSerializer::class)
 package no.nav.helse.speaker.domene
 
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.authentication
 import kotlinx.serialization.Serializable
-import no.nav.helse.speaker.UUIDSerializer
+import kotlinx.serialization.UseSerializers
+import no.nav.helse.speaker.felles.UUIDSerializer
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
-import java.util.UUID
+import java.util.*
 
 @Serializable
 class Bruker(
     private val epostadresse: String,
     private val navn: String,
     private val ident: String,
-    @Serializable(with = UUIDSerializer::class)
     private val oid: UUID
 ) {
     internal companion object {

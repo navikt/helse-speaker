@@ -1,8 +1,8 @@
 package no.nav.helse.speaker.domene
 
 import kotlinx.serialization.Serializable
-import no.nav.helse.speaker.LocalDateTimeSerializer
 import no.nav.helse.speaker.db.VarselException
+import no.nav.helse.speaker.felles.LocalDateTimeSerializer
 import java.time.LocalDateTime
 
 @Serializable

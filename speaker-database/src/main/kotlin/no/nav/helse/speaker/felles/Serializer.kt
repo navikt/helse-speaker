@@ -1,4 +1,4 @@
-package no.nav.helse.speaker
+package no.nav.helse.speaker.felles
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind

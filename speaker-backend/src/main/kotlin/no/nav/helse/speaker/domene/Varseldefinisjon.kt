@@ -1,15 +1,16 @@
+@file:UseSerializers(UUIDSerializer::class, LocalDateTimeSerializer::class)
 package no.nav.helse.speaker.domene
 
 import kotlinx.serialization.Serializable
-import no.nav.helse.speaker.LocalDateTimeSerializer
-import no.nav.helse.speaker.UUIDSerializer
+import kotlinx.serialization.UseSerializers
+import no.nav.helse.speaker.felles.LocalDateTimeSerializer
+import no.nav.helse.speaker.felles.UUIDSerializer
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.util.*
 
 @Serializable
 internal class Varseldefinisjon(
-    @Serializable(with = UUIDSerializer::class)
     private val id: UUID,
     private val varselkode: String,
     private val tittel: String,
@@ -17,12 +18,10 @@ internal class Varseldefinisjon(
     private val handling: String?,
     private val avviklet: Boolean,
     private val forfattere: List<Bruker>,
-    @Serializable(with = LocalDateTimeSerializer::class)
     private val opprettet: LocalDateTime
 ) {
 
     internal fun kode() = varselkode
-
     internal fun erAvviklet() = avviklet
 
     override fun equals(other: Any?) =

@@ -1,8 +1,14 @@
+@file:UseSerializers(UUIDSerializer::class, LocalDateTimeSerializer::class)
 package no.nav.helse.speaker
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
+import no.nav.helse.speaker.felles.LocalDateTimeSerializer
+import no.nav.helse.speaker.felles.UUIDSerializer
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
+@Serializable
 internal class Varseldefinisjon(
     private val unikId: UUID,
     private val kode: String,
