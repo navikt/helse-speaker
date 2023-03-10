@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
+import java.util.*
 
 class VarselkodeTest {
 
@@ -54,7 +55,7 @@ class VarselkodeTest {
     }
 
     private fun varselkode(kode: String, tittel: String = "EN_TITTEL"): Varselkode {
-        return Varselkode(kode, listOf(Varseldefinisjon(kode, tittel, "EN_FORKLARING", "EN_HANDLING", false)), LocalDateTime.now())
+        return Varselkode(kode, listOf(Varseldefinisjon(UUID.randomUUID(), kode, tittel, "EN_FORKLARING", "EN_HANDLING", false)), LocalDateTime.now())
     }
 
     @Test

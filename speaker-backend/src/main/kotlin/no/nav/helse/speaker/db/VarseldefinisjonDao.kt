@@ -58,6 +58,7 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
 
                 tx.run(queryOf(query).map { row ->
                     Varseldefinisjon(
+                        id = row.uuid("unik_id"),
                         varselkode = row.string("kode"),
                         tittel = row.string("tittel"),
                         forklaring = row.stringOrNull("forklaring"),

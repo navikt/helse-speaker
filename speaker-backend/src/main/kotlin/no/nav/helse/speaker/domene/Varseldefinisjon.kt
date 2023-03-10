@@ -4,12 +4,16 @@ import kotlinx.serialization.Serializable
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.speaker.LocalDateTimeSerializer
+import no.nav.helse.speaker.UUIDSerializer
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
+import java.util.*
 import javax.sql.DataSource
 
 @Serializable
 internal class Varseldefinisjon private constructor(
+    @Serializable(with = UUIDSerializer::class)
+    private val id: UUID = UUID.randomUUID(),
     private val varselkode: String,
     private val tittel: String,
     private val forklaring: String?,
@@ -21,13 +25,14 @@ internal class Varseldefinisjon private constructor(
 ) {
 
     internal constructor(
+        id: UUID,
         varselkode: String,
         tittel: String,
         forklaring: String?,
         handling: String?,
         avviklet: Boolean,
         opprettet: LocalDateTime = LocalDateTime.now()
-    ): this(varselkode, tittel, forklaring, handling, avviklet, emptyList(), opprettet)
+    ): this(id, varselkode, tittel, forklaring, handling, avviklet, emptyList(), opprettet)
 
     internal fun kode() = varselkode
 

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime.now
+import java.util.*
 
 internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
     private val definisjonDao = VarseldefinisjonDao(dataSource)
@@ -25,7 +26,7 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         val opprinneligVarselkode = varselkode("RV_IM_1")
         definisjonDao.opprett(opprinneligVarselkode)
         val oppdatertVarselkode = varselkode("RV_IM_1").also {
-            it.håndter(Varseldefinisjon("RV_IM_1", "EN NY TITTEL", null, null, false))
+            it.håndter(Varseldefinisjon(UUID.randomUUID(), "RV_IM_1", "EN NY TITTEL", null, null, false))
         }
         definisjonDao.oppdater(oppdatertVarselkode)
         val funnet = definisjonDao.finnVarselkoder()
@@ -40,6 +41,6 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
     }
 
     private fun varselkode(kode: String): Varselkode {
-        return Varselkode(kode, listOf(Varseldefinisjon(kode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)), now())
+        return Varselkode(kode, listOf(Varseldefinisjon(UUID.randomUUID(), kode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false)), now())
     }
 }
