@@ -16,7 +16,6 @@ import no.nav.helse.speaker.db.DataSourceBuilder
 import no.nav.helse.speaker.db.VarseldefinisjonDao
 import no.nav.helse.speaker.domene.ActualVarselRepository
 import no.nav.helse.speaker.domene.VarselRepository
-import no.nav.helse.speaker.domene.Varseldefinisjon.Companion.konverterTilVarselkode
 import no.nav.helse.speaker.plugins.*
 import no.nav.helse.speaker.routes.nais
 import no.nav.helse.speaker.routes.speaker
@@ -33,10 +32,6 @@ internal fun createApp(env: Map<String, String>) {
         module {
             environment.monitor.subscribe(ServerReady) { _ ->
                 dataSourceBuilder.migrate()
-                val varselkoder = dao.finnAlleDefinisjoner().konverterTilVarselkode(dataSourceBuilder.getDataSource())
-                varselkoder.forEach {
-                    dao.opprett(it)
-                }
             }
             app(repository, env)
         }

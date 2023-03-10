@@ -5,7 +5,7 @@ import no.nav.helse.speaker.domene.Varselkode.Companion.finnSubdomenerOgKontekst
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDateTime
+import java.time.LocalDateTime.now
 import java.util.*
 
 class VarselkodeTest {
@@ -52,10 +52,6 @@ class VarselkodeTest {
         assertEquals(setOf("YY", "FF"), varselkoder["XX"])
         assertEquals(setOf("ØØ"), varselkoder["ÆÆ"])
         assertEquals(setOf("ÆÆ"), varselkoder["ØØ"])
-    }
-
-    private fun varselkode(kode: String, tittel: String = "EN_TITTEL"): Varselkode {
-        return Varselkode(kode, listOf(Varseldefinisjon(UUID.randomUUID(), kode, tittel, "EN_FORKLARING", "EN_HANDLING", false)), LocalDateTime.now())
     }
 
     @Test
@@ -120,6 +116,10 @@ class VarselkodeTest {
         val varselkode2 = varselkode("RV_IM_1", "EN_ANNEN_TITTEL")
         assertNotEquals(varselkode1, varselkode2)
         assertNotEquals(varselkode1.hashCode(), varselkode2.hashCode())
+    }
+
+    private fun varselkode(kode: String, tittel: String = "EN_TITTEL"): Varselkode {
+        return Varselkode(kode, listOf(Varseldefinisjon(UUID.randomUUID(), kode, tittel, "EN_FORKLARING", "EN_HANDLING", false, emptyList(), now())), now())
     }
 
     private fun assertUgyldigVarselkode(kode: String) {

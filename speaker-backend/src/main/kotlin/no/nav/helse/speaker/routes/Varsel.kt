@@ -26,7 +26,7 @@ internal fun Route.varselRoutes(varselRepository: VarselRepository) {
             call.respond(HttpStatusCode.OK, varselRepository.finnGjeldendeDefinisjoner())
         }
         post("/oppdater") {
-            val varseldefinisjon = call.receive<Varseldefinisjon>()
+            val varseldefinisjon = call.receive<Varseldefinisjon.VarseldefinisjonPayload>().toVarseldefinisjon()
             val varselkode = varselRepository.finn(varseldefinisjon.kode())
                 ?: return@post call.respond(HttpStatusCode.NotFound, message = "Finner ikke varselkode")
             logg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
@@ -40,7 +40,7 @@ internal fun Route.varselRoutes(varselRepository: VarselRepository) {
             call.respond(HttpStatusCode.OK)
         }
         post("/opprett") {
-            val varseldefinisjon = call.receive<Varseldefinisjon>()
+            val varseldefinisjon = call.receive<Varseldefinisjon.VarseldefinisjonPayload>().toVarseldefinisjon()
             if (varselRepository.finn(varseldefinisjon.kode()) != null) {
                 return@post call.respond(HttpStatusCode.Conflict, "Varselkode finnes allerede")
             }

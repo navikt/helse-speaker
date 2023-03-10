@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime.now
 import java.util.*
 
 internal class RoutingTest {
@@ -101,12 +102,23 @@ internal class RoutingTest {
     }
 
     @Test
+    fun `Forventer definisjon-payload, ikke definisjon ved oppdatering`() = withTestApplication {
+        varselkodeFinnes = true
+        val response = client.post("/api/varsler/oppdater") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            header("Authorization", "Bearer ${accessToken()}")
+            setBody(Json.encodeToString(varseldefinisjon()))
+        }
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
     fun `oppdater varsel med gyldig token`() = withTestApplication {
         varselkodeFinnes = true
         val response = client.post("/api/varsler/oppdater") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             header("Authorization", "Bearer ${accessToken()}")
-            setBody(Json.encodeToString(varseldefinisjon(tittel = "NY TITTEL")))
+            setBody(Json.encodeToString(varseldefinisjonPayload(tittel = "NY TITTEL")))
         }
         assertEquals(HttpStatusCode.OK, response.status)
     }
@@ -118,7 +130,7 @@ internal class RoutingTest {
         val response = client.post("/api/varsler/oppdater") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             header("Authorization", "Bearer ${accessToken()}")
-            setBody(Json.encodeToString(varseldefinisjon()))
+            setBody(Json.encodeToString(varseldefinisjonPayload()))
         }
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
@@ -240,13 +252,26 @@ internal class RoutingTest {
     }
 
     @Test
-    fun `Lagrer ny definisjon`() {
+    fun `Forventer definisjon-payload, ikke definisjon ved oppretting`() {
         varselkodeFinnes = false
         withTestApplication {
             val response = client.post("/api/varsler/opprett") {
                 header("Authorization", "Bearer ${accessToken()}")
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
                 setBody(Json.encodeToString(varseldefinisjon()))
+            }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+        }
+    }
+
+    @Test
+    fun `Lagrer ny definisjon`() {
+        varselkodeFinnes = false
+        withTestApplication {
+            val response = client.post("/api/varsler/opprett") {
+                header("Authorization", "Bearer ${accessToken()}")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(Json.encodeToString(varseldefinisjonPayload()))
             }
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -257,7 +282,7 @@ internal class RoutingTest {
         withTestApplication {
             val response = client.post("/api/varsler/opprett") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
-                setBody(Json.encodeToString(varseldefinisjon()))
+                setBody(Json.encodeToString(varseldefinisjonPayload()))
             }
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
@@ -306,7 +331,9 @@ internal class RoutingTest {
 
     private companion object {
         private fun varseldefinisjon(tittel: String = "EN TITTEL") =
-            Varseldefinisjon(UUID.randomUUID(), "SB_EX_1", tittel, "EN FORKLARING", "EN HANDLING", false)
+            Varseldefinisjon(UUID.randomUUID(), "SB_EX_1", tittel, "EN FORKLARING", "EN HANDLING", false, emptyList(), now())
+        private fun varseldefinisjonPayload(tittel: String = "EN TITTEL") =
+            Varseldefinisjon.VarseldefinisjonPayload("SB_EX_1", tittel, "EN FORKLARING", "EN HANDLING", false, emptyList())
         private val oauthMock = MockOAuth2Server().also {
             it.start()
         }

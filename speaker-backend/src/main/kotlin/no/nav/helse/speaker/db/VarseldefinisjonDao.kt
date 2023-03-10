@@ -48,30 +48,6 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnAlleDefinisjoner(): List<Varseldefinisjon> {
-        return sessionOf(dataSource).use { session ->
-            session.transaction { tx ->
-                @Language("PostgreSQL")
-                val query = """
-                SELECT vk.kode, tittel, forklaring, handling, vk.avviklet, unik_id, vd.opprettet
-                FROM varselkode vk INNER JOIN varsel_definisjon vd ON vk.id = vd.varselkode_ref ORDER BY vd.id"""
-
-                tx.run(queryOf(query).map { row ->
-                    Varseldefinisjon(
-                        id = row.uuid("unik_id"),
-                        varselkode = row.string("kode"),
-                        tittel = row.string("tittel"),
-                        forklaring = row.stringOrNull("forklaring"),
-                        handling = row.stringOrNull("handling"),
-                        avviklet = row.boolean("avviklet"),
-                        opprettet = row.localDateTime("opprettet")
-                    )
-                }.asList)
-            }
-        }
-    }
-
-
     internal fun finnVarselkoder(): Set<Varselkode> {
         @Language("PostgreSQL")
         val query = "SELECT json FROM varseldefinisjon"
