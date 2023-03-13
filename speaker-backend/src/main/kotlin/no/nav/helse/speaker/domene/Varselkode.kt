@@ -15,9 +15,6 @@ internal class Varselkode private constructor(
     constructor(definisjon: Varseldefinisjon):
         this(definisjon.kode(), mutableListOf(definisjon), LocalDateTime.now())
 
-    constructor(varselkode: String, definisjoner: Collection<Varseldefinisjon>, opprettet: LocalDateTime):
-        this(varselkode, definisjoner.toMutableList(), opprettet)
-
     init {
         require(kode.matches(mønster)) { "Ugyldig varselkode-format" }
         require(definisjoner.isNotEmpty()) { "Må ha minst én definisjon" }

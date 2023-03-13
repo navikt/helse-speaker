@@ -119,7 +119,7 @@ class VarselkodeTest {
     }
 
     private fun varselkode(kode: String, tittel: String = "EN_TITTEL"): Varselkode {
-        return Varselkode(kode, listOf(Varseldefinisjon(UUID.randomUUID(), kode, tittel, "EN_FORKLARING", "EN_HANDLING", false, emptyList(), now())), now())
+        return Varselkode(Varseldefinisjon(UUID.randomUUID(), kode, tittel, "EN_FORKLARING", "EN_HANDLING", false, emptyList(), now()))
     }
 
     private fun assertUgyldigVarselkode(kode: String) {

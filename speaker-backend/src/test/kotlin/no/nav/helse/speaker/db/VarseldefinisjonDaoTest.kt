@@ -41,6 +41,6 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
     }
 
     private fun varselkode(kode: String): Varselkode {
-        return Varselkode(kode, listOf(Varseldefinisjon(UUID.randomUUID(), kode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, emptyList(), now())), now())
+        return Varselkode(Varseldefinisjon(UUID.randomUUID(), kode, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, emptyList(), now()))
     }
 }
