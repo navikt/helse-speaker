@@ -15,9 +15,10 @@ internal class Varselkode private constructor(
     private val opprettet: LocalDateTime
 ) {
 
-    constructor(definisjon: Varseldefinisjon):
+    constructor(definisjon: Varseldefinisjon, vararg observere: IVarselkodeObserver):
         this(definisjon.kode(), mutableListOf(definisjon), LocalDateTime.now()) {
-            observere.varselkodeOppdatert(this, kode, gjeldendeDefinisjon)
+            register(*observere)
+            this.observere.varselkodeOppdatert(this, kode, gjeldendeDefinisjon)
         }
 
     init {

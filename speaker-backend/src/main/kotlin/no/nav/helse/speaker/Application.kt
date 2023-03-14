@@ -12,7 +12,6 @@ import no.nav.helse.speaker.azure.AzureAD
 import no.nav.helse.speaker.db.DataSourceBuilder
 import no.nav.helse.speaker.db.VarseldefinisjonDao
 import no.nav.helse.speaker.domene.ActualVarselRepository
-import no.nav.helse.speaker.domene.IVarselkodeObserver
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.plugins.configureAuthentication
 import no.nav.helse.speaker.plugins.configureServerContentNegotiation
@@ -42,10 +41,10 @@ internal class App(
     private val env: Map<String, String>,
     private val rapidsConnection: RapidsConnection
 ): RapidsConnection.StatusListener {
-    private val mediator: Mediator = Mediator(rapidsConnection)
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dao = VarseldefinisjonDao(dataSourceBuilder.getDataSource())
     private val repository = ActualVarselRepository(dao)
+    private val mediator: Mediator = Mediator(rapidsConnection, repository)
 
     internal fun ktorApp(application: Application) = application.app(repository, env, mediator)
     internal fun start() {
@@ -60,14 +59,14 @@ internal class App(
 internal fun Application.app(
     repository: VarselRepository,
     env: Map<String, String>,
-    vararg observere: IVarselkodeObserver
+    mediator: Mediator
 ) {
     val isLocalDevelopment = env["LOCAL_DEVELOPMENT"]?.toBooleanStrict() ?: false
     statusPages()
     configureUtilities()
     configureServerContentNegotiation()
     if (erDev() || isLocalDevelopment) {
-        dev(repository, env, isLocalDevelopment, *observere)
+        dev(repository, env, isLocalDevelopment, mediator)
     }
 }
 
@@ -75,7 +74,7 @@ private fun Application.dev(
     repository: VarselRepository,
     env: Map<String, String>,
     isLocalDevelopment: Boolean,
-    vararg observere: IVarselkodeObserver
+    mediator: Mediator
 ) {
     val azureAD = AzureAD.fromEnv(env)
     configureAuthentication(azureAD)
@@ -86,7 +85,7 @@ private fun Application.dev(
                 react("speaker-frontend/dist")
                 ignoreFiles { it.endsWith(".txt") }
             }
-            speaker(azureAD, repository, *observere)
+            speaker(azureAD, repository, mediator)
         }
     }
 }

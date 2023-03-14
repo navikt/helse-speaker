@@ -1,9 +1,11 @@
 package no.nav.helse.speaker
 
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -14,7 +16,7 @@ class MediatorTest {
     @Test
     fun `publiserer melding på kafka ved beskjed om oppdatert definisjon`() {
         val kode = "XX_YY_1"
-        val mediator = Mediator(testRapid)
+        val mediator = Mediator(testRapid, repository)
         mediator.varselkodeOppdatert(varselkode(kode), kode, definisjon(kode))
         assertEquals(1, testRapid.inspektør.size)
         assertEquals("varselkode_ny_definisjon", testRapid.inspektør.message(0)["@event_name"].asText())
@@ -29,7 +31,7 @@ class MediatorTest {
     @Test
     fun `publiserer melding på kafka ved beskjed om oppdatert definisjon når forklaring og handling er satt`() {
         val kode = "XX_YY_1"
-        val mediator = Mediator(testRapid)
+        val mediator = Mediator(testRapid, repository)
         mediator.varselkodeOppdatert(varselkode(kode), kode, definisjon(kode, forklaring = "En forklaring", handling = "En handling"))
         assertEquals(1, testRapid.inspektør.size)
         assertEquals("varselkode_ny_definisjon", testRapid.inspektør.message(0)["@event_name"].asText())
@@ -61,5 +63,14 @@ class MediatorTest {
         forfattere = emptyList(),
         opprettet = LocalDateTime.now()
     )
+
+    private val repository = object : VarselRepository {
+        override fun finnGjeldendeDefinisjoner(): List<Varseldefinisjon> = TODO("Not yet implemented")
+        override fun oppdater(varselkode: Varselkode): Unit = TODO("Not yet implemented")
+        override fun finnNesteVarselkodeFor(prefix: String): String = TODO("Not yet implemented")
+        override fun finnSubdomenerOgKontekster(): Map<String, Set<String>> = TODO("Not yet implemented")
+        override fun finn(varselkode: String): Varselkode = TODO("Not yet implemented")
+        override fun opprett(varselkode: Varselkode): Unit = TODO("Not yet implemented")
+    }
 
 }

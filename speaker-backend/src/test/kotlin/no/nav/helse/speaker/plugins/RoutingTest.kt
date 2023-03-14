@@ -14,6 +14,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.speaker.Mediator
 import no.nav.helse.speaker.app
 import no.nav.helse.speaker.domene.Bruker
 import no.nav.helse.speaker.domene.VarselRepository
@@ -322,7 +324,8 @@ internal class RoutingTest {
         testApplication {
             environment {
                 module {
-                    app(repository(varselkodeFinnes = ::settVarselkodeFinnes), env)
+                    val repository = repository(varselkodeFinnes = ::settVarselkodeFinnes)
+                    app(repository, env, Mediator(TestRapid(), repository))
                 }
             }
             block(this)
