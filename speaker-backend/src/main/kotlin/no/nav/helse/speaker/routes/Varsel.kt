@@ -10,12 +10,13 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.speaker.db.VarselException
+import no.nav.helse.speaker.domene.IVarselkodeObserver
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
 import org.slf4j.LoggerFactory
 
-internal fun Route.varselRoutes(varselRepository: VarselRepository) {
+internal fun Route.varselRoutes(varselRepository: VarselRepository, vararg observere: IVarselkodeObserver) {
     val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     val logg = LoggerFactory.getLogger(Route::class.java)
 
@@ -31,6 +32,7 @@ internal fun Route.varselRoutes(varselRepository: VarselRepository) {
                 ?: return@post call.respond(HttpStatusCode.NotFound, message = "Finner ikke varselkode")
             logg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
             sikkerlogg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
+            varselkode.register(*observere)
             try {
                 varselkode.håndter(varseldefinisjon)
                 varselRepository.oppdater(varselkode)

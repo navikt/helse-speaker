@@ -56,4 +56,16 @@ internal class Varseldefinisjon(
         internal fun toVarseldefinisjon() =
             Varseldefinisjon(UUID.randomUUID(), varselkode, tittel, forklaring, handling, avviklet, forfattere, now())
     }
+
+    internal fun toMap(): Map<String, Any?> {
+        return mapOf(
+            "id" to id,
+            "kode" to varselkode,
+            "tittel" to tittel,
+            "forklaring" to forklaring,
+            "handling" to handling,
+            "avviklet" to avviklet,
+            "opprettet" to opprettet
+        )
+    }
 }

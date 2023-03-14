@@ -13,10 +13,10 @@ spec:
   strategy:
     type: Recreate
   liveness:
-    path: internal/isalive
+    path: /isalive
     initialDelay: 5
   readiness:
-    path: internal/isready
+    path: /isready
     initialDelay: 5
   resources:
     limits:
@@ -30,6 +30,9 @@ spec:
     max: 1
     cpuThresholdPercentage: 90
 #  azure:
+#    sidecar:
+#      enabled: true
+#      autoLogin: true
 #    application:
 #      tenant: nav.no
 #      enabled: true
@@ -41,7 +44,9 @@ spec:
 #      allowAllUsers: false
   prometheus:
     enabled: true
-    path: /internal/metrics
+    path: /metrics
+  kafka:
+    pool: nav-prod
   gcp:
     sqlInstances:
       - type: POSTGRES_14
@@ -54,6 +59,10 @@ spec:
               - name: speaker-kafka
   secureLogs:
     enabled: true
-#  env:
+  env:
 #    - name: AZURE_VALID_GROUP_ID
 #      value: "f787f900-6697-440d-a086-d5bb56e26a9c"
+    - name: KAFKA_RAPID_TOPIC
+      value: tbd.rapid.v1
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: tbd-speaker-backend-v1

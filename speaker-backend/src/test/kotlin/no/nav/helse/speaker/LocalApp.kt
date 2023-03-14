@@ -1,5 +1,10 @@
 package no.nav.helse.speaker
 
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.speaker.db.AbstractDatabaseTest
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
@@ -20,12 +25,24 @@ internal class LocalApp: AbstractDatabaseTest(doTruncate = false) {
     }.toMap()
 
     internal fun start() {
-        createApp(environmentVariables)
+        val app = App(environmentVariables, TestRapid())
+        val server = embeddedServer(Netty, applicationEngineEnvironment {
+            module {
+                app.ktorApp(this)
+            }
+            connector {
+                port = 8080
+            }
+        })
+
+        app.start()
+        server.start(wait = true)
     }
 }
 
 internal fun main() {
     val tokenFile = File("testtoken.json")
+
     @Language("JSON")
     val json = """ { "token": "${OauthMock.accessToken()}" } 
     """

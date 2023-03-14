@@ -13,6 +13,7 @@ val testcontainersPostgresqlVersion: String by project
 val flywayVersion: String by project
 val hikariVersion: String by project
 val kotliqueryVersion: String by project
+val rapidsAndRiversVersion = "2023030114281677677302.a5a4e4ab1356"
 
 plugins {
     kotlin("jvm") apply true
@@ -54,6 +55,10 @@ dependencies {
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-apache-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging-jvm:2.2.4")
+
+    api("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion") {
+        exclude("com.fasterxml.jackson.core")
+    }
 
     testImplementation("no.nav.security:mock-oauth2-server:0.5.8")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")

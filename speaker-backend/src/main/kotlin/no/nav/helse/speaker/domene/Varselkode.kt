@@ -1,7 +1,9 @@
 package no.nav.helse.speaker.domene
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import no.nav.helse.speaker.db.VarselException
+import no.nav.helse.speaker.domene.IVarselkodeObserver.Companion.varselkodeOppdatert
 import no.nav.helse.speaker.felles.LocalDateTimeSerializer
 import java.time.LocalDateTime
 
@@ -12,13 +14,19 @@ internal class Varselkode private constructor(
     @Serializable(with = LocalDateTimeSerializer::class)
     private val opprettet: LocalDateTime
 ) {
+
     constructor(definisjon: Varseldefinisjon):
-        this(definisjon.kode(), mutableListOf(definisjon), LocalDateTime.now())
+        this(definisjon.kode(), mutableListOf(definisjon), LocalDateTime.now()) {
+            observere.varselkodeOppdatert(this, kode, gjeldendeDefinisjon)
+        }
 
     init {
         require(kode.matches(mønster)) { "Ugyldig varselkode-format" }
         require(definisjoner.isNotEmpty()) { "Må ha minst én definisjon" }
     }
+
+    @Transient
+    private val observere: MutableList<IVarselkodeObserver> = mutableListOf()
 
     private val oppdelt = kode.split("_")
     private val domene = oppdelt[0]
@@ -27,9 +35,14 @@ internal class Varselkode private constructor(
     private val gjeldendeDefinisjon get() = definisjoner.last()
     private val avviklet = gjeldendeDefinisjon.erAvviklet()
 
+    internal fun register(vararg observere: IVarselkodeObserver) {
+        this.observere.addAll(observere)
+    }
+
     internal fun håndter(varseldefinisjon: Varseldefinisjon) {
         if (varseldefinisjon == gjeldendeDefinisjon) throw VarselException.IngenEndring(varseldefinisjon)
         definisjoner.add(varseldefinisjon)
+        observere.varselkodeOppdatert(this, kode, gjeldendeDefinisjon)
     }
 
     internal fun kode() = kode
