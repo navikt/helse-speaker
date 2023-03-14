@@ -149,11 +149,12 @@ internal class RoutingTest {
     @Test
     fun `validering av subdomene og kontekst før genering av ny varselkode`() = withTestApplication {
         val response = client.get("/api/varsler/generer-kode") {
-            parameter("subdomene", "SB")
-            parameter("kontekst", "EX")
+            parameter("subdomene", "XX")
+            parameter("kontekst", "YY")
             header("Authorization", "Bearer ${accessToken()}")
         }
         assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals("XX_YY_1", response.body<String>())
     }
 
     @Test
