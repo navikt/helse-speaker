@@ -10,20 +10,21 @@ import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
 import org.slf4j.LoggerFactory
 
-internal class Mediator(private val rapidsConnection: RapidsConnection, private val varselRepository: VarselRepository): IVarselkodeObserver {
-    internal fun håndterOppdatering(varseldefinisjon: Varseldefinisjon) {
+internal class Mediator(
+    private val rapidsConnection: RapidsConnection,
+    private val varselRepository: VarselRepository
+): IVarselkodeObserver {
+    internal fun håndterOppdatertVarselkode(varseldefinisjon: Varseldefinisjon) {
         val varselkode = varselRepository.finn(varseldefinisjon.kode()) ?: throw VarselException.FinnesIkke(varseldefinisjon)
         logg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
-        varselkode.register(this)
+        varselkode.register(this, varselRepository)
         varselkode.håndter(varseldefinisjon)
-        varselRepository.oppdater(varselkode)
     }
 
-    internal fun håndterOpprettet(varseldefinisjon: Varseldefinisjon) {
+    internal fun håndterNyVarselkode(varseldefinisjon: Varseldefinisjon) {
         if (varselRepository.finn(varseldefinisjon.kode()) != null) throw VarselException.FinnesAllerede(varseldefinisjon)
-        logg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))
-        val varselkode = Varselkode(varseldefinisjon, this)
-        varselRepository.oppdater(varselkode)
+        logg.info("Oppretter {}", kv("varselkode", varseldefinisjon.kode()))
+        Varselkode(varseldefinisjon, this, varselRepository)
     }
 
     internal fun finnGjeldendeVarseldefinisjoner(): List<Varseldefinisjon> {
@@ -47,8 +48,17 @@ internal class Mediator(private val rapidsConnection: RapidsConnection, private 
         return varselRepository.finnNesteVarselkodeFor(prefix)
     }
 
-    override fun varselkodeOppdatert(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {
+    override fun varselkodeEndret(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {
         logg.info("Publiserer oppdatert definisjon for {}", kv("varselkode", kode))
+        publiser(kode, gjeldendeDefinisjon)
+    }
+
+    override fun nyVarselkode(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {
+        logg.info("Publiserer opprettet definisjon for {}", kv("varselkode", kode))
+        publiser(kode, gjeldendeDefinisjon)
+    }
+
+    private fun publiser(kode: String, gjeldendeDefinisjon: Varseldefinisjon) {
         rapidsConnection.publish(
             JsonMessage.newMessage(
                 "varselkode_ny_definisjon",

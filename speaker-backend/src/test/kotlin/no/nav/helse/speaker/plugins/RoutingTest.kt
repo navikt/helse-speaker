@@ -370,8 +370,6 @@ internal class RoutingTest {
                 return Varselkode(varsler.first {it.kode() == varselkode})
             }
 
-            override fun oppdater(varselkode: Varselkode) {}
-
             override fun finnNesteVarselkodeFor(prefix: String): String {
                 return "${prefix}_1"
             }
@@ -381,8 +379,6 @@ internal class RoutingTest {
                     "AA" to setOf("BB", "CC")
                 )
             }
-
-            override fun opprett(varselkode: Varselkode) {}
         }
 
         @BeforeAll

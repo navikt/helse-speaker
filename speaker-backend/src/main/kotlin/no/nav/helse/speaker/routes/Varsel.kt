@@ -12,22 +12,16 @@ import no.nav.helse.speaker.Mediator
 import no.nav.helse.speaker.db.VarselException
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
-import org.slf4j.LoggerFactory
 
 internal fun Route.varselRoutes(varselRepository: VarselRepository, mediator: Mediator) {
-    val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    val logg = LoggerFactory.getLogger(Route::class.java)
-
     route("/varsler") {
         get {
-            logg.info("Henter varsler")
-            sikkerlogg.info("Henter varsler")
             call.respond(HttpStatusCode.OK, mediator.finnGjeldendeVarseldefinisjoner())
         }
         post("/oppdater") {
             val varseldefinisjon = call.receive<Varseldefinisjon.VarseldefinisjonPayload>().toVarseldefinisjon()
             try {
-                mediator.håndterOppdatering(varseldefinisjon)
+                mediator.håndterOppdatertVarselkode(varseldefinisjon)
             } catch (e: VarselException) {
                 return@post call.respond(message = e.message!!, status = e.httpStatusCode)
             }
@@ -36,7 +30,7 @@ internal fun Route.varselRoutes(varselRepository: VarselRepository, mediator: Me
         post("/opprett") {
             val varseldefinisjon = call.receive<Varseldefinisjon.VarseldefinisjonPayload>().toVarseldefinisjon()
             try {
-                mediator.håndterOpprettet(varseldefinisjon)
+                mediator.håndterNyVarselkode(varseldefinisjon)
             } catch (e: VarselException) {
                 return@post call.respond(message = e.message!!, status = e.httpStatusCode)
             }
