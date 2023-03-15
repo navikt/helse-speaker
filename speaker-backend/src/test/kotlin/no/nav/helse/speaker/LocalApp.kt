@@ -12,7 +12,6 @@ import org.intellij.lang.annotations.Language
 import java.io.File
 
 internal class LocalApp: AbstractDatabaseTest(doTruncate = false) {
-    private lateinit var testRapid: TestRapid
     private val oauthMock = OauthMock
     private val environmentVariables: Map<String, String> = mutableMapOf(
         "DATABASE_HOST" to host,
@@ -24,11 +23,7 @@ internal class LocalApp: AbstractDatabaseTest(doTruncate = false) {
     ).apply {
         putAll(oauthMock.oauthConfig)
     }.toMap()
-    private val app: App by lazy { App(environmentVariables) { testRapid } }
-
-    init {
-        testRapid = TestRapid()
-    }
+    private val app: App by lazy { App(environmentVariables) { TestRapid() } }
 
     internal fun start() {
         val server = embeddedServer(Netty, applicationEngineEnvironment {

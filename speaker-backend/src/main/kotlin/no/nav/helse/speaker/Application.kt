@@ -20,11 +20,7 @@ import no.nav.helse.speaker.plugins.statusPages
 import no.nav.helse.speaker.routes.speaker
 
 internal fun main() {
-    RapidApp(System.getenv() + mapOf(
-        "KAFKA_RAPID_TOPIC" to "noe",
-        "KAFKA_BOOTSTRAP_SERVERS" to "nav-integration-test-kafka-nav-integration-test.aivencloud.com:26484",
-        "KAFKA_CONSUMER_GROUP_ID" to "noe"
-    )).start()
+    RapidApp(System.getenv()).start()
 }
 
 private class RapidApp(env: Map<String, String>) {
