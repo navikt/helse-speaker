@@ -16,7 +16,7 @@ class MediatorTest {
     @Test
     fun `publiserer melding på kafka ved beskjed om oppdatert definisjon`() {
         val kode = "XX_YY_1"
-        val mediator = Mediator(testRapid, repository)
+        val mediator = Mediator({ testRapid }, repository)
         mediator.varselkodeEndret(varselkode(kode), kode, definisjon(kode))
         assertEquals(1, testRapid.inspektør.size)
         assertEquals("varselkode_ny_definisjon", testRapid.inspektør.message(0)["@event_name"].asText())
@@ -31,7 +31,7 @@ class MediatorTest {
     @Test
     fun `publiserer melding på kafka ved beskjed om oppdatert definisjon når forklaring og handling er satt`() {
         val kode = "XX_YY_1"
-        val mediator = Mediator(testRapid, repository)
+        val mediator = Mediator({ testRapid }, repository)
         mediator.varselkodeEndret(varselkode(kode), kode, definisjon(kode, forklaring = "En forklaring", handling = "En handling"))
         assertEquals(1, testRapid.inspektør.size)
         assertEquals("varselkode_ny_definisjon", testRapid.inspektør.message(0)["@event_name"].asText())
@@ -46,7 +46,7 @@ class MediatorTest {
     @Test
     fun `oppretter varsel`() {
         val kode = "XX_YY_1"
-        val mediator = Mediator(testRapid, repository)
+        val mediator = Mediator({ testRapid }, repository)
         mediator.håndterNyVarselkode(definisjon(kode, forklaring = "En forklaring", handling = "En handling"))
         assertEquals(1, repository.opprettet.size)
     }
@@ -54,7 +54,7 @@ class MediatorTest {
     @Test
     fun `oppdaterer varsel`() {
         val kode = "XX_YY_1"
-        val mediator = Mediator(testRapid, repository)
+        val mediator = Mediator({ testRapid }, repository)
         mediator.håndterNyVarselkode(definisjon(kode, forklaring = "En forklaring", handling = "En handling"))
         mediator.håndterOppdatertVarselkode(definisjon(kode, forklaring = "En forklaring", handling = "En annen handling"))
         assertEquals(1, repository.opprettet.size)

@@ -11,9 +11,11 @@ import no.nav.helse.speaker.domene.Varselkode
 import org.slf4j.LoggerFactory
 
 internal class Mediator(
-    private val rapidsConnection: RapidsConnection,
+    rapidsConnection: () -> RapidsConnection,
     private val varselRepository: VarselRepository
 ): IVarselkodeObserver {
+    private val rapidsConnection: RapidsConnection by lazy { rapidsConnection() }
+
     internal fun håndterOppdatertVarselkode(varseldefinisjon: Varseldefinisjon) {
         val varselkode = varselRepository.finn(varseldefinisjon.kode()) ?: throw VarselException.FinnesIkke(varseldefinisjon)
         logg.info("Oppdaterer {}", kv("varselkode", varseldefinisjon.kode()))

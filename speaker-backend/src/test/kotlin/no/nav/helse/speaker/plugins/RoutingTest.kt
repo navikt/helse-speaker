@@ -326,7 +326,7 @@ internal class RoutingTest {
             environment {
                 module {
                     val repository = repository(varselkodeFinnes = ::settVarselkodeFinnes)
-                    app(repository, env, Mediator(TestRapid(), repository))
+                    app(repository, env, Mediator({ TestRapid() }, repository))
                 }
             }
             block(this)
