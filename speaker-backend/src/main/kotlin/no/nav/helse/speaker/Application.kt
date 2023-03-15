@@ -24,11 +24,11 @@ internal fun main() {
 }
 
 private class RapidApp(env: Map<String, String>) {
-    private lateinit var rapidConnection: RapidsConnection
-    private val app = App(env, rapidConnection)
+    private lateinit var rapidsConnection: RapidsConnection
+    private val app = App(env, rapidsConnection)
 
     init {
-        rapidConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
+        rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 app.ktorApp(this)
             }.build()
@@ -39,8 +39,9 @@ private class RapidApp(env: Map<String, String>) {
 
 internal class App(
     private val env: Map<String, String>,
-    private val rapidsConnection: RapidsConnection
+    rapidsConnection: RapidsConnection
 ): RapidsConnection.StatusListener {
+    private val rapidsConnection: RapidsConnection by lazy { rapidsConnection }
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dao = VarseldefinisjonDao(dataSourceBuilder.getDataSource())
     private val repository = ActualVarselRepository(dao)
