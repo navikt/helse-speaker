@@ -34,6 +34,11 @@ internal class Mediator(
         return varselRepository.finnGjeldendeDefinisjoner()
     }
 
+    internal fun finnSubdomenerOgKontekster(): Map<String, Set<String>> {
+        logg.info("Slår opp subdomener og kontekster")
+        return varselRepository.finnSubdomenerOgKontekster()
+    }
+
     internal fun finnNesteVarselkode(subdomene: String?, kontekst: String?): String {
         val mønsterSomMåMatche = "^\\D{2}$".toRegex()
         if (subdomene == null || !subdomene.matches(mønsterSomMåMatche)) {

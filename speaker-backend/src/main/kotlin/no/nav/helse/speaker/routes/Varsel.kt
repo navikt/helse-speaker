@@ -10,10 +10,9 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.helse.speaker.Mediator
 import no.nav.helse.speaker.db.VarselException
-import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
 
-internal fun Route.varselRoutes(varselRepository: VarselRepository, mediator: Mediator) {
+internal fun Route.varselRoutes(mediator: Mediator) {
     route("/varsler") {
         get {
             call.respond(HttpStatusCode.OK, mediator.finnGjeldendeVarseldefinisjoner())
@@ -47,7 +46,7 @@ internal fun Route.varselRoutes(varselRepository: VarselRepository, mediator: Me
             call.respond(HttpStatusCode.OK, nesteVarselkode)
         }
         get("/subdomener-og-kontekster") {
-            call.respond(HttpStatusCode.OK, varselRepository.finnSubdomenerOgKontekster())
+            call.respond(HttpStatusCode.OK, mediator.finnSubdomenerOgKontekster())
         }
     }
 
