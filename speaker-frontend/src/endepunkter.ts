@@ -1,6 +1,7 @@
 import { Bruker, Subdomene, Varsel } from './types';
 
 type VarselPayload = Omit<Varsel, 'opprettet'>;
+type SubdomenePayload = Omit<Subdomene, 'kontekster'>;
 
 export const postOppdaterVarsel = (varsel: VarselPayload) =>
     fetch('/api/varsler/oppdater', {
@@ -32,6 +33,15 @@ export const postLagreVarsel = (varsel: VarselPayload) =>
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(varsel),
+    });
+
+export const postNyttSubdomene = (subdomene: SubdomenePayload) =>
+    fetch('/api/varsler/nytt-subdomene', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(subdomene),
     });
 
 export const fetchUser = () =>
