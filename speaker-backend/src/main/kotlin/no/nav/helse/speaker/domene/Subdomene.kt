@@ -3,7 +3,7 @@ package no.nav.helse.speaker.domene
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal class Subdomene(
+internal data class Subdomene(
     private val navn: String,
     private val forkortelse: String,
     private val kontekster: Set<Kontekst>
@@ -11,7 +11,7 @@ internal class Subdomene(
 }
 
 @Serializable
-internal class Kontekst(
+internal data class Kontekst(
     private val navn: String,
     private val forkortelse: String,
 )

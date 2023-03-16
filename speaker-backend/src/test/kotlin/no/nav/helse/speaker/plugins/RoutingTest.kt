@@ -234,12 +234,19 @@ internal class RoutingTest {
                 header("Authorization", "Bearer ${accessToken()}")
             }
             val subdomenerOgKontekster = response.body<String>().let {
-                Json.decodeFromString<Map<String, Set<String>>>(it)
+                Json.decodeFromString<Set<Subdomene>>(it)
             }
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(
-                mapOf(
-                    "AA" to setOf("BB", "CC")
+                setOf(
+                    Subdomene(
+                        "Et subdomenenavn",
+                        "AA",
+                        setOf(
+                            Kontekst("Et kontekstnavn", "BB"),
+                            Kontekst("Et annet kontekstnavn", "AA")
+                        )
+                    )
                 ),
                 subdomenerOgKontekster
             )
