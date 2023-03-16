@@ -66,9 +66,7 @@ internal fun Application.app(
     statusPages()
     configureUtilities()
     configureServerContentNegotiation()
-    if (erDev() || isLocalDevelopment) {
-        dev(repository, env, isLocalDevelopment, mediator)
-    }
+    dev(repository, env, isLocalDevelopment, mediator)
 }
 
 private fun Application.dev(
@@ -90,5 +88,3 @@ private fun Application.dev(
         }
     }
 }
-
-private fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
