@@ -48,6 +48,7 @@ internal class App(
 
     internal fun ktorApp(application: Application) = application.app(env, mediator)
     internal fun start() {
+        rapidsConnection.register(this)
         rapidsConnection.start()
     }
 
