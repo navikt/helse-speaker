@@ -81,6 +81,7 @@ export const NyttSubdomene = () => {
                             className={'py-5'}
                             error={(errors.forkortelse?.message as string) ?? ''}
                             {...register('forkortelse', {
+                                required: 'Forkortelse er påkrevd',
                                 pattern: {
                                     value: /^[A-ZÆØÅ]{2}$/,
                                     message: 'Maksimalt to tegn og kun store bokstaver',
