@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import styles from './NyttVarsel.module.css';
 import { useRecoilState } from 'recoil';
 import { brukerState, varslerState } from '../state/state';
+import { Subdomene } from '../types';
 
 interface NyttVarselForm {
     tittel: string;
@@ -17,7 +18,7 @@ interface NyttVarselForm {
 }
 
 export const NyttVarsel = () => {
-    const [subdomenerOgKontekster, setSubdomenerOgKontekster] = useState<{ [subdomene: string]: string[] }>();
+    const [subdomener, setSubdomener] = useState<Subdomene[]>();
     const [nesteVarselkode, setNesteVarselkode] = useState<string | undefined>(undefined);
     const [skalOppretteNyttVarsel, setSkalOppretteNyttVarsel] = useState(false);
     const [, setVarsler] = useRecoilState(varslerState);
@@ -62,7 +63,7 @@ export const NyttVarsel = () => {
 
     useEffect(() => {
         fetchSubdomenerOgKontekster().then((subdomenerOgKontekster) => {
-            setSubdomenerOgKontekster(subdomenerOgKontekster);
+            setSubdomener(subdomenerOgKontekster);
         });
     }, []);
 
@@ -74,7 +75,7 @@ export const NyttVarsel = () => {
         else setNesteVarselkode(undefined);
     }, [selectedSubdomene, selectedKontekst]);
 
-    if (!subdomenerOgKontekster) return <></>;
+    if (!subdomener) return <></>;
 
     return (
         <div className={classNames(styles.NyttVarsel, 'p-4 pb-1')}>
@@ -91,7 +92,7 @@ export const NyttVarsel = () => {
                         <div className={'flex flex-row gap-4 items-start'}>
                             {
                                 <Select
-                                    className={'w-[12rem]'}
+                                    className={'min-w-[12rem]'}
                                     label="Subdomene"
                                     error={errors.subdomene ? 'Subdomene påkrevd' : ''}
                                     {...register('subdomene', {
@@ -103,14 +104,16 @@ export const NyttVarsel = () => {
                                     <option key={0} value={'default'}>
                                         Velg subdomene
                                     </option>
-                                    {Object.entries(subdomenerOgKontekster).map(([key]) => (
-                                        <option key={key}>{key}</option>
+                                    {subdomener.map((it) => (
+                                        <option key={it.forkortelse} value={it.forkortelse}>
+                                            {it.navn}
+                                        </option>
                                     ))}
                                 </Select>
                             }
 
                             <Select
-                                className={'w-[10rem]'}
+                                className={'min-w-[10rem]'}
                                 label="Kontekst"
                                 disabled={erDefaultSubdomene()}
                                 error={errors.kontekst ? 'Kontekst påkrevd' : ''}
@@ -124,9 +127,15 @@ export const NyttVarsel = () => {
                                     Velg kontekst
                                 </option>
                                 {!erDefaultSubdomene() &&
-                                    subdomenerOgKontekster[selectedSubdomene].map((key) => {
-                                        return <option key={key}>{key}</option>;
-                                    })}
+                                    subdomener
+                                        .find((it) => it.forkortelse === selectedSubdomene)
+                                        ?.kontekster.map((kontekst) => {
+                                            return (
+                                                <option key={kontekst.forkortelse} value={kontekst.forkortelse}>
+                                                    {kontekst.navn}
+                                                </option>
+                                            );
+                                        })}
                             </Select>
                             <span className={'self-start mt-11'}>Varselkode: {nesteVarselkode ?? ''}</span>
                         </div>

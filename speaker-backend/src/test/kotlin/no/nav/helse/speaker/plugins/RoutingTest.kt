@@ -17,7 +17,8 @@ import kotlinx.serialization.json.Json
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.speaker.Mediator
 import no.nav.helse.speaker.app
-import no.nav.helse.speaker.domene.Bruker
+import no.nav.helse.speaker.domene.*
+import no.nav.helse.speaker.domene.Subdomene
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
@@ -374,9 +375,16 @@ internal class RoutingTest {
                 return "${prefix}_1"
             }
 
-            override fun finnSubdomenerOgKontekster(): Map<String, Set<String>> {
-                return mapOf(
-                    "AA" to setOf("BB", "CC")
+            override fun finnSubdomenerOgKontekster(): Set<Subdomene> {
+                return setOf(
+                    Subdomene(
+                        "Et subdomenenavn",
+                        "AA",
+                        setOf(
+                            Kontekst("Et kontekstnavn", "BB"),
+                            Kontekst("Et annet kontekstnavn", "AA")
+                        )
+                    )
                 )
             }
         }

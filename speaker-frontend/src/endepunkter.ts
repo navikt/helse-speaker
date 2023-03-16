@@ -1,4 +1,4 @@
-import { Bruker, Varsel } from './types';
+import { Bruker, Subdomene, Varsel } from './types';
 
 type VarselPayload = Omit<Varsel, 'opprettet'>;
 
@@ -18,7 +18,7 @@ export const fetchVarsler = () =>
 export const fetchSubdomenerOgKontekster = () =>
     fetch('/api/varsler/subdomener-og-kontekster')
         .then((response) => response.json())
-        .then((data) => data as { [subdomene: string]: string[] });
+        .then((data) => data as Subdomene[]);
 
 export const fetchNesteVarselkode = (subdomene: string, kontekst: string) =>
     fetch(`/api/varsler/generer-kode?subdomene=${subdomene}&kontekst=${kontekst}`)

@@ -1,6 +1,7 @@
 package no.nav.helse.speaker
 
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.speaker.domene.Subdomene
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
@@ -87,7 +88,7 @@ class MediatorTest {
         internal val oppdatert = mutableListOf<Varselkode>()
         override fun finnGjeldendeDefinisjoner(): List<Varseldefinisjon> = TODO("Not yet implemented")
         override fun finnNesteVarselkodeFor(prefix: String): String = TODO("Not yet implemented")
-        override fun finnSubdomenerOgKontekster(): Map<String, Set<String>> = TODO("Not yet implemented")
+        override fun finnSubdomenerOgKontekster(): Set<Subdomene> = TODO("Not yet implemented")
         override fun finn(varselkode: String): Varselkode? = opprettet.find { it.kode() == varselkode }
         override fun nyVarselkode(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {
             opprettet.add(varselkode)

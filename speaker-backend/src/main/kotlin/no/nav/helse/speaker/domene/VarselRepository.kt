@@ -2,13 +2,12 @@ package no.nav.helse.speaker.domene
 
 import no.nav.helse.speaker.db.VarseldefinisjonDao
 import no.nav.helse.speaker.domene.Varselkode.Companion.finnNeste
-import no.nav.helse.speaker.domene.Varselkode.Companion.finnSubdomenerOgKontekster
 import no.nav.helse.speaker.domene.Varselkode.Companion.gjeldendeDefinisjoner
 
 internal interface VarselRepository: IVarselkodeObserver {
     fun finnGjeldendeDefinisjoner(): List<Varseldefinisjon>
     fun finnNesteVarselkodeFor(prefix: String): String
-    fun finnSubdomenerOgKontekster(): Map<String, Set<String>>
+    fun finnSubdomenerOgKontekster(): Set<Subdomene>
     fun finn(varselkode: String): Varselkode?
 }
 
@@ -26,9 +25,8 @@ internal class ActualVarselRepository(private val dao: VarseldefinisjonDao): Var
         return koder.finnNeste(prefix)
     }
 
-    override fun finnSubdomenerOgKontekster(): Map<String, Set<String>> {
-        val koder = dao.finnVarselkoder()
-        return koder.finnSubdomenerOgKontekster()
+    override fun finnSubdomenerOgKontekster(): Set<Subdomene> {
+        return dao.finnSubdomener()
     }
 
     override fun varselkodeEndret(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {

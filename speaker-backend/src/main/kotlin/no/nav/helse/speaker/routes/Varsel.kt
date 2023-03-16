@@ -49,5 +49,4 @@ internal fun Route.varselRoutes(mediator: Mediator) {
             call.respond(HttpStatusCode.OK, mediator.finnSubdomenerOgKontekster())
         }
     }
-
 }

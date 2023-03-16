@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.speaker.db.VarselException
+import no.nav.helse.speaker.domene.*
 import no.nav.helse.speaker.domene.IVarselkodeObserver
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
@@ -34,7 +35,7 @@ internal class Mediator(
         return varselRepository.finnGjeldendeDefinisjoner()
     }
 
-    internal fun finnSubdomenerOgKontekster(): Map<String, Set<String>> {
+    internal fun finnSubdomenerOgKontekster(): Set<Subdomene> {
         logg.info("Slår opp subdomener og kontekster")
         return varselRepository.finnSubdomenerOgKontekster()
     }

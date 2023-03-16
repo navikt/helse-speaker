@@ -4,8 +4,11 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.speaker.domene.Kontekst
+import no.nav.helse.speaker.domene.Subdomene
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
 import org.intellij.lang.annotations.Language
@@ -54,6 +57,33 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query).map { Json.decodeFromString<Varselkode>(it.string("json")) }.asList)
         }.toSet()
+    }
+
+    internal fun finnSubdomener(): Set<Subdomene> {
+        @Language("PostgreSQL")
+        val query = "SELECT id, navn, forkortelse FROM subdomene sd"
+        return sessionOf(dataSource).use { session ->
+            session.transaction { tx ->
+                tx.run(queryOf(query).map {
+                    Subdomene(
+                        it.string("navn"),
+                        it.string("forkortelse"),
+                        tx.finnKontekster(it.uuid("id"))
+                    )
+                }.asList).toSet()
+            }
+        }
+    }
+
+    private fun TransactionalSession.finnKontekster(id: UUID): Set<Kontekst> {
+        @Language("PostgreSQL")
+        val query = "SELECT navn, forkortelse FROM kontekst WHERE subdomene_ref = ?"
+        return run(queryOf(query, id).map {
+            Kontekst(
+                it.string("navn"),
+                it.string("forkortelse")
+            )
+        }.asList).toSet()
     }
 }
 

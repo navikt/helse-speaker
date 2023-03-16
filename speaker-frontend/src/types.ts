@@ -14,3 +14,14 @@ export declare type Bruker = {
     ident: string;
     oid: string;
 };
+
+export declare type Subdomene = {
+    navn: string;
+    forkortelse: string;
+    kontekster: Kontekst[];
+};
+
+export declare type Kontekst = {
+    navn: string;
+    forkortelse: string;
+};
