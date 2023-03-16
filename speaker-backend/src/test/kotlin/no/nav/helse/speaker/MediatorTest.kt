@@ -1,13 +1,11 @@
 package no.nav.helse.speaker
 
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.speaker.domene.Subdomene
-import no.nav.helse.speaker.domene.VarselRepository
-import no.nav.helse.speaker.domene.Varseldefinisjon
-import no.nav.helse.speaker.domene.Varselkode
+import no.nav.helse.speaker.domene.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.*
 
@@ -49,7 +47,7 @@ class MediatorTest {
         val kode = "XX_YY_1"
         val mediator = Mediator({ testRapid }, repository)
         mediator.håndterNyVarselkode(definisjon(kode, forklaring = "En forklaring", handling = "En handling"))
-        assertEquals(1, repository.opprettet.size)
+        assertEquals(1, repository.varselOpprettet.size)
     }
 
     @Test
@@ -58,8 +56,24 @@ class MediatorTest {
         val mediator = Mediator({ testRapid }, repository)
         mediator.håndterNyVarselkode(definisjon(kode, forklaring = "En forklaring", handling = "En handling"))
         mediator.håndterOppdatertVarselkode(definisjon(kode, forklaring = "En forklaring", handling = "En annen handling"))
-        assertEquals(1, repository.opprettet.size)
-        assertEquals(1, repository.oppdatert.size)
+        assertEquals(1, repository.varselOpprettet.size)
+        assertEquals(1, repository.varselOppdatert.size)
+    }
+
+    @Test
+    fun `oppretter subdomene`() {
+        val mediator = Mediator({ testRapid }, repository)
+        mediator.håndterNyttSubdomene(Subdomene("Et subdomene", "XX"))
+        assertEquals(1, repository.subdomeneOpprettet.size)
+    }
+
+    @Test
+    fun `oppretter ikke subdomene hvis det eksisterer fra før av`() {
+        val mediator = Mediator({ testRapid }, repository)
+        assertThrows<VarselException.SubdomeneFinnesAllerede> {
+            mediator.håndterNyttSubdomene(Subdomene("Et subdomene", "AA"))
+        }
+        assertEquals(0, repository.subdomeneOpprettet.size)
     }
 
     private fun varselkode(
@@ -84,18 +98,23 @@ class MediatorTest {
     )
 
     private val repository = object : VarselRepository {
-        internal val opprettet = mutableListOf<Varselkode>()
-        internal val oppdatert = mutableListOf<Varselkode>()
+        internal val varselOpprettet = mutableListOf<Varselkode>()
+        internal val varselOppdatert = mutableListOf<Varselkode>()
+        internal val subdomeneOpprettet = mutableListOf<String>()
         override fun finnGjeldendeDefinisjoner(): List<Varseldefinisjon> = TODO("Not yet implemented")
         override fun finnNesteVarselkodeFor(prefix: String): String = TODO("Not yet implemented")
-        override fun finnSubdomenerOgKontekster(): Set<Subdomene> = TODO("Not yet implemented")
-        override fun finn(varselkode: String): Varselkode? = opprettet.find { it.kode() == varselkode }
+        override fun finnSubdomenerOgKontekster(): Set<Subdomene> = setOf(Subdomene("Et subdomene AA", "AA"), Subdomene("Et subdomene BB", "BB"))
+        override fun finn(varselkode: String): Varselkode? = varselOpprettet.find { it.kode() == varselkode }
         override fun nyVarselkode(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {
-            opprettet.add(varselkode)
+            varselOpprettet.add(varselkode)
         }
 
         override fun varselkodeEndret(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {
-            oppdatert.add(varselkode)
+            varselOppdatert.add(varselkode)
+        }
+
+        override fun nyttSubdomene(navn: String, forkortelse: String) {
+            subdomeneOpprettet.add(navn)
         }
     }
 

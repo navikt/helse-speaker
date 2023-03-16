@@ -9,7 +9,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.helse.speaker.Mediator
-import no.nav.helse.speaker.db.VarselException
+import no.nav.helse.speaker.domene.SubdomenePayload
+import no.nav.helse.speaker.domene.VarselException
 import no.nav.helse.speaker.domene.Varseldefinisjon
 
 internal fun Route.varselRoutes(mediator: Mediator) {
@@ -47,6 +48,15 @@ internal fun Route.varselRoutes(mediator: Mediator) {
         }
         get("/subdomener-og-kontekster") {
             call.respond(HttpStatusCode.OK, mediator.finnSubdomenerOgKontekster())
+        }
+        post("/nytt-subdomene") {
+            try {
+                val subdomene = call.receive<SubdomenePayload>()
+                mediator.håndterNyttSubdomene(subdomene.toSubdomene())
+            } catch (e: VarselException) {
+                return@post call.respond(message = e.message!!, status = e.httpStatusCode)
+            }
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

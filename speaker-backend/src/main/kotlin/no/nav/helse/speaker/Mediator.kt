@@ -3,9 +3,10 @@ package no.nav.helse.speaker
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.speaker.db.VarselException
+import no.nav.helse.speaker.domene.VarselException
 import no.nav.helse.speaker.domene.*
 import no.nav.helse.speaker.domene.IVarselkodeObserver
+import no.nav.helse.speaker.domene.Subdomene.Companion.finnesAllerede
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
@@ -28,6 +29,13 @@ internal class Mediator(
         if (varselRepository.finn(varseldefinisjon.kode()) != null) throw VarselException.FinnesAllerede(varseldefinisjon)
         logg.info("Oppretter {}", kv("varselkode", varseldefinisjon.kode()))
         Varselkode(varseldefinisjon, this, varselRepository)
+    }
+
+    internal fun håndterNyttSubdomene(subdomene: Subdomene) {
+        subdomene.register(this, varselRepository)
+        val eksisterendeSubdomener = varselRepository.finnSubdomenerOgKontekster()
+        if (eksisterendeSubdomener.finnesAllerede(subdomene)) throw VarselException.SubdomeneFinnesAllerede(subdomene)
+        subdomene.opprett()
     }
 
     internal fun finnGjeldendeVarseldefinisjoner(): List<Varseldefinisjon> {

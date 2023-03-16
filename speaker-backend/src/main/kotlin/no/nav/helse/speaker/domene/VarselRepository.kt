@@ -36,4 +36,8 @@ internal class ActualVarselRepository(private val dao: VarseldefinisjonDao): Var
     override fun nyVarselkode(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {
         dao.opprett(varselkode)
     }
+
+    override fun nyttSubdomene(navn: String, forkortelse: String) {
+        dao.opprettSubdomene(navn, forkortelse)
+    }
 }

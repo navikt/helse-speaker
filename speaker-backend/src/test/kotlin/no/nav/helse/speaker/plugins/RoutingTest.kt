@@ -18,10 +18,6 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.speaker.Mediator
 import no.nav.helse.speaker.app
 import no.nav.helse.speaker.domene.*
-import no.nav.helse.speaker.domene.Subdomene
-import no.nav.helse.speaker.domene.VarselRepository
-import no.nav.helse.speaker.domene.Varseldefinisjon
-import no.nav.helse.speaker.domene.Varselkode
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import org.junit.jupiter.api.AfterAll
@@ -296,6 +292,41 @@ internal class RoutingTest {
                 setBody(Json.encodeToString(varseldefinisjonPayload()))
             }
             assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+    }
+
+    @Test
+    fun `Forsøker å lagre nytt subdomene uten autentisering`() {
+        withTestApplication {
+            val response = client.post("/api/varsler/nytt-subdomene") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(Json.encodeToString(SubdomenePayload("Et navn", "AB")))
+            }
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+    }
+
+    @Test
+    fun `Opprett nytt subdomene`() {
+        withTestApplication {
+            val response = client.post("/api/varsler/nytt-subdomene") {
+                header("Authorization", "Bearer ${accessToken()}")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(Json.encodeToString(SubdomenePayload("Et navn", "AB")))
+            }
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
+    }
+
+    @Test
+    fun `Forsøk å opprette nytt subdomene ved ugyldig subdomene`() {
+        withTestApplication {
+            val response = client.post("/api/varsler/nytt-subdomene") {
+                header("Authorization", "Bearer ${accessToken()}")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(Json.encodeToString(SubdomenePayload("Et navn", "ABX")))
+            }
+            assertEquals(HttpStatusCode.BadRequest, response.status)
         }
     }
 

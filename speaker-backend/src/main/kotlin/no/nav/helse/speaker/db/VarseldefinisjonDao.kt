@@ -1,6 +1,5 @@
 package no.nav.helse.speaker.db
 
-import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -9,7 +8,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.speaker.domene.Kontekst
 import no.nav.helse.speaker.domene.Subdomene
-import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
 import org.intellij.lang.annotations.Language
 import java.util.*
@@ -59,6 +57,14 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
         }.toSet()
     }
 
+    internal fun opprettSubdomene(navn: String, forkortelse: String) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO subdomene(navn, forkortelse) VALUES (?, ?)"
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, navn, forkortelse).asUpdate)
+        }
+    }
+
     internal fun finnSubdomener(): Set<Subdomene> {
         @Language("PostgreSQL")
         val query = "SELECT id, navn, forkortelse FROM subdomene sd"
@@ -87,31 +93,3 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
     }
 }
 
-internal sealed class VarselException(message: String) : Exception(message) {
-    internal abstract val httpStatusCode: HttpStatusCode
-
-    internal class IngenEndring(varseldefinisjon: Varseldefinisjon) :
-        VarselException("Varseldefinisjon $varseldefinisjon er allerede gjeldende definisjon") {
-        override val httpStatusCode: HttpStatusCode = HttpStatusCode.NotModified
-    }
-
-    internal class FinnesIkke(varseldefinisjon: Varseldefinisjon) :
-        VarselException("Varselkode for varseldefinisjon $varseldefinisjon finnes ikke") {
-        override val httpStatusCode: HttpStatusCode = HttpStatusCode.NotFound
-    }
-
-    internal class FinnesAllerede(varseldefinisjon: Varseldefinisjon) :
-        VarselException("Varselkode for varseldefinisjon $varseldefinisjon finnes fra før av") {
-        override val httpStatusCode: HttpStatusCode = HttpStatusCode.Conflict
-    }
-
-    internal class UgyldigSubdomene(subdomene: String?):
-        VarselException("Subdomene=$subdomene er ikke på gyldig format.") {
-        override val httpStatusCode: HttpStatusCode = HttpStatusCode.BadRequest
-    }
-
-    internal class UgyldigKontekst(kontekst: String?):
-        VarselException("Kontekst=$kontekst er ikke på gyldig format.") {
-        override val httpStatusCode: HttpStatusCode = HttpStatusCode.BadRequest
-    }
-}

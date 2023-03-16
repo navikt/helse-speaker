@@ -2,7 +2,6 @@ package no.nav.helse.speaker.domene
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import no.nav.helse.speaker.db.VarselException
 import no.nav.helse.speaker.domene.IVarselkodeObserver.Companion.varselkodeEndret
 import no.nav.helse.speaker.domene.IVarselkodeObserver.Companion.varselkodeOpprettet
 import no.nav.helse.speaker.felles.LocalDateTimeSerializer

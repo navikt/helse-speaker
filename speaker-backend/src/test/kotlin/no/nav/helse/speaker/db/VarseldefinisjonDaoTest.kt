@@ -1,9 +1,9 @@
 package no.nav.helse.speaker.db
 
+import no.nav.helse.speaker.domene.Subdomene
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime.now
 import java.util.*
@@ -38,6 +38,13 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
     fun `finner ingen varselkoder dersom det ikke finnes noen`() {
         val funnet = definisjonDao.finnVarselkoder()
         assertEquals(emptySet<Varselkode>(), funnet)
+    }
+
+    @Test
+    fun `kan opprette subdomener`() {
+        definisjonDao.opprettSubdomene("navn", "SB")
+        val subdomener = definisjonDao.finnSubdomener()
+        assertTrue(subdomener.contains(Subdomene("navn", "SB")))
     }
 
     private fun varselkode(kode: String): Varselkode {
