@@ -33,4 +33,12 @@ internal sealed class VarselException(message: String) : Exception(message) {
     internal class SubdomeneFinnesAllerede(subdomene: Subdomene) : VarselException("Subdomene=${subdomene} finnes allerede.") {
         override val httpStatusCode: HttpStatusCode = HttpStatusCode.Conflict
     }
+
+    internal class SubdomeneFinnesIkke(kontekstPayload: String) : VarselException("Subdomene for kontekst=$kontekstPayload finnes ikke") {
+        override val httpStatusCode: HttpStatusCode = HttpStatusCode.NotFound
+    }
+
+    internal class KontekstFinnesAllerede(kontekst: Kontekst) : VarselException("Subdomene for kontekst=$kontekst finnes ikke") {
+        override val httpStatusCode: HttpStatusCode = HttpStatusCode.Conflict
+    }
 }

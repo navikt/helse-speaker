@@ -76,6 +76,31 @@ class MediatorTest {
         assertEquals(0, repository.subdomeneOpprettet.size)
     }
 
+    @Test
+    fun `oppretter kontekst`() {
+        val mediator = Mediator({ testRapid }, repository)
+        mediator.håndterNyKontekst(KontekstPayload(navn = "Et subdomene", forkortelse = "XX", subdomene = "AA"))
+        assertEquals(1, repository.kontekstOpprettet.size)
+    }
+
+    @Test
+    fun `oppretter ikke kontekst hvis det eksisterer fra før av`() {
+        val mediator = Mediator({ testRapid }, repository)
+        assertThrows<VarselException.KontekstFinnesAllerede> {
+            mediator.håndterNyKontekst(KontekstPayload(navn = "Et subdomene", forkortelse = "XX", subdomene = "BB"))
+        }
+        assertEquals(0, repository.kontekstOpprettet.size)
+    }
+
+    @Test
+    fun `oppretter ikke kontekst hvis subdomene ikke finnes`() {
+        val mediator = Mediator({ testRapid }, repository)
+        assertThrows<VarselException.SubdomeneFinnesIkke> {
+            mediator.håndterNyKontekst(KontekstPayload(navn = "Et subdomene", forkortelse = "XX", subdomene = "YY"))
+        }
+        assertEquals(0, repository.kontekstOpprettet.size)
+    }
+
     private fun varselkode(
         kode: String = "AA_BB_1",
         tittel: String = "En tittel",
@@ -101,9 +126,10 @@ class MediatorTest {
         internal val varselOpprettet = mutableListOf<Varselkode>()
         internal val varselOppdatert = mutableListOf<Varselkode>()
         internal val subdomeneOpprettet = mutableListOf<String>()
+        internal val kontekstOpprettet = mutableListOf<String>()
         override fun finnGjeldendeDefinisjoner(): List<Varseldefinisjon> = TODO("Not yet implemented")
         override fun finnNesteVarselkodeFor(prefix: String): String = TODO("Not yet implemented")
-        override fun finnSubdomenerOgKontekster(): Set<Subdomene> = setOf(Subdomene("Et subdomene AA", "AA"), Subdomene("Et subdomene BB", "BB"))
+        override fun finnSubdomenerOgKontekster(): Set<Subdomene> = setOf(Subdomene("Et subdomene AA", "AA"), Subdomene("Et subdomene BB", "BB", setOf(Kontekst("En kontekst XX", "XX"))))
         override fun finn(varselkode: String): Varselkode? = varselOpprettet.find { it.kode() == varselkode }
         override fun nyVarselkode(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {
             varselOpprettet.add(varselkode)
@@ -115,6 +141,10 @@ class MediatorTest {
 
         override fun nyttSubdomene(navn: String, forkortelse: String) {
             subdomeneOpprettet.add(navn)
+        }
+
+        override fun nyKontekst(navn: String, forkortelse: String, subdomene: String) {
+            kontekstOpprettet.add(navn)
         }
     }
 

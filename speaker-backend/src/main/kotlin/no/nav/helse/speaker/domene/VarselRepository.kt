@@ -40,4 +40,8 @@ internal class ActualVarselRepository(private val dao: VarseldefinisjonDao): Var
     override fun nyttSubdomene(navn: String, forkortelse: String) {
         dao.opprettSubdomene(navn, forkortelse)
     }
+
+    override fun nyKontekst(navn: String, forkortelse: String, subdomene: String) {
+        dao.opprettKontekst(navn, forkortelse, subdomene)
+    }
 }

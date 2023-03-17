@@ -85,4 +85,20 @@ class SubdomeneTest {
         val subdomene = Subdomene("Et annet navn", "SB")
         assertTrue(subdomener.finnesAllerede(subdomene))
     }
+
+    @Test
+    fun `håndter ny kontekst som allerede finnes`() {
+        val subdomene = Subdomene("Saksbehandling", "SB", setOf(Kontekst("Søknad", "SØ")))
+        assertThrows<VarselException.KontekstFinnesAllerede> {
+            subdomene.håndterNyKontekst(Kontekst("Søknad", "SØ"))
+        }
+    }
+
+    @Test
+    fun `håndter ny kontekst som ikke finnes`() {
+        val subdomene = Subdomene("Saksbehandling", "SB")
+        subdomene.håndterNyKontekst(Kontekst("Søknad", "SØ"))
+        assertEquals(Subdomene("Saksbehandling", "SB", setOf(Kontekst("Søknad", "SØ"))), subdomene
+        )
+    }
 }

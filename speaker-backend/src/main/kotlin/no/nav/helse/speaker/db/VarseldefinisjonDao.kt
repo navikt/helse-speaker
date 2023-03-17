@@ -65,6 +65,14 @@ internal class VarseldefinisjonDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun opprettKontekst(navn: String, forkortelse: String, subdomene: String) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO kontekst(navn, forkortelse, subdomene_ref) VALUES (?, ?, (SELECT id FROM subdomene WHERE forkortelse = ?))"
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, navn, forkortelse, subdomene).asUpdate)
+        }
+    }
+
     internal fun finnSubdomener(): Set<Subdomene> {
         @Language("PostgreSQL")
         val query = "SELECT id, navn, forkortelse FROM subdomene sd"

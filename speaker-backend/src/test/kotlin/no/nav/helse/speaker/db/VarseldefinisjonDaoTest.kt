@@ -1,5 +1,6 @@
 package no.nav.helse.speaker.db
 
+import no.nav.helse.speaker.domene.Kontekst
 import no.nav.helse.speaker.domene.Subdomene
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
@@ -45,6 +46,14 @@ internal class VarseldefinisjonDaoTest: AbstractDatabaseTest() {
         definisjonDao.opprettSubdomene("navn", "SB")
         val subdomener = definisjonDao.finnSubdomener()
         assertTrue(subdomener.contains(Subdomene("navn", "SB")))
+    }
+
+    @Test
+    fun `kan opprette kontekster`() {
+        definisjonDao.opprettSubdomene("navn", "SB")
+        definisjonDao.opprettKontekst(navn = "navn", forkortelse = "AA", subdomene = "SB")
+        val subdomener = definisjonDao.finnSubdomener()
+        assertEquals(setOf(Subdomene("navn", "SB", setOf(Kontekst("navn", "AA")))), subdomener)
     }
 
     private fun varselkode(kode: String): Varselkode {

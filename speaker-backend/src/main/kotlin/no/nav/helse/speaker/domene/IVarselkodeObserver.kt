@@ -4,6 +4,7 @@ internal interface IVarselkodeObserver {
     fun varselkodeEndret(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {}
     fun nyVarselkode(varselkode: Varselkode, kode: String, gjeldendeDefinisjon: Varseldefinisjon) {}
     fun nyttSubdomene(navn: String, forkortelse: String) {}
+    fun nyKontekst(navn: String, forkortelse: String, subdomene: String) {}
 
     companion object {
         internal fun Set<IVarselkodeObserver>.varselkodeEndret(
@@ -25,6 +26,13 @@ internal interface IVarselkodeObserver {
             forkortelse: String
         ) {
             forEach { it.nyttSubdomene(navn, forkortelse) }
+        }
+        internal fun Set<IVarselkodeObserver>.nyKontekst(
+            navn: String,
+            forkortelse: String,
+            subdomene: String
+        ) {
+            forEach { it.nyKontekst(navn, forkortelse, subdomene) }
         }
     }
 }

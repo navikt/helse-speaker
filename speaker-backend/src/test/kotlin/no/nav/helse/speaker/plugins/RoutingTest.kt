@@ -239,8 +239,8 @@ internal class RoutingTest {
                         "Et subdomenenavn",
                         "AA",
                         setOf(
-                            Kontekst("Et kontekstnavn", "BB"),
-                            Kontekst("Et annet kontekstnavn", "AA")
+                            Kontekst("Et kontekstnavn", "XX"),
+                            Kontekst("Et annet kontekstnavn", "YY")
                         )
                     )
                 ),
@@ -330,6 +330,53 @@ internal class RoutingTest {
         }
     }
 
+    @Test
+    fun `Opprett ny kontekst`() {
+        withTestApplication {
+            val response = client.post("/api/varsler/ny-kontekst") {
+                header("Authorization", "Bearer ${accessToken()}")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(Json.encodeToString(KontekstPayload(navn = "Et navn", forkortelse = "SØ", subdomene = "AA")))
+            }
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
+    }
+
+    @Test
+    fun `Forsøk å opprette ny kontekst uten autentisering`() {
+        withTestApplication {
+            val response = client.post("/api/varsler/ny-kontekst") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(Json.encodeToString(KontekstPayload(navn = "Et navn", forkortelse = "SØ", subdomene = "AA")))
+            }
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+    }
+
+    @Test
+    fun `Forsøk å opprette ny kontekst når subdomene ikke eksisterer`() {
+        withTestApplication {
+            val response = client.post("/api/varsler/ny-kontekst") {
+                header("Authorization", "Bearer ${accessToken()}")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(Json.encodeToString(KontekstPayload(navn = "Et navn", forkortelse = "SØ", subdomene = "ÅÅ")))
+            }
+            assertEquals(HttpStatusCode.NotFound, response.status)
+        }
+    }
+
+    @Test
+    fun `Forsøk å opprette ny kontekst når kontekst eksisterer fra før av`() {
+        withTestApplication {
+            val response = client.post("/api/varsler/ny-kontekst") {
+                header("Authorization", "Bearer ${accessToken()}")
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(Json.encodeToString(KontekstPayload(navn = "Et navn", forkortelse = "XX", subdomene = "AA")))
+            }
+            assertEquals(HttpStatusCode.Conflict, response.status)
+        }
+    }
+
     private fun accessToken(
         harNavIdent: Boolean = true,
         grupper: List<String> = listOf("$groupId"),
@@ -416,11 +463,11 @@ internal class RoutingTest {
             override fun finnSubdomenerOgKontekster(): Set<Subdomene> {
                 return setOf(
                     Subdomene(
-                        "Et subdomenenavn",
-                        "AA",
-                        setOf(
-                            Kontekst("Et kontekstnavn", "BB"),
-                            Kontekst("Et annet kontekstnavn", "AA")
+                        navn = "Et subdomenenavn",
+                        forkortelse = "AA",
+                        kontekster = setOf(
+                            Kontekst(navn = "Et kontekstnavn", forkortelse = "XX"),
+                            Kontekst(navn = "Et annet kontekstnavn", forkortelse = "YY")
                         )
                     )
                 )

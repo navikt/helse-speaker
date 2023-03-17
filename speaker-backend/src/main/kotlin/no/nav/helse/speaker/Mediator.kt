@@ -7,6 +7,8 @@ import no.nav.helse.speaker.domene.VarselException
 import no.nav.helse.speaker.domene.*
 import no.nav.helse.speaker.domene.IVarselkodeObserver
 import no.nav.helse.speaker.domene.Subdomene.Companion.finnesAllerede
+import no.nav.helse.speaker.domene.Subdomene.Companion.håndterNyKontekst
+import no.nav.helse.speaker.domene.Subdomene.Companion.register
 import no.nav.helse.speaker.domene.VarselRepository
 import no.nav.helse.speaker.domene.Varseldefinisjon
 import no.nav.helse.speaker.domene.Varselkode
@@ -36,6 +38,12 @@ internal class Mediator(
         val eksisterendeSubdomener = varselRepository.finnSubdomenerOgKontekster()
         if (eksisterendeSubdomener.finnesAllerede(subdomene)) throw VarselException.SubdomeneFinnesAllerede(subdomene)
         subdomene.opprett()
+    }
+
+    internal fun håndterNyKontekst(kontekstPayload: KontekstPayload) {
+        val eksisterendeSubdomener = varselRepository.finnSubdomenerOgKontekster()
+        eksisterendeSubdomener.register(this, varselRepository)
+        eksisterendeSubdomener.håndterNyKontekst(kontekstPayload)
     }
 
     internal fun finnGjeldendeVarseldefinisjoner(): List<Varseldefinisjon> {
