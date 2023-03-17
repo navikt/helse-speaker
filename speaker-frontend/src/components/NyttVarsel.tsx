@@ -84,28 +84,25 @@ export const NyttVarsel = () => {
                 </Heading>
                 <form className={'flex flex-col gap-4'} onSubmit={handleSubmit(onSubmit)}>
                     <div className={'flex flex-row gap-4 items-start'}>
-                        {
-                            <Select
-                                className={'min-w-[12rem]'}
-                                label="Subdomene"
-                                error={errors.subdomene ? 'Subdomene påkrevd' : ''}
-                                {...register('subdomene', {
-                                    validate: (value) => {
-                                        return !['default', undefined].includes(value);
-                                    },
-                                })}
-                            >
-                                <option key={0} value={'default'}>
-                                    Velg subdomene
+                        <Select
+                            className={'min-w-[12rem]'}
+                            label="Subdomene"
+                            error={errors.subdomene ? 'Subdomene påkrevd' : ''}
+                            {...register('subdomene', {
+                                validate: (value) => {
+                                    return !['default', undefined].includes(value);
+                                },
+                            })}
+                        >
+                            <option key={0} value={'default'}>
+                                Velg subdomene
+                            </option>
+                            {subdomener.map((it) => (
+                                <option key={it.forkortelse} value={it.forkortelse}>
+                                    {it.navn} ({it.forkortelse})
                                 </option>
-                                {subdomener.map((it) => (
-                                    <option key={it.forkortelse} value={it.forkortelse}>
-                                        {it.navn} ({it.forkortelse})
-                                    </option>
-                                ))}
-                            </Select>
-                        }
-
+                            ))}
+                        </Select>
                         <Select
                             className={'min-w-[10rem]'}
                             label="Kontekst"

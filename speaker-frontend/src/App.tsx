@@ -10,6 +10,7 @@ import { Header } from './components/Header';
 import { NyttVarsel } from './components/NyttVarsel';
 import { NyttSubdomene } from './components/NyttSubdomene';
 import { Tabs } from '@navikt/ds-react';
+import { NyKontekst } from './components/NyKontekst';
 
 const App = () => {
     const [state, setState] = useState('varsler');
@@ -52,7 +53,9 @@ const App = () => {
                     <Tabs.Panel value="nytt-subdomene">
                         <NyttSubdomene />
                     </Tabs.Panel>
-                    <Tabs.Panel value="ny-kontekst">Sendt-tab</Tabs.Panel>
+                    <Tabs.Panel value="ny-kontekst">
+                        <NyKontekst />
+                    </Tabs.Panel>
                 </Tabs>
             </div>
         </RecoilRoot>
