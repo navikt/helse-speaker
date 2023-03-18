@@ -1,10 +1,15 @@
 @file:UseSerializers(UUIDSerializer::class)
 package no.nav.helse.speaker.domene
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.authentication
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
+import no.nav.helse.speaker.domene.BrukerException.*
+import no.nav.helse.speaker.domene.BrukerException.ManglerEpostadresse
+import no.nav.helse.speaker.domene.BrukerException.ManglerIdent
+import no.nav.helse.speaker.domene.BrukerException.ManglerNavn
 import no.nav.helse.speaker.felles.UUIDSerializer
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.util.*
@@ -19,11 +24,10 @@ class Bruker(
     internal companion object {
         internal fun fromCall(issuer: String, call: ApplicationCall): Bruker {
             return Bruker(
-                epostadresse = call.getClaim(issuer, "preferred_username")
-                    ?: throw IllegalStateException("Forventer å finne preferred_username"),
-                navn = call.getClaim(issuer, "name") ?: throw IllegalStateException("Forventer å finne name"),
-                ident = call.getClaim(issuer, "NAVident") ?: throw IllegalStateException("Forventer å finne NAVident"),
-                oid = call.getClaim(issuer, "oid")?.let(UUID::fromString) ?: throw IllegalStateException("Forventer å finne oid")
+                epostadresse = call.getClaim(issuer, "preferred_username") ?: throw ManglerEpostadresse(),
+                navn = call.getClaim(issuer, "name") ?: throw ManglerNavn(),
+                ident = call.getClaim(issuer, "NAVident") ?: throw ManglerIdent(),
+                oid = call.getClaim(issuer, "oid")?.let(UUID::fromString) ?: throw ManglerOid()
             )
         }
 
@@ -54,6 +58,28 @@ class Bruker(
         result = 31 * result + oid.hashCode()
         return result
     }
+}
 
+internal sealed class BrukerException(message: String): Exception(message) {
+    internal abstract val httpStatusCode: HttpStatusCode
 
+    internal class ManglerEpostadresse:
+        BrukerException("Token mangler epostadresse (claim: preferred_username)") {
+        override val httpStatusCode: HttpStatusCode = HttpStatusCode.BadRequest
+    }
+
+    internal class ManglerNavn:
+        BrukerException("Token mangler navn (claim: name)") {
+        override val httpStatusCode: HttpStatusCode = HttpStatusCode.BadRequest
+    }
+
+    internal class ManglerIdent:
+        BrukerException("Token mangler ident (claim: NAVident)") {
+        override val httpStatusCode: HttpStatusCode = HttpStatusCode.BadRequest
+    }
+
+    internal class ManglerOid:
+        BrukerException("Token mangler oid (claim: oid)") {
+        override val httpStatusCode: HttpStatusCode = HttpStatusCode.BadRequest
+    }
 }

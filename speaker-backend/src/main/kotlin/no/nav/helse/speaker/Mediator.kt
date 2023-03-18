@@ -3,15 +3,10 @@ package no.nav.helse.speaker
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.speaker.domene.VarselException
 import no.nav.helse.speaker.domene.*
-import no.nav.helse.speaker.domene.IVarselkodeObserver
 import no.nav.helse.speaker.domene.Subdomene.Companion.finnesAllerede
 import no.nav.helse.speaker.domene.Subdomene.Companion.håndterNyKontekst
 import no.nav.helse.speaker.domene.Subdomene.Companion.register
-import no.nav.helse.speaker.domene.VarselRepository
-import no.nav.helse.speaker.domene.Varseldefinisjon
-import no.nav.helse.speaker.domene.Varselkode
 import org.slf4j.LoggerFactory
 
 internal class Mediator(

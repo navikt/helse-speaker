@@ -7,11 +7,15 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import no.nav.helse.speaker.Mediator
 import no.nav.helse.speaker.domene.Bruker
-import no.nav.helse.speaker.microsoft.AzureAD
+import no.nav.helse.speaker.domene.BrukerException
 
-internal fun Route.brukerRoutes(azureAD: AzureAD, mediator: Mediator) {
+internal fun Route.brukerRoutes(identityIssuer: String, mediator: Mediator) {
     get("/bruker") {
-        val bruker = Bruker.fromCall(azureAD.issuer(), call)
+        val bruker = try {
+            Bruker.fromCall(identityIssuer, call)
+        } catch (e: BrukerException) {
+            return@get call.respond(e.httpStatusCode, e.message!!)
+        }
         call.respond(HttpStatusCode.OK, bruker)
     }
     get("/teammedlemmer") {

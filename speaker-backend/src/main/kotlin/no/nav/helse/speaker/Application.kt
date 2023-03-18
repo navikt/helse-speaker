@@ -51,12 +51,12 @@ internal class App(
     rapidsConnection: () -> RapidsConnection,
 ) : RapidsConnection.StatusListener {
     private val azureAD = AzureAD.fromEnv(env)
-    private val teamkatalogClient = msGraphClient(azureAD)
+    private val msGraphClient = msGraphClient(azureAD)
     private val rapidsConnection: RapidsConnection by lazy { rapidsConnection() }
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dao = VarseldefinisjonDao(dataSourceBuilder.getDataSource())
     private val repository = ActualVarselRepository(dao)
-    private val mediator: Mediator = Mediator(rapidsConnection, repository, teamkatalogClient)
+    private val mediator: Mediator = Mediator(rapidsConnection, repository, this.msGraphClient)
 
     internal fun ktorApp(application: Application) = application.app(env, mediator, azureAD)
     internal fun start() {
@@ -86,7 +86,7 @@ internal fun Application.app(
                 react("speaker-frontend/dist")
                 ignoreFiles { it.endsWith(".txt") }
             }
-            speaker(azureAD, mediator)
+            speaker(azureAD.issuer(), mediator)
         }
     }
 }
