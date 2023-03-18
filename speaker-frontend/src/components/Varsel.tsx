@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { BodyShort, Button, Textarea } from '@navikt/ds-react';
+import { BodyShort, Button, Chips, Label, Textarea } from '@navikt/ds-react';
 import { EkspanderbartVarsel } from './EkspanderbartVarsel';
 import { useForm } from 'react-hook-form';
 import { fetchVarsler, postOppdaterVarsel } from '../endepunkter';
-import { useRecoilState, useSetRecoilState } from 'recoil';
-import { brukerState, varslerState } from '../state/state';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { brukerState, varslerState, velgbareTeammeldemmerState } from '../state/state';
 import styles from './Varsel.module.css';
-import { Varsel } from '../types';
+import { Bruker, Varsel } from '../types';
 
 export interface VarselProps {
     varsel: Varsel;
@@ -21,6 +21,10 @@ interface VarselForm {
 export const VarselComponent = ({ varsel }: VarselProps) => {
     const setVarsler = useSetRecoilState(varslerState);
     const [bruker] = useRecoilState(brukerState);
+
+    const teammedlemmer = useRecoilValue(velgbareTeammeldemmerState);
+    const [selectedMedforfattere, setSelectedMedforfattere] = useState<Bruker[]>([]);
+
     const [isLoading, setIsLoading] = useState(false);
     const defaultValues = {
         tittel: varsel.tittel,
@@ -47,7 +51,7 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
             forklaring: forklaring,
             handling: handling,
             avviklet: varsel.avviklet,
-            forfattere: [bruker],
+            forfattere: [...selectedMedforfattere, bruker],
         }).then((r) => {
             if (r.status === 200) {
                 fetchVarsler()
@@ -69,36 +73,40 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
             tidspunkt={varsel?.opprettet ?? ''}
             forfattere={varsel.forfattere}
         >
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <BodyShort className={'pt-5'}>
+            <form onSubmit={handleSubmit(onSubmit)} className={'flex flex-col gap-4'}>
+                <BodyShort>
                     <span className={styles.varselkode}>Varselkode:</span> {varsel.varselkode}
                 </BodyShort>
                 <Textarea
                     label="Tittel"
                     size="medium"
-                    className={'py-5'}
                     minRows={1}
                     maxRows={5}
                     error={(errors.tittel?.message as string) ?? ''}
                     {...register('tittel', { required: 'Tittel er påkrevd' })}
                 />
-                <Textarea
-                    label="Forklaring"
-                    size="medium"
-                    className={'pb-5'}
-                    minRows={1}
-                    maxRows={5}
-                    {...register('forklaring')}
-                />
-                <Textarea
-                    label="Hva gjør man?"
-                    size="medium"
-                    className={'pb-5'}
-                    minRows={1}
-                    maxRows={5}
-                    {...register('handling')}
-                />
-                <div className={'flex flex-row gap-4 pb-5'}>
+                <Textarea label="Forklaring" size="medium" minRows={1} maxRows={5} {...register('forklaring')} />
+                <Textarea label="Hva gjør man?" size="medium" minRows={1} maxRows={5} {...register('handling')} />
+                <Label>Medforfattere</Label>
+                <Chips>
+                    {teammedlemmer.map((c) => (
+                        <Chips.Toggle
+                            selected={selectedMedforfattere.includes(c)}
+                            key={c.oid}
+                            onClick={(event) => {
+                                event.preventDefault();
+                                setSelectedMedforfattere(
+                                    selectedMedforfattere.includes(c)
+                                        ? selectedMedforfattere.filter((x) => x !== c)
+                                        : [...selectedMedforfattere, c],
+                                );
+                            }}
+                        >
+                            {c.navn}
+                        </Chips.Toggle>
+                    ))}
+                </Chips>
+                <div className={'flex flex-row gap-4'}>
                     <Button type={'submit'} variant={'primary'} disabled={!isValid || !isDirty} loading={isLoading}>
                         Lagre
                     </Button>

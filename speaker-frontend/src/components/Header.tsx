@@ -1,20 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Header as DSHeader } from '@navikt/ds-react-internal';
 import { useRecoilState } from 'recoil';
 import { brukerState } from '../state/state';
-import { fetchUser } from '../endepunkter';
+import { fetchBruker } from '../endepunkter';
 import { Søk } from './Søk';
 
 export const Header = () => {
     const [bruker, setBruker] = useRecoilState(brukerState);
-    const [, setLoading] = useState(false);
 
     useEffect(() => {
-        setLoading(true);
-        fetchUser().then((bruker) => {
-            setBruker(bruker);
-            setLoading(false);
-        });
+        fetchBruker().then((bruker) => setBruker(bruker));
     }, []);
 
     return (

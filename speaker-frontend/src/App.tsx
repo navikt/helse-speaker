@@ -1,22 +1,31 @@
 import './App.css';
 import '@navikt/ds-css';
 import '@navikt/ds-css-internal';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Separator } from './components/Separator';
 import { Add, Clock, Dialog, Folder } from '@navikt/ds-icons';
-import { RecoilRoot } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { Varsler } from './components/Varsler';
 import { Header } from './components/Header';
 import { NyttVarsel } from './components/NyttVarsel';
 import { NyttSubdomene } from './components/NyttSubdomene';
 import { Tabs } from '@navikt/ds-react';
 import { NyKontekst } from './components/NyKontekst';
+import { fetchTeammedlemmer } from './endepunkter';
+import { teammedlemmerState } from './state/state';
 
 const App = () => {
     const [state, setState] = useState('varsler');
+    const setTeammedlemmer = useSetRecoilState(teammedlemmerState);
+
+    useEffect(() => {
+        fetchTeammedlemmer().then((teammedlemmer) => {
+            setTeammedlemmer(teammedlemmer);
+        });
+    }, []);
 
     return (
-        <RecoilRoot>
+        <>
             <Header />
             <div className={'flex flex-row py-4 pr-8 justify-end gap-16'}>
                 <Clock className={'w-[24px] h-[24px]'}></Clock>
@@ -58,7 +67,7 @@ const App = () => {
                     </Tabs.Panel>
                 </Tabs>
             </div>
-        </RecoilRoot>
+        </>
     );
 };
 

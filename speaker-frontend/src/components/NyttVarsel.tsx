@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Heading, Select, Textarea } from '@navikt/ds-react';
+import { Button, Chips, Heading, Label, Select, Textarea } from '@navikt/ds-react';
 import { useForm, useWatch } from 'react-hook-form';
 import { fetchNesteVarselkode, fetchSubdomenerOgKontekster, fetchVarsler, postLagreVarsel } from '../endepunkter';
 import classNames from 'classnames';
 import styles from './NyttVarsel.module.css';
-import { useRecoilState } from 'recoil';
-import { brukerState, varslerState } from '../state/state';
-import { Subdomene } from '../types';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { brukerState, varslerState, velgbareTeammeldemmerState } from '../state/state';
+import { Bruker, Subdomene } from '../types';
 
 interface NyttVarselForm {
     tittel: string;
@@ -17,11 +17,14 @@ interface NyttVarselForm {
 }
 
 export const NyttVarsel = () => {
-    const [subdomener, setSubdomener] = useState<Subdomene[]>();
     const [nesteVarselkode, setNesteVarselkode] = useState<string | undefined>(undefined);
-    const [skalOppretteNyttVarsel, setSkalOppretteNyttVarsel] = useState(false);
-    const [, setVarsler] = useRecoilState(varslerState);
-    const [bruker] = useRecoilState(brukerState);
+    const [subdomener, setSubdomener] = useState<Subdomene[]>();
+
+    const teammedlemmer = useRecoilValue(velgbareTeammeldemmerState);
+    const [selectedMedforfattere, setSelectedMedforfattere] = useState<Bruker[]>([]);
+
+    const setVarsler = useSetRecoilState(varslerState);
+    const bruker = useRecoilValue(brukerState);
     const [isLoading, setIsLoading] = useState(false);
 
     const {
@@ -46,13 +49,12 @@ export const NyttVarsel = () => {
             forklaring: forklaring,
             handling: handling,
             avviklet: false,
-            forfattere: [bruker],
+            forfattere: [...selectedMedforfattere, bruker],
         }).then((r) => {
             if (r.status === 200) {
                 fetchVarsler()
                     .then((varsler) => {
                         setVarsler(varsler);
-                        setSkalOppretteNyttVarsel(false);
                         reset();
                     })
                     .finally(() => setIsLoading(false));
@@ -155,18 +157,30 @@ export const NyttVarsel = () => {
                         maxRows={5}
                         {...register('handling')}
                     />
+                    <Label>Medforfattere</Label>
+                    <Chips>
+                        {teammedlemmer.map((c) => (
+                            <Chips.Toggle
+                                selected={selectedMedforfattere.includes(c)}
+                                key={c.oid}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    setSelectedMedforfattere(
+                                        selectedMedforfattere.includes(c)
+                                            ? selectedMedforfattere.filter((x) => x !== c)
+                                            : [...selectedMedforfattere, c],
+                                    );
+                                }}
+                            >
+                                {c.navn}
+                            </Chips.Toggle>
+                        ))}
+                    </Chips>
                     <div className={'flex flex-row gap-4 pb-5'}>
                         <Button type={'submit'} variant={'primary'} disabled={!isValid || !isDirty} loading={isLoading}>
                             Lagre
                         </Button>
-                        <Button
-                            variant={'secondary'}
-                            disabled={!isDirty && !skalOppretteNyttVarsel}
-                            onClick={() => {
-                                reset();
-                                setSkalOppretteNyttVarsel(false);
-                            }}
-                        >
+                        <Button variant={'secondary'} disabled={!isDirty} onClick={() => reset()}>
                             Avbryt
                         </Button>
                     </div>

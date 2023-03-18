@@ -16,6 +16,23 @@ export const brukerState = atom<Bruker | undefined>({
     default: undefined,
 });
 
+export const teammedlemmerState = atom<Bruker[]>({
+    key: 'teammedlemmerState',
+    default: [],
+});
+
+export const velgbareTeammeldemmerState = selector({
+    key: 'velgbareTeammeldemmerState',
+    get: ({ get }) => {
+        const gjeldendeBruker = get(brukerState);
+        const teammedlemmer = get(teammedlemmerState);
+
+        if (!gjeldendeBruker || !teammedlemmer) return [];
+
+        return teammedlemmer.filter((it) => it.oid != gjeldendeBruker.oid);
+    },
+});
+
 export const søkbareVarslerState = selector({
     key: 'søkbareVarslerState',
     get: ({ get }) => {

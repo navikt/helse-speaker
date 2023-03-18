@@ -56,7 +56,11 @@ export const postNyKontekst = (kontekst: KontekstPayload) =>
         body: JSON.stringify(kontekst),
     });
 
-export const fetchUser = () =>
+export const fetchBruker = () =>
     fetch('/api/bruker', {})
         .then((response) => response.json())
         .then((data) => data as Bruker);
+export const fetchTeammedlemmer = () =>
+    fetch('/api/teammedlemmer', {})
+        .then((response) => response.json())
+        .then((data) => data as Bruker[]);
