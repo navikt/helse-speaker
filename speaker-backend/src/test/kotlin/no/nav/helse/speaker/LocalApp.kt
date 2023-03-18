@@ -10,6 +10,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import org.intellij.lang.annotations.Language
 import java.io.File
+import java.util.*
 
 internal class LocalApp: AbstractDatabaseTest(doTruncate = false) {
     private val oauthMock = OauthMock
@@ -19,11 +20,12 @@ internal class LocalApp: AbstractDatabaseTest(doTruncate = false) {
         "DATABASE_DATABASE" to database,
         "DATABASE_USERNAME" to "test",
         "DATABASE_PASSWORD" to "test",
-        "LOCAL_DEVELOPMENT" to "true"
+        "LOCAL_DEVELOPMENT" to "true",
     ).apply {
         putAll(oauthMock.oauthConfig)
     }.toMap()
-    private val app: App by lazy { App(environmentVariables) { TestRapid() } }
+
+    private val app: App by lazy { App(environmentVariables, LocalTeamkatalogClient()) { TestRapid() } }
 
     internal fun start() {
         val server = embeddedServer(Netty, applicationEngineEnvironment {

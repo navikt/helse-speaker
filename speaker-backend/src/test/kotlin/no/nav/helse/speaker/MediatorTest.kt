@@ -15,7 +15,7 @@ class MediatorTest {
     @Test
     fun `publiserer melding på kafka ved beskjed om oppdatert definisjon`() {
         val kode = "XX_YY_1"
-        val mediator = Mediator({ testRapid }, repository)
+        val mediator = mediator()
         mediator.varselkodeEndret(varselkode(kode), kode, definisjon(kode))
         assertEquals(1, testRapid.inspektør.size)
         assertEquals("varselkode_ny_definisjon", testRapid.inspektør.message(0)["@event_name"].asText())
@@ -30,7 +30,7 @@ class MediatorTest {
     @Test
     fun `publiserer melding på kafka ved beskjed om oppdatert definisjon når forklaring og handling er satt`() {
         val kode = "XX_YY_1"
-        val mediator = Mediator({ testRapid }, repository)
+        val mediator = mediator()
         mediator.varselkodeEndret(varselkode(kode), kode, definisjon(kode, forklaring = "En forklaring", handling = "En handling"))
         assertEquals(1, testRapid.inspektør.size)
         assertEquals("varselkode_ny_definisjon", testRapid.inspektør.message(0)["@event_name"].asText())
@@ -45,7 +45,7 @@ class MediatorTest {
     @Test
     fun `oppretter varsel`() {
         val kode = "XX_YY_1"
-        val mediator = Mediator({ testRapid }, repository)
+        val mediator = mediator()
         mediator.håndterNyVarselkode(definisjon(kode, forklaring = "En forklaring", handling = "En handling"))
         assertEquals(1, repository.varselOpprettet.size)
     }
@@ -53,7 +53,7 @@ class MediatorTest {
     @Test
     fun `oppdaterer varsel`() {
         val kode = "XX_YY_1"
-        val mediator = Mediator({ testRapid }, repository)
+        val mediator = mediator()
         mediator.håndterNyVarselkode(definisjon(kode, forklaring = "En forklaring", handling = "En handling"))
         mediator.håndterOppdatertVarselkode(definisjon(kode, forklaring = "En forklaring", handling = "En annen handling"))
         assertEquals(1, repository.varselOpprettet.size)
@@ -62,14 +62,14 @@ class MediatorTest {
 
     @Test
     fun `oppretter subdomene`() {
-        val mediator = Mediator({ testRapid }, repository)
+        val mediator = mediator()
         mediator.håndterNyttSubdomene(Subdomene("Et subdomene", "XX"))
         assertEquals(1, repository.subdomeneOpprettet.size)
     }
 
     @Test
     fun `oppretter ikke subdomene hvis det eksisterer fra før av`() {
-        val mediator = Mediator({ testRapid }, repository)
+        val mediator = mediator()
         assertThrows<VarselException.SubdomeneFinnesAllerede> {
             mediator.håndterNyttSubdomene(Subdomene("Et subdomene", "AA"))
         }
@@ -78,14 +78,14 @@ class MediatorTest {
 
     @Test
     fun `oppretter kontekst`() {
-        val mediator = Mediator({ testRapid }, repository)
+        val mediator = mediator()
         mediator.håndterNyKontekst(KontekstPayload(navn = "Et subdomene", forkortelse = "XX", subdomene = "AA"))
         assertEquals(1, repository.kontekstOpprettet.size)
     }
 
     @Test
     fun `oppretter ikke kontekst hvis det eksisterer fra før av`() {
-        val mediator = Mediator({ testRapid }, repository)
+        val mediator = mediator()
         assertThrows<VarselException.KontekstFinnesAllerede> {
             mediator.håndterNyKontekst(KontekstPayload(navn = "Et subdomene", forkortelse = "XX", subdomene = "BB"))
         }
@@ -94,12 +94,14 @@ class MediatorTest {
 
     @Test
     fun `oppretter ikke kontekst hvis subdomene ikke finnes`() {
-        val mediator = Mediator({ testRapid }, repository)
+        val mediator = mediator()
         assertThrows<VarselException.SubdomeneFinnesIkke> {
             mediator.håndterNyKontekst(KontekstPayload(navn = "Et subdomene", forkortelse = "XX", subdomene = "YY"))
         }
         assertEquals(0, repository.kontekstOpprettet.size)
     }
+
+    private fun mediator() = Mediator({testRapid}, repository, teamkatalogClient)
 
     private fun varselkode(
         kode: String = "AA_BB_1",
@@ -146,6 +148,13 @@ class MediatorTest {
         override fun nyKontekst(navn: String, forkortelse: String, subdomene: String) {
             kontekstOpprettet.add(navn)
         }
+    }
+
+    private val teamkatalogClient = object : ITeamkatalogClient {
+        override fun finnTeammedlemmer(): List<Bruker> {
+            return listOf(Bruker("epostadresse", "navn", "ident"))
+        }
+
     }
 
 }

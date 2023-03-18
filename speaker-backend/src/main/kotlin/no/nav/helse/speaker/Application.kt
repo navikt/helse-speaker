@@ -17,6 +17,7 @@ import no.nav.helse.speaker.plugins.configureServerContentNegotiation
 import no.nav.helse.speaker.plugins.configureUtilities
 import no.nav.helse.speaker.plugins.statusPages
 import no.nav.helse.speaker.routes.speaker
+import java.util.*
 
 internal fun main() {
     RapidApp(System.getenv()).start()
@@ -24,7 +25,9 @@ internal fun main() {
 
 private class RapidApp(env: Map<String, String>) {
     private lateinit var rapidsConnection: RapidsConnection
-    private val app = App(env) { rapidsConnection }
+    private val teamkatalogBaseUrl = env["TEAMKATALOG_BASE_URL"] ?: throw IllegalStateException("Forventer å finne TEAMKATALOG_BASE_URL")
+    private val teamkatalogTeamId = env["TEAMKATALOG_TEAM_ID"] ?: throw IllegalStateException("Forventer å finne TEAMKATALOG_TEAM_ID")
+    private val app = App(env, TeamkatalogClient(teamkatalogBaseUrl, UUID.fromString(teamkatalogTeamId))) { rapidsConnection }
 
     init {
         rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
@@ -38,13 +41,14 @@ private class RapidApp(env: Map<String, String>) {
 
 internal class App(
     private val env: Map<String, String>,
-    rapidsConnection: () -> RapidsConnection
+    teamkatalogClient: ITeamkatalogClient,
+    rapidsConnection: () -> RapidsConnection,
 ) : RapidsConnection.StatusListener {
     private val rapidsConnection: RapidsConnection by lazy { rapidsConnection() }
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dao = VarseldefinisjonDao(dataSourceBuilder.getDataSource())
     private val repository = ActualVarselRepository(dao)
-    private val mediator: Mediator = Mediator(rapidsConnection, repository)
+    private val mediator: Mediator = Mediator(rapidsConnection, repository, teamkatalogClient)
 
     internal fun ktorApp(application: Application) = application.app(env, mediator)
     internal fun start() {

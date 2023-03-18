@@ -16,7 +16,8 @@ import org.slf4j.LoggerFactory
 
 internal class Mediator(
     rapidsConnection: () -> RapidsConnection,
-    private val varselRepository: VarselRepository
+    private val varselRepository: VarselRepository,
+    private val teamkatalogClient: ITeamkatalogClient
 ): IVarselkodeObserver {
     private val rapidsConnection: RapidsConnection by lazy { rapidsConnection() }
 
@@ -44,6 +45,12 @@ internal class Mediator(
         val eksisterendeSubdomener = varselRepository.finnSubdomenerOgKontekster()
         eksisterendeSubdomener.register(this, varselRepository)
         eksisterendeSubdomener.håndterNyKontekst(kontekstPayload)
+    }
+
+    internal fun finnTeammedlemmer(): List<Bruker> {
+        val medlemmer = teamkatalogClient.finnTeammedlemmer()
+        logg.info(medlemmer.joinToString())
+        return medlemmer
     }
 
     internal fun finnGjeldendeVarseldefinisjoner(): List<Varseldefinisjon> {

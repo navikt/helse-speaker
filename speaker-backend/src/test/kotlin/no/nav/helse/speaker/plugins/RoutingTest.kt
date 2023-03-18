@@ -15,6 +15,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.speaker.ITeamkatalogClient
 import no.nav.helse.speaker.Mediator
 import no.nav.helse.speaker.app
 import no.nav.helse.speaker.domene.*
@@ -208,8 +209,7 @@ internal class RoutingTest {
             Bruker(
                 epostadresse = "some_username",
                 navn = "some name",
-                ident = "EN_IDENT",
-                oid = userOid
+                ident = "EN_IDENT"
             ),
             bruker
         )
@@ -412,7 +412,7 @@ internal class RoutingTest {
             environment {
                 module {
                     val repository = repository(varselkodeFinnes = ::settVarselkodeFinnes)
-                    app(env, Mediator({ TestRapid() }, repository))
+                    app(env, Mediator({ TestRapid() }, repository, teamkatalogClient))
                 }
             }
             block(this)
@@ -442,6 +442,13 @@ internal class RoutingTest {
             "LOCAL_DEVELOPMENT" to "true",
             "AZURE_VALID_GROUP_ID" to "$groupId"
         )
+
+        private val teamkatalogClient = object : ITeamkatalogClient {
+            override fun finnTeammedlemmer(): List<Bruker> {
+                return listOf(Bruker("epostadresse", "navn", "ident"))
+            }
+
+        }
 
         private fun repository(
             varsler: List<Varseldefinisjon> = listOf(varseldefinisjon()),

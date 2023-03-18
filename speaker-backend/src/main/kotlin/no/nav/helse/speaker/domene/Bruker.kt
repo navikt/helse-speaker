@@ -13,8 +13,7 @@ import java.util.*
 class Bruker(
     private val epostadresse: String,
     private val navn: String,
-    private val ident: String,
-    private val oid: UUID
+    private val ident: String
 ) {
     internal companion object {
         internal fun fromCall(issuer: String, call: ApplicationCall): Bruker {
@@ -22,8 +21,7 @@ class Bruker(
                 epostadresse = call.getClaim(issuer, "preferred_username")
                     ?: throw IllegalStateException("Forventer å finne preferred_username"),
                 navn = call.getClaim(issuer, "name") ?: throw IllegalStateException("Forventer å finne name"),
-                ident = call.getClaim(issuer, "NAVident") ?: throw IllegalStateException("Forventer å finne NAVident"),
-                oid = call.getClaim(issuer, "oid")?.let(UUID::fromString) ?: throw IllegalStateException("Forventer å finne oid")
+                ident = call.getClaim(issuer, "NAVident") ?: throw IllegalStateException("Forventer å finne NAVident")
             )
         }
 
@@ -34,20 +32,22 @@ class Bruker(
                 ?.getStringClaim(name)
     }
 
+    override fun toString(): String {
+        return navn
+    }
+
     override fun equals(other: Any?) = this === other || (
         other is Bruker &&
             javaClass == other.javaClass &&
             epostadresse == other.epostadresse &&
             navn == other.navn &&
-            ident == other.ident &&
-            oid == other.oid
+            ident == other.ident
         )
 
     override fun hashCode(): Int {
         var result = epostadresse.hashCode()
         result = 31 * result + navn.hashCode()
         result = 31 * result + ident.hashCode()
-        result = 31 * result + oid.hashCode()
         return result
     }
 

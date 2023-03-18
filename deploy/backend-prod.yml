@@ -66,3 +66,7 @@ spec:
       value: tbd.rapid.v1
     - name: KAFKA_CONSUMER_GROUP_ID
       value: tbd-speaker-backend-v1
+    - name: TEAMKATALOG_BASE_URL
+      value: "https://teamkatalog-api.intern.nav.no"
+    - name: TEAMKATALOG_TEAM_ID
+      value: "3ce5502a-9d7e-43dc-b6f3-a21c44927b03"
