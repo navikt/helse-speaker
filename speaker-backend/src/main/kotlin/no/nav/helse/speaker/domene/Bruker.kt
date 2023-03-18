@@ -13,7 +13,8 @@ import java.util.*
 class Bruker(
     private val epostadresse: String,
     private val navn: String,
-    private val ident: String
+    private val ident: String,
+    private val oid: UUID
 ) {
     internal companion object {
         internal fun fromCall(issuer: String, call: ApplicationCall): Bruker {
@@ -21,7 +22,8 @@ class Bruker(
                 epostadresse = call.getClaim(issuer, "preferred_username")
                     ?: throw IllegalStateException("Forventer å finne preferred_username"),
                 navn = call.getClaim(issuer, "name") ?: throw IllegalStateException("Forventer å finne name"),
-                ident = call.getClaim(issuer, "NAVident") ?: throw IllegalStateException("Forventer å finne NAVident")
+                ident = call.getClaim(issuer, "NAVident") ?: throw IllegalStateException("Forventer å finne NAVident"),
+                oid = call.getClaim(issuer, "oid")?.let(UUID::fromString) ?: throw IllegalStateException("Forventer å finne oid")
             )
         }
 
@@ -41,13 +43,15 @@ class Bruker(
             javaClass == other.javaClass &&
             epostadresse == other.epostadresse &&
             navn == other.navn &&
-            ident == other.ident
+            ident == other.ident &&
+            oid == other.oid
         )
 
     override fun hashCode(): Int {
         var result = epostadresse.hashCode()
         result = 31 * result + navn.hashCode()
         result = 31 * result + ident.hashCode()
+        result = 31 * result + oid.hashCode()
         return result
     }
 

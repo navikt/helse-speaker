@@ -4,7 +4,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.speaker.azure.AzureAD
+import no.nav.helse.speaker.microsoft.AzureAD
 import no.nav.security.token.support.v2.TokenSupportConfig
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.LoggerFactory

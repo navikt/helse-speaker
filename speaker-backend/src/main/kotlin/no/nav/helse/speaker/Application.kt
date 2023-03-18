@@ -8,16 +8,16 @@ import io.ktor.server.http.content.singlePageApplication
 import io.ktor.server.routing.routing
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.speaker.azure.AzureAD
 import no.nav.helse.speaker.db.DataSourceBuilder
 import no.nav.helse.speaker.db.VarseldefinisjonDao
 import no.nav.helse.speaker.domene.ActualVarselRepository
+import no.nav.helse.speaker.microsoft.AzureAD
+import no.nav.helse.speaker.microsoft.MsGraphClient
 import no.nav.helse.speaker.plugins.configureAuthentication
 import no.nav.helse.speaker.plugins.configureServerContentNegotiation
 import no.nav.helse.speaker.plugins.configureUtilities
 import no.nav.helse.speaker.plugins.statusPages
 import no.nav.helse.speaker.routes.speaker
-import java.util.*
 
 internal fun main() {
     RapidApp(System.getenv()).start()
@@ -25,9 +25,15 @@ internal fun main() {
 
 private class RapidApp(env: Map<String, String>) {
     private lateinit var rapidsConnection: RapidsConnection
-    private val teamkatalogBaseUrl = env["TEAMKATALOG_BASE_URL"] ?: throw IllegalStateException("Forventer å finne TEAMKATALOG_BASE_URL")
-    private val teamkatalogTeamId = env["TEAMKATALOG_TEAM_ID"] ?: throw IllegalStateException("Forventer å finne TEAMKATALOG_TEAM_ID")
-    private val app = App(env, TeamkatalogClient(teamkatalogBaseUrl, UUID.fromString(teamkatalogTeamId))) { rapidsConnection }
+    private val app = App(env,
+        {
+            MsGraphClient(
+                azureAD = it,
+                groupId = env.getValue("AZURE_APP_CLIENT_ID"),
+                graphUrl = env.getValue("MS_GRAPH_BASE_URL")
+            )
+        }
+    ) { rapidsConnection }
 
     init {
         rapidsConnection = RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
@@ -41,16 +47,18 @@ private class RapidApp(env: Map<String, String>) {
 
 internal class App(
     private val env: Map<String, String>,
-    teamkatalogClient: ITeamkatalogClient,
+    msGraphClient: (AzureAD) -> IMsGraphClient,
     rapidsConnection: () -> RapidsConnection,
 ) : RapidsConnection.StatusListener {
+    private val azureAD = AzureAD.fromEnv(env)
+    private val teamkatalogClient = msGraphClient(azureAD)
     private val rapidsConnection: RapidsConnection by lazy { rapidsConnection() }
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dao = VarseldefinisjonDao(dataSourceBuilder.getDataSource())
     private val repository = ActualVarselRepository(dao)
     private val mediator: Mediator = Mediator(rapidsConnection, repository, teamkatalogClient)
 
-    internal fun ktorApp(application: Application) = application.app(env, mediator)
+    internal fun ktorApp(application: Application) = application.app(env, mediator, azureAD)
     internal fun start() {
         rapidsConnection.register(this)
         rapidsConnection.start()
@@ -63,13 +71,13 @@ internal class App(
 
 internal fun Application.app(
     env: Map<String, String>,
-    mediator: Mediator
+    mediator: Mediator,
+    azureAD: AzureAD
 ) {
     val isLocalDevelopment = env["LOCAL_DEVELOPMENT"]?.toBooleanStrict() ?: false
     statusPages()
     configureUtilities()
     configureServerContentNegotiation()
-    val azureAD = AzureAD.fromEnv(env)
     configureAuthentication(azureAD)
     routing {
         authenticate("ValidToken") {

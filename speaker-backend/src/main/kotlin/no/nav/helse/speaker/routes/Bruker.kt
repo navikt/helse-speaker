@@ -6,7 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import no.nav.helse.speaker.azure.AzureAD
+import no.nav.helse.speaker.microsoft.AzureAD
 import no.nav.helse.speaker.domene.Bruker
 
 internal fun Route.brukerRoutes(azureAD: AzureAD) {

@@ -6,17 +6,19 @@ import java.util.*
 
 class BrukerTest {
 
+    private val oid = UUID.randomUUID()
+
     @Test
     fun `referential equals`() {
-        val bruker = Bruker("epost", "navn", "ident")
+        val bruker = Bruker("epost", "navn", "ident", oid)
         assertEquals(bruker, bruker)
     }
 
     @Test
     fun `structural equals`() {
         val oid = UUID.randomUUID()
-        val enBruker = Bruker("epost", "navn", "ident")
-        val annenBruker = Bruker("epost", "navn", "ident")
+        val enBruker = Bruker("epost", "navn", "ident", oid)
+        val annenBruker = Bruker("epost", "navn", "ident", oid)
         assertEquals(enBruker, annenBruker)
         assertEquals(enBruker.hashCode(), annenBruker.hashCode())
     }
@@ -24,8 +26,8 @@ class BrukerTest {
     @Test
     fun `not equals epost`() {
         val oid = UUID.randomUUID()
-        val enBruker = Bruker("epost", "navn", "ident")
-        val annenBruker = Bruker("annen epost", "navn", "ident")
+        val enBruker = Bruker("epost", "navn", "ident", oid)
+        val annenBruker = Bruker("annen epost", "navn", "ident", oid)
         assertNotEquals(enBruker, annenBruker)
         assertNotEquals(enBruker.hashCode(), annenBruker.hashCode())
     }
@@ -33,8 +35,8 @@ class BrukerTest {
     @Test
     fun `not equals navn`() {
         val oid = UUID.randomUUID()
-        val enBruker = Bruker("epost", "navn", "ident")
-        val annenBruker = Bruker("epost", "annet navn", "ident")
+        val enBruker = Bruker("epost", "navn", "ident", oid)
+        val annenBruker = Bruker("epost", "annet navn", "ident", oid)
         assertNotEquals(enBruker, annenBruker)
         assertNotEquals(enBruker.hashCode(), annenBruker.hashCode())
     }
@@ -42,17 +44,17 @@ class BrukerTest {
     @Test
     fun `not equals ident`() {
         val oid = UUID.randomUUID()
-        val enBruker = Bruker("epost", "navn", "ident")
-        val annenBruker = Bruker("epost", "navn", "annen ident")
+        val enBruker = Bruker("epost", "navn", "ident", oid)
+        val annenBruker = Bruker("epost", "navn", "annen ident", oid)
         assertNotEquals(enBruker, annenBruker)
         assertNotEquals(enBruker.hashCode(), annenBruker.hashCode())
     }
-//
-//    @Test
-//    fun `not equals oid`() {
-//        val enBruker = Bruker("epost", "navn", "ident")
-//        val annenBruker = Bruker("epost", "navn", "ident")
-//        assertNotEquals(enBruker, annenBruker)
-//        assertNotEquals(enBruker.hashCode(), annenBruker.hashCode())
-//    }
+
+    @Test
+    fun `not equals oid`() {
+        val enBruker = Bruker("epost", "navn", "ident", oid)
+        val annenBruker = Bruker("epost", "navn", "ident", UUID.randomUUID())
+        assertNotEquals(enBruker, annenBruker)
+        assertNotEquals(enBruker.hashCode(), annenBruker.hashCode())
+    }
 }

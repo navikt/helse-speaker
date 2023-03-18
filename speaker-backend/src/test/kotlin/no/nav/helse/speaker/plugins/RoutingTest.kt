@@ -15,10 +15,11 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.speaker.ITeamkatalogClient
+import no.nav.helse.speaker.IMsGraphClient
 import no.nav.helse.speaker.Mediator
 import no.nav.helse.speaker.app
 import no.nav.helse.speaker.domene.*
+import no.nav.helse.speaker.microsoft.AzureAD
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import org.junit.jupiter.api.AfterAll
@@ -209,7 +210,8 @@ internal class RoutingTest {
             Bruker(
                 epostadresse = "some_username",
                 navn = "some name",
-                ident = "EN_IDENT"
+                ident = "EN_IDENT",
+                oid = userOid
             ),
             bruker
         )
@@ -412,7 +414,7 @@ internal class RoutingTest {
             environment {
                 module {
                     val repository = repository(varselkodeFinnes = ::settVarselkodeFinnes)
-                    app(env, Mediator({ TestRapid() }, repository, teamkatalogClient))
+                    app(env, Mediator({ TestRapid() }, repository, msGraphClient), AzureAD.fromEnv(env))
                 }
             }
             block(this)
@@ -436,16 +438,19 @@ internal class RoutingTest {
             return varselkodeFinnes
         }
 
+        private val oid = UUID.randomUUID()
+
         private val env = mapOf(
             "AZURE_APP_WELL_KNOWN_URL" to oauthMock.wellKnownUrl(issuerId.toString()).toString(),
             "AZURE_APP_CLIENT_ID" to "$clientId",
             "LOCAL_DEVELOPMENT" to "true",
-            "AZURE_VALID_GROUP_ID" to "$groupId"
+            "AZURE_VALID_GROUP_ID" to "$groupId",
+            "AZURE_APP_JWK" to "some_jwk"
         )
 
-        private val teamkatalogClient = object : ITeamkatalogClient {
+        private val msGraphClient = object : IMsGraphClient {
             override fun finnTeammedlemmer(): List<Bruker> {
-                return listOf(Bruker("epostadresse", "navn", "ident"))
+                return listOf(Bruker("epostadresse", "navn", "ident", oid))
             }
 
         }

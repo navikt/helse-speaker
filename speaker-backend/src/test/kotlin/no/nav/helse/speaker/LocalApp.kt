@@ -25,7 +25,7 @@ internal class LocalApp: AbstractDatabaseTest(doTruncate = false) {
         putAll(oauthMock.oauthConfig)
     }.toMap()
 
-    private val app: App by lazy { App(environmentVariables, LocalTeamkatalogClient()) { TestRapid() } }
+    private val app: App by lazy { App(environmentVariables, { LocalMsGraphClient() }) { TestRapid() } }
 
     internal fun start() {
         val server = embeddedServer(Netty, applicationEngineEnvironment {
@@ -65,6 +65,7 @@ private object OauthMock {
         "AZURE_APP_WELL_KNOWN_URL" to server.wellKnownUrl(issuerId).toString(),
         "AZURE_APP_CLIENT_ID" to clientId,
         "AZURE_VALID_GROUP_ID" to acceptedGroupId,
+        "AZURE_APP_JWK" to "some_jwk"
     )
 
     internal fun accessToken(

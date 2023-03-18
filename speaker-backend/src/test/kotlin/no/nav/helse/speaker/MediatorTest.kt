@@ -101,7 +101,14 @@ class MediatorTest {
         assertEquals(0, repository.kontekstOpprettet.size)
     }
 
-    private fun mediator() = Mediator({testRapid}, repository, teamkatalogClient)
+    @Test
+    fun `henter teammedlemmer`() {
+        val mediator = mediator()
+        val funnet = mediator.finnTeammedlemmer()
+        assertEquals(listOf(Bruker("epostadresse", "navn", "ident", oid)), funnet)
+    }
+
+    private fun mediator() = Mediator({testRapid}, repository, testMsGraphClient)
 
     private fun varselkode(
         kode: String = "AA_BB_1",
@@ -150,11 +157,14 @@ class MediatorTest {
         }
     }
 
-    private val teamkatalogClient = object : ITeamkatalogClient {
+    private val testMsGraphClient = object : IMsGraphClient {
         override fun finnTeammedlemmer(): List<Bruker> {
-            return listOf(Bruker("epostadresse", "navn", "ident"))
+            return listOf(Bruker("epostadresse", "navn", "ident", oid))
         }
 
     }
 
+    private companion object {
+        private val oid = UUID.randomUUID()
+    }
 }
