@@ -379,6 +379,19 @@ internal class RoutingTest {
         }
     }
 
+    @Test
+    fun `Henter teammedlemmer`() {
+        withTestApplication {
+            val response = client.get("/api/teammedlemmer") {
+                header("Authorization", "Bearer ${accessToken()}")
+            }
+            val brukere = response.body<String>().let {
+                Json.decodeFromString<List<Bruker>>(it)
+            }
+            assertEquals(listOf(Bruker("epostadresse", "navn", "ident", oid)), brukere)
+        }
+    }
+
     private fun accessToken(
         harNavIdent: Boolean = true,
         grupper: List<String> = listOf("$groupId"),

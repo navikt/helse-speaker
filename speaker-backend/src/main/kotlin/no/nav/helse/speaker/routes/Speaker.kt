@@ -9,7 +9,7 @@ import no.nav.helse.speaker.microsoft.AzureAD
 internal fun Route.speaker(azureAD: AzureAD, mediator: Mediator) {
     route("/api") {
         varselRoutes(mediator)
-        brukerRoutes(azureAD)
+        brukerRoutes(azureAD, mediator)
     }
 }
 
