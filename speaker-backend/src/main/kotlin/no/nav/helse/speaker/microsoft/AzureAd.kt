@@ -31,6 +31,7 @@ import java.util.*
 
 class AzureAD private constructor(private val config: Config) {
     private val httpClient: HttpClient = HttpClient(Apache) {
+        expectSuccess = true
         install(ContentNegotiation) {
             json()
         }
