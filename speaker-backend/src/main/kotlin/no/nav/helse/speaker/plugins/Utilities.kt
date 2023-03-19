@@ -16,7 +16,7 @@ internal fun Application.configureUtilities() {
     }
     install(CallLogging) {
         disableDefaultColors()
-        level = Level.INFO
+        level = Level.DEBUG
     }
     install(XForwardedHeaders)
 }
