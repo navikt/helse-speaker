@@ -1,5 +1,6 @@
 package no.nav.helse.speaker
 
+import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -43,7 +44,9 @@ internal class Mediator(
     }
 
     internal fun finnTeammedlemmer(): List<Bruker> {
-        return msGraphClient.finnTeammedlemmer()
+        return runBlocking {
+            msGraphClient.finnTeammedlemmer()
+        }
     }
 
     internal fun finnGjeldendeVarseldefinisjoner(): List<Varseldefinisjon> {

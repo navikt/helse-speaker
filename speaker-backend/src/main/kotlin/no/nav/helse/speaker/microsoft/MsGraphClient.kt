@@ -9,12 +9,12 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import no.nav.helse.speaker.IMsGraphClient
 import no.nav.helse.speaker.domene.Bruker
+import no.nav.helse.speaker.domene.TeammedlemmerException
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -34,15 +34,18 @@ internal class MsGraphClient(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override fun finnTeammedlemmer(): List<Bruker> {
+    override suspend fun finnTeammedlemmer(): List<Bruker> {
         sikkerlogg.info("Henter access token for å kunne hente teammedlemmer")
-        val token = runBlocking { azureAD.fetchToken() }
+        val token = azureAD.fetchToken()
         sikkerlogg.info("Access token hentet, henter teammedlemmer")
-        val response = runBlocking {
+        val response = try {
             httpClient.get("$graphUrl/groups/$groupId/members?\$select=id,givenName,surname,mail,onPremisesSamAccountName") {
                 bearerAuth(token.toString())
                 accept(ContentType.parse("application/json"))
             }.body<JsonObject>()
+        } catch (e: Exception) {
+            sikkerlogg.error("Klarte ikke hente teammedlemmer fra Graph: ${e.message}")
+            throw TeammedlemmerException.HentingFeilet(e.message!!)
         }
         sikkerlogg.info("Respons fra Graph: $response")
         val brukere = response.getValue("value").jsonArray.map { userNode ->

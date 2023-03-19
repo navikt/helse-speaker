@@ -462,7 +462,7 @@ internal class RoutingTest {
         )
 
         private val msGraphClient = object : IMsGraphClient {
-            override fun finnTeammedlemmer(): List<Bruker> {
+            override suspend fun finnTeammedlemmer(): List<Bruker> {
                 return listOf(Bruker("epostadresse", "navn", "ident", oid))
             }
 

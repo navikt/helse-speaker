@@ -8,6 +8,7 @@ import io.ktor.server.routing.get
 import no.nav.helse.speaker.Mediator
 import no.nav.helse.speaker.domene.Bruker
 import no.nav.helse.speaker.domene.BrukerException
+import no.nav.helse.speaker.domene.TeammedlemmerException
 
 internal fun Route.brukerRoutes(identityIssuer: String, mediator: Mediator) {
     get("/bruker") {
@@ -19,7 +20,12 @@ internal fun Route.brukerRoutes(identityIssuer: String, mediator: Mediator) {
         call.respond(HttpStatusCode.OK, bruker)
     }
     get("/teammedlemmer") {
-        call.respond(HttpStatusCode.OK, mediator.finnTeammedlemmer())
+        val teammedlemmer = try {
+            mediator.finnTeammedlemmer()
+        } catch (e: TeammedlemmerException) {
+            return@get call.respond(e.httpStatusCode, e.message!!)
+        }
+        call.respond(HttpStatusCode.OK, teammedlemmer)
     }
 }
 

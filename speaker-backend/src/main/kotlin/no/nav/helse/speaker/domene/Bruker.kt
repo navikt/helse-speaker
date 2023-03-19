@@ -83,3 +83,12 @@ internal sealed class BrukerException(message: String): Exception(message) {
         override val httpStatusCode: HttpStatusCode = HttpStatusCode.BadRequest
     }
 }
+
+internal sealed class TeammedlemmerException(message: String): Exception(message) {
+    internal abstract val httpStatusCode: HttpStatusCode
+
+    internal class HentingFeilet(melding: String):
+        TeammedlemmerException("Henting av teammedlemmer feilet: $melding") {
+        override val httpStatusCode: HttpStatusCode = HttpStatusCode.BadRequest
+    }
+}
