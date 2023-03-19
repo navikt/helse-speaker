@@ -37,7 +37,7 @@ internal class MsGraphClient(
         logg.info("Henter teammedlemmer")
         val token = runBlocking { azureAD.fetchToken() }
         val response = runBlocking {
-            httpClient.get("$graphUrl/groups/$groupId/members?\$select=id,displayName,mail,onPremisesSamAccountName") {
+            httpClient.get("$graphUrl/groups/$groupId/members?\$select=id,givenName,surname,mail,onPremisesSamAccountName") {
                 bearerAuth(token.toString())
                 accept(ContentType.parse("application/json"))
             }.body<JsonObject>()
@@ -46,7 +46,7 @@ internal class MsGraphClient(
             val userObject = userNode.jsonObject
             Bruker(
                 epostadresse = userObject["mail"].toString(),
-                navn = userObject["displayName"].toString(),
+                navn = "${userObject["givenName"].toString()} ${userObject["surname"].toString()}",
                 ident = userObject["onPremisesSamAccountName"].toString(),
                 oid = UUID.fromString(userObject["id"].toString())
             )
