@@ -31,20 +31,20 @@ internal class MsGraphClient(
     }
 
     companion object {
-        private val logg = LoggerFactory.getLogger("tjenestekall")
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun finnTeammedlemmer(): List<Bruker> {
-        logg.info("Henter access token for å kunne hente teammedlemmer")
+        sikkerlogg.info("Henter access token for å kunne hente teammedlemmer")
         val token = runBlocking { azureAD.fetchToken() }
-        logg.info("Access token hentet, henter teammedlemmer")
+        sikkerlogg.info("Access token hentet, henter teammedlemmer")
         val response = runBlocking {
             httpClient.get("$graphUrl/groups/$groupId/members?\$select=id,givenName,surname,mail,onPremisesSamAccountName") {
                 bearerAuth(token.toString())
                 accept(ContentType.parse("application/json"))
             }.body<JsonObject>()
         }
-        logg.info("Respons fra Graph: $response")
+        sikkerlogg.info("Respons fra Graph: $response")
         val brukere = response.getValue("value").jsonArray.map { userNode ->
             val userObject = userNode.jsonObject
             Bruker(
@@ -54,7 +54,7 @@ internal class MsGraphClient(
                 oid = UUID.fromString(userObject["id"].toString())
             )
         }
-        logg.info("Teammedlemmer hentet")
+        sikkerlogg.info("Teammedlemmer hentet")
         return brukere
     }
 }

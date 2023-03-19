@@ -75,7 +75,7 @@ class AzureAD private constructor(private val config: Config) {
         }.sign(Algorithm.RSA256(null, privateKey.toRSAPrivateKey()))
 
         val callId = UUID.randomUUID()
-        logg.info("Henter Azure token for MS graph")
+        sikkerlogg.info("Henter Azure token for MS graph")
         val token = httpClient.post(config.tokenEndpoint) {
             header("callId", callId)
             header(HttpHeaders.ContentType, ContentType.Application.Json)
@@ -88,7 +88,7 @@ class AzureAD private constructor(private val config: Config) {
             }))
         }.body<AadAccessToken>()
 
-        logg.info("hentet token for MS graph")
+        sikkerlogg.info("hentet token for MS graph")
 
         return token
     }
@@ -102,7 +102,7 @@ class AzureAD private constructor(private val config: Config) {
     }
 
     internal companion object {
-        private val logg = LoggerFactory.getLogger(AzureAD::class.java)
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         internal fun fromEnv(env: Map<String, String>): AzureAD {
             return AzureAD(
