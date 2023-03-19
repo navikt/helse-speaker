@@ -29,7 +29,7 @@ private class RapidApp(env: Map<String, String>) {
         {
             MsGraphClient(
                 azureAD = it,
-                groupId = env.getValue("AZURE_APP_CLIENT_ID"),
+                groupId = env.getValue("AZURE_VALID_GROUP_ID"),
                 graphUrl = env.getValue("MS_GRAPH_BASE_URL")
             )
         }
