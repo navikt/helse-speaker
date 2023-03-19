@@ -24,6 +24,7 @@ internal class MsGraphClient(
     private val graphUrl: String
 ): IMsGraphClient {
     private val httpClient: HttpClient = HttpClient(Apache) {
+        expectSuccess = true
         install(ContentNegotiation) {
             json()
         }
