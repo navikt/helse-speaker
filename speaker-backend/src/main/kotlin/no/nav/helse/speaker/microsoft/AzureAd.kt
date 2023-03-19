@@ -64,6 +64,8 @@ class AzureAD private constructor(private val config: Config) {
     internal fun hasValidClaims(claims: List<String>) = requiredClaims.keys.all { it in claims }
     internal fun hasValidGroups(groups: List<String>) = requiredGroups.any { it in groups }
 
+    private val jsonParser = Json { ignoreUnknownKeys = true }
+
     internal suspend fun fetchToken(): AadAccessToken {
         val privateKey = RSAKey.parse(config.privateJwk)
         val now = Instant.now()
@@ -98,7 +100,7 @@ class AzureAD private constructor(private val config: Config) {
         }
 
         val token = try {
-            Json.decodeFromJsonElement<AadAccessToken>(tokenJson)
+            jsonParser.decodeFromJsonElement<AadAccessToken>(tokenJson)
         } catch (e: Exception) {
             sikkerlogg.info("Exception ved parsing av access token: ${e.message}, ${e.printStackTrace()}")
             throw e
