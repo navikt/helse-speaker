@@ -19,6 +19,9 @@ import io.ktor.http.Parameters
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import no.nav.security.token.support.v2.IssuerConfig
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -77,17 +80,29 @@ class AzureAD private constructor(private val config: Config) {
 
         val callId = UUID.randomUUID()
         sikkerlogg.info("Henter Azure token for MS graph")
-        val token = httpClient.post(config.tokenEndpoint) {
-            header("callId", callId)
-            header(HttpHeaders.ContentType, ContentType.Application.Json)
-            setBody(FormDataContent(Parameters.build {
-                append("grant_type", "client_credentials")
-                append("scope", "https://graph.microsoft.com/.default")
-                append("client_id", config.clientId)
-                append("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                append("client_assertion", clientAssertion)
-            }))
-        }.body<AadAccessToken>()
+        val tokenJson = try {
+            httpClient.post(config.tokenEndpoint) {
+                header("callId", callId)
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+                setBody(FormDataContent(Parameters.build {
+                    append("grant_type", "client_credentials")
+                    append("scope", "https://graph.microsoft.com/.default")
+                    append("client_id", config.clientId)
+                    append("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                    append("client_assertion", clientAssertion)
+                }))
+            }.body<JsonObject>()
+        } catch (e: Exception) {
+            sikkerlogg.info("Exception ved henting av access token: ${e.message}, ${e.printStackTrace()}")
+            throw e
+        }
+
+        val token = try {
+            Json.decodeFromJsonElement<AadAccessToken>(tokenJson)
+        } catch (e: Exception) {
+            sikkerlogg.info("Exception ved parsing av access token: ${e.message}, ${e.printStackTrace()}")
+            throw e
+        }
 
         sikkerlogg.info("hentet token for MS graph")
 
