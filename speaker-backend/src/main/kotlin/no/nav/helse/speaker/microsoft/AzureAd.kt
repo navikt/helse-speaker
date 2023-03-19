@@ -2,7 +2,6 @@ package no.nav.helse.speaker.microsoft
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nimbusds.jose.jwk.RSAKey
@@ -18,6 +17,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import no.nav.security.token.support.v2.IssuerConfig
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -92,8 +93,13 @@ class AzureAD private constructor(private val config: Config) {
         return token
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    internal data class AadAccessToken(val access_token: String)
+    @Serializable
+    internal data class AadAccessToken(
+        @SerialName("access_token")
+        private val accessToken: String
+    ) {
+        override fun toString(): String = accessToken
+    }
 
     internal companion object {
         private val logg = LoggerFactory.getLogger(AzureAD::class.java)

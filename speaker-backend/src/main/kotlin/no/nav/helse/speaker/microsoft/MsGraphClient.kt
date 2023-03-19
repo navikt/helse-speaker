@@ -38,7 +38,7 @@ internal class MsGraphClient(
         val token = runBlocking { azureAD.fetchToken() }
         val response = runBlocking {
             httpClient.get("$graphUrl/groups/$groupId/members?\$select=id,displayName,mail,onPremisesSamAccountName") {
-                bearerAuth(token.access_token)
+                bearerAuth(token.toString())
                 accept(ContentType.parse("application/json"))
             }.body<JsonObject>()
         }
