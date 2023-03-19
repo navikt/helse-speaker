@@ -34,14 +34,16 @@ internal class MsGraphClient(
     }
 
     override fun finnTeammedlemmer(): List<Bruker> {
-        logg.info("Henter teammedlemmer")
+        logg.info("Henter access token for å kunne hente teammedlemmer")
         val token = runBlocking { azureAD.fetchToken() }
+        logg.info("Access token hentet, henter teammedlemmer")
         val response = runBlocking {
             httpClient.get("$graphUrl/groups/$groupId/members?\$select=id,givenName,surname,mail,onPremisesSamAccountName") {
                 bearerAuth(token.toString())
                 accept(ContentType.parse("application/json"))
             }.body<JsonObject>()
         }
+        logg.info("Respons fra Graph: $response")
         val brukere = response.getValue("value").jsonArray.map { userNode ->
             val userObject = userNode.jsonObject
             Bruker(
