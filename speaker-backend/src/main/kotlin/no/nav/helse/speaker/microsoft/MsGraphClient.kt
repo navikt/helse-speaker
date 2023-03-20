@@ -12,6 +12,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import no.nav.helse.speaker.IMsGraphClient
 import no.nav.helse.speaker.domene.Bruker
 import no.nav.helse.speaker.domene.TeammedlemmerException
@@ -51,10 +52,10 @@ internal class MsGraphClient(
         val brukere = response.getValue("value").jsonArray.map { userNode ->
             val userObject = userNode.jsonObject
             Bruker(
-                epostadresse = userObject["mail"].toString(),
-                navn = "${userObject["givenName"].toString()} ${userObject["surname"].toString()}",
-                ident = userObject["onPremisesSamAccountName"].toString(),
-                oid = UUID.fromString(userObject["id"].toString())
+                epostadresse = userObject.getValue("mail").jsonPrimitive.content,
+                navn = "${userObject.getValue("givenName").jsonPrimitive.content} ${userObject.getValue("surname").jsonPrimitive.content}",
+                ident = userObject.getValue("onPremisesSamAccountName").jsonPrimitive.content,
+                oid = UUID.fromString(userObject.getValue("id").jsonPrimitive.content)
             )
         }
         sikkerlogg.info("Teammedlemmer hentet")
