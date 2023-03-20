@@ -49,7 +49,9 @@ internal class MsGraphClient(
             throw TeammedlemmerException.HentingFeilet(e.message!!)
         }
         sikkerlogg.info("Respons fra Graph: $response")
-        val brukere = response.getValue("value").jsonArray.map { userNode ->
+        val brukere = response.getValue("value").jsonArray
+            .filterNot { it.jsonObject["givenName"] == null }
+            .map { userNode ->
             val userObject = userNode.jsonObject
             Bruker(
                 epostadresse = userObject.getValue("mail").jsonPrimitive.content,
