@@ -9,10 +9,7 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import no.nav.helse.speaker.IMsGraphClient
 import no.nav.helse.speaker.domene.Bruker
 import no.nav.helse.speaker.domene.TeammedlemmerException
@@ -50,7 +47,7 @@ internal class MsGraphClient(
         }
         sikkerlogg.info("Respons fra Graph: $response")
         val brukere = response.getValue("value").jsonArray
-            .filterNot { it.jsonObject["givenName"] == null }
+            .filterNot { it.jsonObject["givenName"]?.jsonPrimitive?.contentOrNull == null }
             .map { userNode ->
             val userObject = userNode.jsonObject
             Bruker(
