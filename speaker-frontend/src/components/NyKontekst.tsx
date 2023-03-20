@@ -1,10 +1,10 @@
 import { Button, Heading, Select, TextField } from '@navikt/ds-react';
 import React, { useEffect, useState } from 'react';
-import { Kontekst, Subdomene } from '../types';
+import { Subdomene } from '../types';
 import { useRecoilState } from 'recoil';
 import { brukerState, varslerState } from '../state/state';
 import { useForm, useWatch } from 'react-hook-form';
-import { fetchSubdomenerOgKontekster, fetchVarsler, postNyKontekst, postNyttSubdomene } from '../endepunkter';
+import { fetchSubdomenerOgKontekster, fetchVarsler, postNyKontekst } from '../endepunkter';
 import classNames from 'classnames';
 import styles from './NyttVarsel.module.css';
 
@@ -108,6 +108,7 @@ export const NyKontekst = () => {
                         <TextField
                             label="Forkortelse"
                             size="medium"
+                            htmlSize={4}
                             disabled={erDefaultSubdomene()}
                             error={(errors.forkortelse?.message as string) ?? ''}
                             {...register('forkortelse', {

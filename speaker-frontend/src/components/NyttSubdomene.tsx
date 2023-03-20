@@ -76,6 +76,7 @@ export const NyttSubdomene = () => {
                         />
                         <TextField
                             label="Forkortelse"
+                            htmlSize={4}
                             size="medium"
                             description={'Maksimalt to tegn og kun store bokstaver'}
                             className={'py-5'}
