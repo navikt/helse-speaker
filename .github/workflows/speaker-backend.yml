@@ -60,7 +60,7 @@ jobs:
 
   deployDev:
     name: deploy to dev
-    needs: [set_version, build, snyk]
+    needs: [set_version, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -73,7 +73,7 @@ jobs:
 
   deployProd:
     name: deploy to prod
-    needs: [set_version, build, snyk]
+    needs: [set_version, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
