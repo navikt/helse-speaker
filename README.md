@@ -7,7 +7,9 @@ Fire moduler, to runtimes
 
 * To ansvarsområder:
   * Validere varselkoder som produseres av Spleis
-  * Tilby endring av varsler/varseldefinisjoner gjennom brukergrensesnitt (https://speaker.intern.nav.no)
+  * Tilby oppretting av/endring av varsler/varseldefinisjoner gjennom brukergrensesnitt
+    * dev: https://speaker.intern.dev.nav.no
+    * prod: https://speaker.intern.nav.no
 
 * kafka - egen runtime, følger med på `aktivitetslogg_ny_aktivitet` på rapid'en og validerer varselkoden mot
 databasen

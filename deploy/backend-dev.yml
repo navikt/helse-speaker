@@ -9,7 +9,6 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - https://speaker.dev.intern.nav.no
     - https://speaker.intern.dev.nav.no
   strategy:
     type: Recreate
