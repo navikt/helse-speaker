@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Chips, Heading, Label, Select, Textarea } from '@navikt/ds-react';
+import { BodyShort, Button, Chips, Heading, Label, Select, Textarea, TextField } from '@navikt/ds-react';
 import { useForm, useWatch } from 'react-hook-form';
 import { fetchNesteVarselkode, fetchVarsler, postLagreVarsel } from '../endepunkter';
 import classNames from 'classnames';
@@ -143,14 +143,14 @@ export const NyttVarsel = () => {
                                             );
                                         })}
                             </Select>
-                            <span className={'self-start mt-11'}>Varselkode: {nesteVarselkode ?? ''}</span>
+                            <BodyShort size="small" className={'self-end pb-4 pl-4'}>
+                                Varselkode: {nesteVarselkode ?? ''}
+                            </BodyShort>
                         </div>
-                        <Textarea
+                        <TextField
                             label="Tittel"
                             size="medium"
-                            className={'py-5'}
-                            minRows={1}
-                            maxRows={5}
+                            className={'py-5 w-1/2'}
                             error={(errors.tittel?.message as string) ?? ''}
                             {...register('tittel', { required: 'Tittel er påkrevd' })}
                         />
