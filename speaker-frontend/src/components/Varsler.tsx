@@ -1,18 +1,10 @@
 import { VarselComponent } from './Varsel';
-import { fetchVarsler } from '../endepunkter';
-import React, { useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { søkbareVarslerState, varslerState } from '../state/state';
+import React from 'react';
+import { useRecoilValue } from 'recoil';
+import { søkbareVarslerState } from '../state/state';
 
 export const Varsler = () => {
-    const [, setVarsler] = useRecoilState(varslerState);
     const søkbareVarsler = useRecoilValue(søkbareVarslerState);
-
-    useEffect(() => {
-        fetchVarsler().then((varsler) => {
-            setVarsler(varsler);
-        });
-    }, []);
 
     return (
         <div className={'p-4 pt-0'}>

@@ -1,5 +1,5 @@
 import { atom, selector } from 'recoil';
-import { Bruker, Varsel } from '../types';
+import { Bruker, Subdomene, Varsel } from '../types';
 
 export const varslerState = atom({
     key: 'varslerState',
@@ -18,6 +18,11 @@ export const brukerState = atom<Bruker | undefined>({
 
 export const teammedlemmerState = atom<Bruker[]>({
     key: 'teammedlemmerState',
+    default: [],
+});
+
+export const subdomenerOgKonteksterState = atom<Subdomene[]>({
+    key: 'subdomenerOgKonteksterState',
     default: [],
 });
 

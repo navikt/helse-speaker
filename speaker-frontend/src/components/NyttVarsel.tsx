@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Chips, Heading, Label, Select, Textarea } from '@navikt/ds-react';
 import { useForm, useWatch } from 'react-hook-form';
-import { fetchNesteVarselkode, fetchSubdomenerOgKontekster, fetchVarsler, postLagreVarsel } from '../endepunkter';
+import { fetchNesteVarselkode, fetchVarsler, postLagreVarsel } from '../endepunkter';
 import classNames from 'classnames';
 import styles from './NyttVarsel.module.css';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { brukerState, varslerState, velgbareTeammeldemmerState } from '../state/state';
+import { brukerState, subdomenerOgKonteksterState, varslerState, velgbareTeammeldemmerState } from '../state/state';
 import { Bruker, Subdomene } from '../types';
 
 interface NyttVarselForm {
@@ -18,7 +18,7 @@ interface NyttVarselForm {
 
 export const NyttVarsel = () => {
     const [nesteVarselkode, setNesteVarselkode] = useState<string | undefined>(undefined);
-    const [subdomener, setSubdomener] = useState<Subdomene[]>();
+    const subdomener = useRecoilValue<Subdomene[]>(subdomenerOgKonteksterState);
 
     const teammedlemmer = useRecoilValue(velgbareTeammeldemmerState);
     const [selectedMedforfattere, setSelectedMedforfattere] = useState<Bruker[]>([]);
@@ -61,12 +61,6 @@ export const NyttVarsel = () => {
             }
         });
     };
-
-    useEffect(() => {
-        fetchSubdomenerOgKontekster().then((subdomenerOgKontekster) => {
-            setSubdomener(subdomenerOgKontekster);
-        });
-    }, []);
 
     useEffect(() => {
         if (!erDefaultSubdomene() && !erDefaultKontekst())

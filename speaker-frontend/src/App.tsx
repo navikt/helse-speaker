@@ -11,16 +11,24 @@ import { NyttVarsel } from './components/NyttVarsel';
 import { NyttSubdomene } from './components/NyttSubdomene';
 import { Tabs } from '@navikt/ds-react';
 import { NyKontekst } from './components/NyKontekst';
-import { fetchTeammedlemmer } from './endepunkter';
-import { teammedlemmerState } from './state/state';
+import { fetchSubdomenerOgKontekster, fetchTeammedlemmer, fetchVarsler } from './endepunkter';
+import { subdomenerOgKonteksterState, teammedlemmerState, varslerState } from './state/state';
 
 const App = () => {
     const [state, setState] = useState('varsler');
     const setTeammedlemmer = useSetRecoilState(teammedlemmerState);
+    const setSubdomener = useSetRecoilState(subdomenerOgKonteksterState);
+    const setVarsler = useSetRecoilState(varslerState);
 
     useEffect(() => {
         fetchTeammedlemmer().then((teammedlemmer) => {
             setTeammedlemmer(teammedlemmer);
+        });
+        fetchVarsler().then((varsler) => {
+            setVarsler(varsler);
+        });
+        fetchSubdomenerOgKontekster().then((subdomenerOgKontekster) => {
+            setSubdomener(subdomenerOgKontekster);
         });
     }, []);
 
