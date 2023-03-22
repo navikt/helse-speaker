@@ -93,6 +93,7 @@ private object OauthMock {
                 issuerId = issuerId,
                 audience = listOf(clientId),
                 claims = claims,
+                expiry = 604800 // en uke
             )
         ).serialize()
     }
