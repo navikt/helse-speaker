@@ -7,7 +7,7 @@ export const Varsler = () => {
     const søkbareVarsler = useRecoilValue(søkbareVarslerState);
 
     return (
-        <div className={'p-4 pt-0'}>
+        <div className={'flex flex-col gap-4'}>
             {søkbareVarsler.length > 0 &&
                 søkbareVarsler.map((varsel) => <VarselComponent key={varsel.varselkode} varsel={varsel} />)}
         </div>

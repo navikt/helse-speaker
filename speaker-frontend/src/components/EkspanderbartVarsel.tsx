@@ -30,7 +30,7 @@ export const EkspanderbartVarsel: React.FC<EkspanderbartVarselProps> = ({
     return (
         <Accordion.Item
             defaultOpen={open}
-            className={classNames(styles.EkspanderbartVarsel, styles.warning, 'py-3', className)}
+            className={classNames(styles.EkspanderbartVarsel, styles.warning, className)}
             {...divProps}
         >
             <Accordion.Header onClick={() => setOpen(!open)}>
