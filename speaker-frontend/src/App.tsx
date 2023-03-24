@@ -11,6 +11,7 @@ import { Tabs } from '@navikt/ds-react';
 import { NyKontekst } from './components/NyKontekst';
 import { fetchSubdomenerOgKontekster, fetchTeammedlemmer, fetchVarsler } from './endepunkter';
 import { subdomenerOgKonteksterState, teammedlemmerState, varslerState } from './state/state';
+import { Kontekster } from './components/Kontekster';
 
 const App = () => {
     const [state, setState] = useState('varsler');
@@ -48,6 +49,7 @@ const App = () => {
                 </Tabs.Panel>
                 <Tabs.Panel value="kontekster" className="pl-10">
                     <NyKontekst />
+                    <Kontekster />
                 </Tabs.Panel>
             </Tabs>
         </>

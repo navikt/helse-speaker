@@ -1,10 +1,10 @@
 import { Button, Select, TextField } from '@navikt/ds-react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Subdomene } from '../types';
-import { useRecoilState } from 'recoil';
-import { brukerState, varslerState } from '../state/state';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { brukerState, subdomenerOgKonteksterState, varslerState } from '../state/state';
 import { useForm, useWatch } from 'react-hook-form';
-import { fetchSubdomenerOgKontekster, fetchVarsler, postNyKontekst } from '../endepunkter';
+import { fetchVarsler, postNyKontekst } from '../endepunkter';
 import { FormContainer } from './FormContainer';
 
 interface NyKontekstForm {
@@ -14,7 +14,7 @@ interface NyKontekstForm {
 }
 
 export const NyKontekst = () => {
-    const [subdomener, setSubdomener] = useState<Subdomene[]>();
+    const subdomener = useRecoilValue(subdomenerOgKonteksterState);
     const [, setVarsler] = useRecoilState(varslerState);
     const [bruker] = useRecoilState(brukerState);
     const [isLoading, setIsLoading] = useState(false);
@@ -52,12 +52,6 @@ export const NyKontekst = () => {
             }
         });
     };
-
-    useEffect(() => {
-        fetchSubdomenerOgKontekster().then((subdomenerOgKontekster) => {
-            setSubdomener(subdomenerOgKontekster);
-        });
-    }, []);
 
     if (!subdomener) return <></>;
 
