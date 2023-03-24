@@ -12,6 +12,7 @@ import { NyKontekst } from './components/kontekst/NyKontekst';
 import { fetchSubdomenerOgKontekster, fetchTeammedlemmer, fetchVarsler } from './endepunkter';
 import { subdomenerOgKonteksterState, teammedlemmerState, varslerState } from './state/state';
 import { Kontekster } from './components/kontekst/Kontekster';
+import { Subdomener } from './components/subdomene/Subdomener';
 
 const App = () => {
     const [state, setState] = useState('varsler');
@@ -46,6 +47,7 @@ const App = () => {
                 </Tabs.Panel>
                 <Tabs.Panel value="subdomener" className="pl-10">
                     <NyttSubdomene />
+                    <Subdomener />
                 </Tabs.Panel>
                 <Tabs.Panel value="kontekster" className="pl-10">
                     <NyKontekst />
