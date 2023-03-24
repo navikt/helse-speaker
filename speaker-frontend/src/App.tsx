@@ -3,15 +3,15 @@ import '@navikt/ds-css';
 import '@navikt/ds-css-internal';
 import React, { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
-import { Varsler } from './components/Varsler';
+import { Varsler } from './components/varsler/Varsler';
 import { Header } from './components/Header';
-import { NyttVarsel } from './components/NyttVarsel';
-import { NyttSubdomene } from './components/NyttSubdomene';
+import { NyttVarsel } from './components/varsler/NyttVarsel';
+import { NyttSubdomene } from './components/subdomene/NyttSubdomene';
 import { Tabs } from '@navikt/ds-react';
-import { NyKontekst } from './components/NyKontekst';
+import { NyKontekst } from './components/kontekst/NyKontekst';
 import { fetchSubdomenerOgKontekster, fetchTeammedlemmer, fetchVarsler } from './endepunkter';
 import { subdomenerOgKonteksterState, teammedlemmerState, varslerState } from './state/state';
-import { Kontekster } from './components/Kontekster';
+import { Kontekster } from './components/kontekst/Kontekster';
 
 const App = () => {
     const [state, setState] = useState('varsler');

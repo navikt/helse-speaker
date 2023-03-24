@@ -1,11 +1,11 @@
 import { Button, Select, TextField } from '@navikt/ds-react';
 import React, { useState } from 'react';
-import { Subdomene } from '../types';
+import { Subdomene } from '../../types';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { brukerState, subdomenerOgKonteksterState, varslerState } from '../state/state';
+import { brukerState, subdomenerOgKonteksterState, varslerState } from '../../state/state';
 import { useForm, useWatch } from 'react-hook-form';
-import { fetchVarsler, postNyKontekst } from '../endepunkter';
-import { FormContainer } from './FormContainer';
+import { fetchVarsler, postNyKontekst } from '../../endepunkter';
+import { FormContainer } from '../FormContainer';
 
 interface NyKontekstForm {
     subdomene: string;

@@ -1,7 +1,7 @@
 import { VarselComponent } from './Varsel';
 import React from 'react';
 import { useRecoilValue } from 'recoil';
-import { søkbareVarslerState } from '../state/state';
+import { søkbareVarslerState } from '../../state/state';
 
 export const Varsler = () => {
     const søkbareVarsler = useRecoilValue(søkbareVarslerState);

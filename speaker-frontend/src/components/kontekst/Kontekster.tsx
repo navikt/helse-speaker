@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table } from '@navikt/ds-react';
 import { useRecoilValue } from 'recoil';
-import { subdomenerOgKonteksterState } from '../state/state';
+import { subdomenerOgKonteksterState } from '../../state/state';
 
 interface Flattened {
     subdomenenavn: string;

@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { BodyShort, Button, Chips, Label, Textarea } from '@navikt/ds-react';
 import { EkspanderbartVarsel } from './EkspanderbartVarsel';
 import { useForm } from 'react-hook-form';
-import { fetchVarsler, postOppdaterVarsel } from '../endepunkter';
+import { fetchVarsler, postOppdaterVarsel } from '../../endepunkter';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { brukerState, varslerState, velgbareTeammeldemmerState } from '../state/state';
+import { brukerState, varslerState, velgbareTeammeldemmerState } from '../../state/state';
 import styles from './Varsel.module.css';
-import { Bruker, Varsel } from '../types';
+import { Bruker, Varsel } from '../../types';
 
 export interface VarselProps {
     varsel: Varsel;

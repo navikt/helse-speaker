@@ -3,7 +3,7 @@ import React, { ReactNode, useState } from 'react';
 import { Accordion, Alert, BodyShort } from '@navikt/ds-react';
 
 import styles from './EkspanderbartVarsel.module.css';
-import { Bruker } from '../types';
+import { Bruker } from '../../types';
 import dayjs from 'dayjs';
 
 interface EkspanderbartVarselProps extends React.HTMLAttributes<HTMLDivElement> {

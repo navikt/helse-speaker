@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { BodyShort, Button, Chips, Label, Select, Textarea, TextField } from '@navikt/ds-react';
 import { useForm, useWatch } from 'react-hook-form';
-import { fetchNesteVarselkode, fetchVarsler, postLagreVarsel } from '../endepunkter';
+import { fetchNesteVarselkode, fetchVarsler, postLagreVarsel } from '../../endepunkter';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { brukerState, subdomenerOgKonteksterState, varslerState, velgbareTeammeldemmerState } from '../state/state';
-import { Bruker, Subdomene } from '../types';
-import { FormContainer } from './FormContainer';
+import { brukerState, subdomenerOgKonteksterState, varslerState, velgbareTeammeldemmerState } from '../../state/state';
+import { Bruker, Subdomene } from '../../types';
+import { FormContainer } from '../FormContainer';
 
 interface NyttVarselForm {
     tittel: string;
