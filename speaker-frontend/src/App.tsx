@@ -34,7 +34,7 @@ const App = () => {
     return (
         <>
             <Header />
-            <Tabs value={state} onChange={setState} className="mt-8">
+            <Tabs value={state} onChange={setState} className="mt-8 pb-8">
                 <Tabs.List className="pl-10">
                     <Tabs.Tab value={'varsler'} label={'Varsler'} />
                     <Tabs.Tab value="subdomener" label="Subdomener" />

@@ -1,10 +1,9 @@
 import { Button, TextField } from '@navikt/ds-react';
-import React, { useEffect, useState } from 'react';
-import { Subdomene } from '../../types';
+import React, { useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { brukerState, varslerState } from '../../state/state';
+import { brukerState, subdomenerOgKonteksterState } from '../../state/state';
 import { useForm } from 'react-hook-form';
-import { fetchSubdomenerOgKontekster, fetchVarsler, postNyttSubdomene } from '../../endepunkter';
+import { fetchSubdomenerOgKontekster, postNyttSubdomene } from '../../endepunkter';
 import { FormContainer } from '../FormContainer';
 
 interface NyttSubdomeneForm {
@@ -13,8 +12,7 @@ interface NyttSubdomeneForm {
 }
 
 export const NyttSubdomene = () => {
-    const [subdomener, setSubdomener] = useState<Subdomene[]>();
-    const [, setVarsler] = useRecoilState(varslerState);
+    const [subdomener, setSubdomener] = useRecoilState(subdomenerOgKonteksterState);
     const [bruker] = useRecoilState(brukerState);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -33,21 +31,15 @@ export const NyttSubdomene = () => {
             forkortelse: forkortelse,
         }).then((r) => {
             if (r.status === 200) {
-                fetchVarsler()
-                    .then((varsler) => {
-                        setVarsler(varsler);
+                fetchSubdomenerOgKontekster()
+                    .then((subdomener) => {
+                        setSubdomener(subdomener);
                         reset();
                     })
                     .finally(() => setIsLoading(false));
             }
         });
     };
-
-    useEffect(() => {
-        fetchSubdomenerOgKontekster().then((subdomenerOgKontekster) => {
-            setSubdomener(subdomenerOgKontekster);
-        });
-    }, []);
 
     if (!subdomener) return <></>;
 

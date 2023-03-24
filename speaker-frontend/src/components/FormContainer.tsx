@@ -14,7 +14,7 @@ export const FormContainer = ({ buttonTitle, formTitle, children }: FormContaine
     const [toggled, setToggled] = useState(false);
 
     return (
-        <div className={classNames(styles.NyttVarsel, 'pb-5')}>
+        <div className={classNames(styles.Container, 'pb-5')}>
             {!toggled ? (
                 <div className="pt-4">
                     <Button variant="secondary" icon={<AddCircle />} onClick={() => setToggled(true)}>
@@ -22,7 +22,7 @@ export const FormContainer = ({ buttonTitle, formTitle, children }: FormContaine
                     </Button>
                 </div>
             ) : (
-                <div className={classNames(styles.NyttVarselContainer, 'flex flex-col gap-4 bg-gray-100 pt-1 pr-1')}>
+                <div className={classNames(styles.FormContainer, 'flex flex-col gap-4 bg-gray-100 pt-1 pr-1')}>
                     <div className="flex flex-row justify-between items-center">
                         <Heading level="4" size="small">
                             {formTitle}
