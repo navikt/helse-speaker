@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import styles from './varsler/NyttVarsel.module.css';
+import styles from './FormContainer.module.css';
 import { Button, Heading } from '@navikt/ds-react';
 import { AddCircle, Close } from '@navikt/ds-icons';
 

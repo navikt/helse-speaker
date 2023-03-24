@@ -1,7 +1,7 @@
-.NyttVarsel {
+.Container {
     max-width: 1275px;
 }
 
-.NyttVarselContainer {
+.FormContainer {
     box-shadow: -2.25rem 0 0 0 var(--a-gray-100);
 }
