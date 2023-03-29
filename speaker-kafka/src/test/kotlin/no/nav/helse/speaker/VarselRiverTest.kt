@@ -21,42 +21,21 @@ internal class VarselRiverTest {
     fun `leser aktiviteter`() {
         val melding = lesMelding("testmelding.json")
         rapid.sendTestMessage(melding)
-        verify(exactly = 1) { repository.sjekkGyldighet(any(), any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `aktiviteter uten varsler medfører ikke melding på Kafka`() {
-        val melding = lesMelding("testmelding_uten_varsler.json")
-        rapid.sendTestMessage(melding)
-        verify(exactly = 0) { repository.sjekkGyldighet(any(), any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `varsel uten varselkode medfører ikke melding på kafka`() {
-        val melding = lesMelding("testmelding_varsel_uten_varselkode.json")
-        rapid.sendTestMessage(melding)
-        verify(exactly = 0) { repository.sjekkGyldighet(any(), any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `varsel uten id medfører ikke melding på kafka`() {
-        val melding = lesMelding("testmelding_varsel_uten_id.json")
-        rapid.sendTestMessage(melding)
-        verify(exactly = 0) { repository.sjekkGyldighet(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { repository.varselkoderFor(any()) }
     }
 
     @Test
     fun `aktivitetslogg uten aktiviteter leses ikke inn`() {
         val melding = lesMelding("testmelding_uten_aktiviteter.json")
         rapid.sendTestMessage(melding)
-        verify(exactly = 0) { repository.sjekkGyldighet(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { repository.varselkoderFor(any()) }
     }
 
     @Test
     fun `aktivitetslogg uten fødselsnummer leses ikke inn`() {
         val melding = lesMelding("testmelding_uten_fnr.json")
         rapid.sendTestMessage(melding)
-        verify(exactly = 0) { repository.sjekkGyldighet(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { repository.varselkoderFor(any()) }
     }
 
     private fun lesMelding(filnavn: String) =

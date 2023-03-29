@@ -52,27 +52,6 @@ internal abstract class AbstractDatabaseTest {
             it.run(queryOf("SELECT truncate_tables()").asExecute)
         }
     }
-
-    protected fun opprettVarsel(kode: String) {
-        opprettKode(kode)
-        opprettDefinisjon(kode, "EN TITTEL", "EN FORKLARING", "EN HANDLING")
-    }
-
-    private fun opprettKode(kode: String) {
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query = "INSERT INTO varselkode(kode, avviklet, opprettet, endret) VALUES (?, false, now(), null)"
-            it.run(queryOf(query, kode).asExecute)
-        }
-    }
-
-    protected fun opprettDefinisjon(kode: String, tittel: String, forklaring: String, handling: String) {
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query = "INSERT INTO varsel_definisjon(varselkode_ref, tittel, forklaring, handling) VALUES ((SELECT id FROM varselkode WHERE kode = ?), ?, ?, ?)"
-            it.run(queryOf(query, kode, tittel, forklaring, handling).asExecute)
-        }
-    }
 }
 
 private fun createTruncateFunction(dataSource: DataSource) {

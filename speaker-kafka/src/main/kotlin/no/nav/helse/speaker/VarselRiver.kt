@@ -3,7 +3,7 @@ package no.nav.helse.speaker
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.rapids_rivers.*
-import no.nav.helse.speaker.VarselRepository.Companion.validerVarsler
+import no.nav.helse.speaker.Varselkode.Companion.loggUgyldige
 import org.slf4j.LoggerFactory
 
 internal class VarselRiver(
@@ -41,6 +41,8 @@ internal class VarselRiver(
             .filter { it["nivå"].asText() == "VARSEL" }
             .partition { it["varselkode"]?.asText() != null }
         varslerUtenKode.logg()
-        varslerMedKode.validerVarsler(varselRepository)
+        val varselkoderStrings = varslerMedKode.map { it["varselkode"].asText() }
+        val varselkoder = varselRepository.varselkoderFor(varselkoderStrings)
+        varselkoder.loggUgyldige()
     }
 }
