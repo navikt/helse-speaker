@@ -85,8 +85,8 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
                     error={(errors.tittel?.message as string) ?? ''}
                     {...register('tittel', { required: 'Tittel er påkrevd' })}
                 />
-                <Textarea label="Forklaring" size="medium" minRows={1} maxRows={5} {...register('forklaring')} />
-                <Textarea label="Hva gjør man?" size="medium" minRows={1} maxRows={5} {...register('handling')} />
+                <Textarea label="Hva betyr det?" size="medium" minRows={1} maxRows={5} {...register('forklaring')} />
+                <Textarea label="Hva gjør du?" size="medium" minRows={1} maxRows={5} {...register('handling')} />
                 <Label>Medforfattere</Label>
                 <Chips>
                     {teammedlemmer.map((c) => (

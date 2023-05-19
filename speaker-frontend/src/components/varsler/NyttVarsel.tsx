@@ -132,7 +132,7 @@ export const NyttVarsel = () => {
                     {...register('tittel', { required: 'Tittel er påkrevd' })}
                 />
                 <Textarea
-                    label="Forklaring"
+                    label="Hva betyr det?"
                     size="medium"
                     className={'pb-5'}
                     minRows={3}
@@ -140,7 +140,7 @@ export const NyttVarsel = () => {
                     {...register('forklaring')}
                 />
                 <Textarea
-                    label="Hva gjør man?"
+                    label="Hva gjør du?"
                     size="medium"
                     className={'pb-5'}
                     minRows={3}
