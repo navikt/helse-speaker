@@ -18,7 +18,7 @@ internal class Varselkode private constructor(
     constructor(definisjon: Varseldefinisjon, vararg observere: IVarselkodeObserver):
         this(definisjon.kode(), mutableListOf(definisjon), LocalDateTime.now()) {
             register(*observere)
-            this.observere.varselkodeOpprettet(this, kode, gjeldendeDefinisjon)
+            this.observers.varselkodeOpprettet(this, kode, gjeldendeDefinisjon)
         }
 
     init {
@@ -27,7 +27,7 @@ internal class Varselkode private constructor(
     }
 
     @Transient
-    private val observere: MutableSet<IVarselkodeObserver> = mutableSetOf()
+    private val observers: MutableSet<IVarselkodeObserver> = mutableSetOf()
 
     private val oppdelt = kode.split("_")
     private val domene = oppdelt[0]
@@ -37,13 +37,13 @@ internal class Varselkode private constructor(
     private val avviklet = gjeldendeDefinisjon.erAvviklet()
 
     internal fun register(vararg observere: IVarselkodeObserver) {
-        this.observere.addAll(observere)
+        this.observers.addAll(observere)
     }
 
     internal fun håndter(varseldefinisjon: Varseldefinisjon) {
         if (varseldefinisjon == gjeldendeDefinisjon) throw VarselException.IngenEndring(varseldefinisjon)
         definisjoner.add(varseldefinisjon)
-        observere.varselkodeEndret(this, kode, gjeldendeDefinisjon)
+        observers.varselkodeEndret(this, kode, gjeldendeDefinisjon)
     }
 
     internal fun kode() = kode
