@@ -1,15 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: speaker-db-policy-dev
+  name: speaker-db-policy-prod
   namespace: tbd
 spec:
   egress:
     - to:
         - ipBlock:
-            cidr: 35.228.234.233/32
+            cidr: 35.228.3.236/32
   podSelector:
     matchLabels:
-      app: speaker-kafka
+      db: speakerdb
   policyTypes:
     - Egress

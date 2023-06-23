@@ -5,6 +5,7 @@ metadata:
   namespace: tbd
   labels:
     team: tbd
+    db: speakerdb
 spec:
   image: {{image}}
   port: 8080
