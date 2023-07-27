@@ -77,6 +77,9 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
                 <BodyShort>
                     <span className={styles.varselkode}>Varselkode:</span> {varsel.varselkode}
                 </BodyShort>
+                <BodyShort>
+                    <span className={styles.avviklet}>{varsel.avviklet ? 'NB: AVVIKLET': ''}</span>
+                </BodyShort>
                 <Textarea
                     label="Tittel"
                     size="medium"
