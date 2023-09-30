@@ -2,9 +2,9 @@ import java.nio.file.Paths
 
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
-val micrometerVersion = "1.9.4"
-val ktorVersion = "2.2.4"
-val jacksonVersion = "2.14.2"
+val micrometerVersion = "1.11.4"
+val ktorVersion = "2.3.4"
+val jacksonVersion = "2.15.2"
 val logbackVersion: String by project
 val postgresqlVersion: String by project
 val junitVersion: String by project
@@ -13,11 +13,11 @@ val testcontainersPostgresqlVersion: String by project
 val flywayVersion: String by project
 val hikariVersion: String by project
 val kotliqueryVersion: String by project
-val rapidsAndRiversVersion = "2023030114281677677302.a5a4e4ab1356"
+val rapidsAndRiversVersion = "2023093008351696055717.ffdec6aede3d"
 
 plugins {
     kotlin("jvm") apply true
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 }
 
 dependencies {
@@ -59,7 +59,7 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-client-apache-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-server-call-logging-jvm:2.2.4")
+    implementation("io.ktor:ktor-server-call-logging-jvm:$ktorVersion")
 
     api("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion") {
         exclude("com.fasterxml.jackson.core")
@@ -103,9 +103,8 @@ tasks {
 
         doLast {
             configurations.runtimeClasspath.get().forEach {
-                val file = File("$buildDir/libs/${it.name}")
-                if (!file.exists())
-                    it.copyTo(file)
+                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
+                if (!file.exists()) it.copyTo(file)
             }
         }
     }

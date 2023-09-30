@@ -12,11 +12,11 @@ val hikariVersion: String by project
 val kotliqueryVersion: String by project
 val cloudSqlProxyVersion = "1.7.1"
 val mockkVersion = "1.13.2"
-val rapidsAndRiversVersion = "2022100711511665136276.49acbaae4ed4"
+val rapidsAndRiversVersion = "2023093008351696055717.ffdec6aede3d"
 
 plugins {
     kotlin("jvm") apply true
-    kotlin("plugin.serialization") version "1.8.10"
+    kotlin("plugin.serialization") version "1.9.10"
 }
 
 dependencies {
@@ -37,7 +37,7 @@ dependencies {
     api("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion") {
         exclude("com.fasterxml.jackson.core")
     }
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation(project(":speaker-database"))
 
@@ -70,9 +70,8 @@ tasks {
 
         doLast {
             configurations.runtimeClasspath.get().forEach {
-                val file = File("$buildDir/libs/${it.name}")
-                if (!file.exists())
-                    it.copyTo(file)
+                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
+                if (!file.exists()) it.copyTo(file)
             }
         }
     }

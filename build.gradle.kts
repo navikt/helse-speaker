@@ -1,15 +1,15 @@
-val postgresqlVersion = "42.5.0"
-val junitVersion = "5.9.0"
-val logbackVersion = "1.4.0"
-val logstashVersion = "7.2"
-val testcontainersPostgresqlVersion = "1.17.3"
+val postgresqlVersion = "42.6.0"
+val junitVersion = "5.10.0"
+val logbackVersion = "1.4.11"
+val logstashVersion = "7.4"
+val testcontainersPostgresqlVersion = "1.19.0"
 val flywayVersion = "9.3.0"
 val hikariVersion = "5.0.1"
 val kotliqueryVersion = "1.9.0"
 
 plugins {
     base
-    kotlin("jvm") version "1.7.20" apply false
+    kotlin("jvm") version "1.9.10" apply false
     id("com.github.node-gradle.node") version "3.0.1"
 }
 
