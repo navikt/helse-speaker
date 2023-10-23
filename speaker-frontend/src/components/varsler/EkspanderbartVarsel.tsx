@@ -36,7 +36,7 @@ export const EkspanderbartVarsel: React.FC<EkspanderbartVarselProps> = ({
             <Accordion.Header onClick={() => setOpen(!open)}>
                 <Alert className={styles.Alert} variant={'warning'}>
                     {label}
-                    <div className={'flex flex-row gap-1'}>
+                    <div className={'flex flex-row gap-1 italic text-gray-700'}>
                         <BodyShort size={'small'}>
                             Sist endret {dayjs(tidspunkt).format(NORSK_DATOFORMAT_MED_KLOKKESLETT)}
                         </BodyShort>
