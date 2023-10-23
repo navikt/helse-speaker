@@ -144,7 +144,7 @@ export const NyttVarsel = () => {
                     size="medium"
                     className={'pb-5'}
                     minRows={3}
-                    maxRows={5}
+                    maxRows={20}
                     {...register('handling')}
                 />
                 <Label>Medforfattere</Label>

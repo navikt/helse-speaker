@@ -89,7 +89,7 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
                     {...register('tittel', { required: 'Tittel er påkrevd' })}
                 />
                 <Textarea label="Hva betyr det?" size="medium" minRows={1} maxRows={5} {...register('forklaring')} />
-                <Textarea label="Hva gjør du?" size="medium" minRows={1} maxRows={5} {...register('handling')} />
+                <Textarea label="Hva gjør du?" size="medium" minRows={1} maxRows={20} {...register('handling')} />
                 <Label>Medforfattere</Label>
                 <Chips>
                     {teammedlemmer.map((c) => (
