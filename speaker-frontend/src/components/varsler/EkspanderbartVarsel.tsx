@@ -27,6 +27,15 @@ export const EkspanderbartVarsel: React.FC<EkspanderbartVarselProps> = ({
 
     const authorsText = forfattere.map((it) => it.navn).join(', ');
 
+    const siDet = () => {
+        if (label != null) {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(label.toString());
+            utterance.lang = "nb"
+            synth.speak(utterance);
+        }
+    };
+
     return (
         <Accordion.Item
             defaultOpen={open}
@@ -35,7 +44,7 @@ export const EkspanderbartVarsel: React.FC<EkspanderbartVarselProps> = ({
         >
             <Accordion.Header onClick={() => setOpen(!open)}>
                 <Alert className={styles.Alert} variant={'warning'}>
-                    {label}
+                    {label} <button onClick={siDet}>🔊</button>
                     <div className={'flex flex-row gap-1 italic text-gray-700'}>
                         <BodyShort size={'small'}>
                             Sist endret {dayjs(tidspunkt).format(NORSK_DATOFORMAT_MED_KLOKKESLETT)}
