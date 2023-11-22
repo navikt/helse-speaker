@@ -10,8 +10,8 @@ export const Varsler = () => {
 
     const Checkbox = () => {
         return (
-            <div style={{ color: 'green', lineHeight : 3, padding: 5 }}>
-                <input type="checkbox" id="checkbox" checked={skalFiltrereAvvikledeVarsler} onChange={() => setSkalFiltrereAvvikledeVarsler(!skalFiltrereAvvikledeVarsler)} />
+            <div className={'inline-flex items-center gap-2 mb-5'}>
+                <input className={'h-4 w-4 cursor-pointer'} type="checkbox" id="checkbox" checked={skalFiltrereAvvikledeVarsler} onChange={() => setSkalFiltrereAvvikledeVarsler(!skalFiltrereAvvikledeVarsler)} />
                 <label htmlFor="checkbox">Filtrer bort avviklede varsler</label>
             </div>
         )
@@ -22,7 +22,7 @@ export const Varsler = () => {
     return (
         <div>
             <Checkbox/>
-            <p style={{color: 'green', lineHeight: 3}}> Viser {antallVarsler} varsler </p>
+            <p className={'mb-3'}> Viser {antallVarsler} varsler </p>
             <div className={'flex flex-col gap-4'}>
                 {søkbareVarsler.length > 0 &&
                     søkbareVarsler.map((varsel) => {
