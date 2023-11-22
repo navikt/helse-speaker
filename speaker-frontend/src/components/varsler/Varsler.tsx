@@ -2,27 +2,20 @@ import { VarselComponent } from './Varsel';
 import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { søkbareVarslerState } from '../../state/state';
+import { Checkbox, CheckboxGroup } from '@navikt/ds-react';
 
 export const Varsler = () => {
     const søkbareVarsler = useRecoilValue(søkbareVarslerState);
-
     const [skalFiltrereAvvikledeVarsler, setSkalFiltrereAvvikledeVarsler] = useState(false)
-
-    const Checkbox = () => {
-        return (
-            <div className={'inline-flex items-center gap-2 mb-5'}>
-                <input className={'h-4 w-4 cursor-pointer'} type="checkbox" id="checkbox" checked={skalFiltrereAvvikledeVarsler} onChange={() => setSkalFiltrereAvvikledeVarsler(!skalFiltrereAvvikledeVarsler)} />
-                <label htmlFor="checkbox">Filtrer bort avviklede varsler</label>
-            </div>
-        )
-    }
 
     const antallVarsler = skalFiltrereAvvikledeVarsler ? søkbareVarsler.filter(varsel => !varsel.avviklet).length : søkbareVarsler.length
 
     return (
         <div>
-            <Checkbox/>
-            <p className={'mb-3'}> Viser {antallVarsler} varsler </p>
+            <CheckboxGroup legend="Filtrer bort avviklede varsler" hideLegend onChange={(v) => setSkalFiltrereAvvikledeVarsler(!!v[0])}>
+                <Checkbox value={true}>Filtrer bort avviklede varsler</Checkbox>
+            </CheckboxGroup>
+            <p className={'my-3'}> Viser {antallVarsler} varsler </p>
             <div className={'flex flex-col gap-4'}>
                 {søkbareVarsler.length > 0 &&
                     søkbareVarsler.map((varsel) => {
