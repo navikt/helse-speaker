@@ -22,6 +22,15 @@
     --border-color: var(--a-border-warning);
 }
 
+.EkspanderbartVarsel.avviklet > button {
+    --background-color: var(--a-surface-danger-subtle);
+    --border-color: var(--a-border-danger);
+}
+
+.EkspanderbartVarsel.avviklet > button > span > div {
+    background-color: var(--a-surface-danger-subtle);
+}
+
 .EkspanderbartVarsel > button:hover,
 .EkspanderbartVarsel > button:focus {
     border-bottom: 1px solid var(--border-color);
@@ -70,7 +79,12 @@
     border: none;
     background-color: var(--background-color);
 }
+
 .Content.warning {
     --border-color: var(--a-border-warning);
     --background-color: var(--a-surface-warning-subtle);
+}
+
+.Content.avviklet {
+    --background-color: var(--a-surface-danger-subtle);
 }

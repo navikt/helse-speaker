@@ -11,6 +11,7 @@ interface EkspanderbartVarselProps extends React.HTMLAttributes<HTMLDivElement> 
     tidspunkt: string;
     label: ReactNode;
     children: ReactNode;
+    avviklet: boolean;
 }
 
 const NORSK_DATOFORMAT_MED_KLOKKESLETT = 'DD.MM.YYYY kl HH.mm';
@@ -21,6 +22,7 @@ export const EkspanderbartVarsel: React.FC<EkspanderbartVarselProps> = ({
     className,
     tidspunkt,
     forfattere,
+    avviklet,
     ...divProps
 }) => {
     const [open, setOpen] = useState(false);
@@ -39,7 +41,7 @@ export const EkspanderbartVarsel: React.FC<EkspanderbartVarselProps> = ({
     return (
         <Accordion.Item
             defaultOpen={open}
-            className={classNames(styles.EkspanderbartVarsel, styles.warning, className)}
+            className={classNames(styles.EkspanderbartVarsel, avviklet ? styles.avviklet : styles.warning, className)}
             {...divProps}
         >
             <Accordion.Header onClick={() => setOpen(!open)}>
@@ -54,7 +56,7 @@ export const EkspanderbartVarsel: React.FC<EkspanderbartVarselProps> = ({
                 </Alert>
             </Accordion.Header>
             {open && (
-                <Accordion.Content className={classNames(styles.Content, styles.warning)}>{children}</Accordion.Content>
+                <Accordion.Content className={classNames(styles.Content, avviklet ? styles.avviklet : styles.warning)}>{children}</Accordion.Content>
             )}
         </Accordion.Item>
     );

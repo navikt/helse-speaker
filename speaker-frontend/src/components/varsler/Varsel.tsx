@@ -72,6 +72,7 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
             label={varsel.tittel}
             tidspunkt={varsel?.opprettet ?? ''}
             forfattere={varsel.forfattere}
+            avviklet={varsel.avviklet}
         >
             <form onSubmit={handleSubmit(onSubmit)} className={'flex flex-col gap-4'}>
                 <BodyShort>
