@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BodyShort, Button, Chips, Label, Textarea } from '@navikt/ds-react';
+import { BodyShort, Button, Checkbox, CheckboxGroup, Chips, Label, Textarea } from '@navikt/ds-react';
 import { EkspanderbartVarsel } from './EkspanderbartVarsel';
 import { useForm } from 'react-hook-form';
 import { fetchVarsler, postOppdaterVarsel } from '../../endepunkter';
@@ -16,6 +16,7 @@ interface VarselForm {
     tittel: string;
     forklaring: string | null;
     handling: string | null;
+    avviklet: boolean;
 }
 
 export const VarselComponent = ({ varsel }: VarselProps) => {
@@ -30,6 +31,7 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
         tittel: varsel.tittel,
         forklaring: varsel.forklaring ?? '',
         handling: varsel.handling ?? '',
+        avviklet: varsel.avviklet,
     };
 
     const {
@@ -42,7 +44,7 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
         defaultValues,
     });
 
-    const onSubmit = ({ tittel, forklaring, handling }: VarselForm) => {
+    const onSubmit = ({ tittel, forklaring, handling, avviklet }: VarselForm) => {
         if (!bruker) return;
         setIsLoading(true);
         postOppdaterVarsel({
@@ -50,14 +52,19 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
             tittel: tittel,
             forklaring: forklaring,
             handling: handling,
-            avviklet: varsel.avviklet,
+            avviklet: avviklet,
             forfattere: [...selectedMedforfattere, bruker],
         }).then((r) => {
             if (r.status === 200) {
                 fetchVarsler()
                     .then((varsler) => {
                         setVarsler(varsler);
-                        reset({ tittel: tittel, forklaring: forklaring ?? '', handling: handling ?? '' });
+                        reset({
+                            tittel: tittel,
+                            forklaring: forklaring ?? '',
+                            handling: handling ?? '',
+                            avviklet: avviklet,
+                        });
                     })
                     .finally(() => {
                         setIsLoading(false);
@@ -78,19 +85,25 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
                 <BodyShort>
                     <span className={styles.varselkode}>Varselkode:</span> {varsel.varselkode}
                 </BodyShort>
-                <BodyShort>
-                    <span className={styles.avviklet}>{varsel.avviklet ? 'NB: AVVIKLET': ''}</span>
-                </BodyShort>
+                {varsel.avviklet ?
+                    <BodyShort>
+                        <span className={styles.avviklet}>{varsel.avviklet ? 'NB: AVVIKLET' : ''}</span>
+                    </BodyShort>
+                    :
+                    <CheckboxGroup legend='Avviklet' hideLegend>
+                        <Checkbox {...register('avviklet')} value={true}>Avvikle varsel</Checkbox>
+                    </CheckboxGroup>
+                }
                 <Textarea
-                    label="Tittel"
-                    size="medium"
+                    label='Tittel'
+                    size='medium'
                     minRows={1}
                     maxRows={5}
                     error={(errors.tittel?.message as string) ?? ''}
                     {...register('tittel', { required: 'Tittel er påkrevd' })}
                 />
-                <Textarea label="Hva betyr det?" size="medium" minRows={1} maxRows={5} {...register('forklaring')} />
-                <Textarea label="Hva gjør du?" size="medium" minRows={1} maxRows={20} {...register('handling')} />
+                <Textarea label='Hva betyr det?' size='medium' minRows={1} maxRows={5} {...register('forklaring')} />
+                <Textarea label='Hva gjør du?' size='medium' minRows={1} maxRows={20} {...register('handling')} />
                 <Label>Medforfattere</Label>
                 <Chips>
                     {teammedlemmer.map((c) => (
