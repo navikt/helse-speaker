@@ -7,6 +7,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { brukerState, varslerState, velgbareTeammeldemmerState } from '../../state/state';
 import styles from './Varsel.module.css';
 import { Bruker, Varsel } from '../../types';
+import { erUtvikling } from '../../utils/featureToggles';
 
 export interface VarselProps {
     varsel: Varsel;
@@ -89,10 +90,10 @@ export const VarselComponent = ({ varsel }: VarselProps) => {
                     <BodyShort>
                         <span className={styles.avviklet}>{varsel.avviklet ? 'NB: AVVIKLET' : ''}</span>
                     </BodyShort>
-                    :
+                    : erUtvikling() ?
                     <CheckboxGroup legend='Avviklet' hideLegend>
                         <Checkbox {...register('avviklet')} value={true}>Avvikle varsel</Checkbox>
-                    </CheckboxGroup>
+                    </CheckboxGroup> : null
                 }
                 <Textarea
                     label='Tittel'
