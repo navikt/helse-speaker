@@ -10,13 +10,13 @@ val logstashVersion: String by project
 val testcontainersPostgresqlVersion: String by project
 val hikariVersion: String by project
 val kotliqueryVersion: String by project
-val cloudSqlProxyVersion = "1.7.1"
+val cloudSqlProxyVersion = "1.15.1"
 val mockkVersion = "1.13.2"
-val rapidsAndRiversVersion = "2023093008351696055717.ffdec6aede3d"
+val rapidsAndRiversVersion = "2024010209171704183456.6d035b91ffb4"
 
 plugins {
     kotlin("jvm") apply true
-    kotlin("plugin.serialization") version "1.9.10"
+    kotlin("plugin.serialization") version "1.9.21"
 }
 
 dependencies {
@@ -55,7 +55,7 @@ tasks {
         useJUnitPlatform()
     }
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
+        kotlinOptions.jvmTarget = "21"
     }
 
     withType<Jar> {

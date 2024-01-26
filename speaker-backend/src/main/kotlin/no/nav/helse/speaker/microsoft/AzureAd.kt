@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 import java.time.Instant
 import java.util.*
 
@@ -135,13 +135,13 @@ class AzureAD private constructor(private val config: Config) {
     }
 
     private class Config(
-        internal val discoveryUrl: String,
-        internal val clientId: String,
-        internal val validGroupId: String,
-        internal val privateJwk: String
+        val discoveryUrl: String,
+        val clientId: String,
+        val validGroupId: String,
+        val privateJwk: String
     ) {
         private val discovered = discoveryUrl.discover()
-        internal val tokenEndpoint = discovered["token_endpoint"]?.textValue() ?: throw RuntimeException("Unable to discover token endpoint")
+        val tokenEndpoint = discovered["token_endpoint"]?.textValue() ?: throw RuntimeException("Unable to discover token endpoint")
 
         private fun String.discover(): JsonNode {
             val (responseCode, responseBody) = this.fetchUrl()
@@ -149,7 +149,7 @@ class AzureAD private constructor(private val config: Config) {
             return jacksonObjectMapper().readTree(responseBody)
         }
 
-        private fun String.fetchUrl() = with(URL(this).openConnection() as HttpURLConnection) {
+        private fun String.fetchUrl() = with(URI(this).toURL().openConnection() as HttpURLConnection) {
             requestMethod = "GET"
             val stream: InputStream? = if (responseCode < 300) this.inputStream else this.errorStream
             responseCode to stream?.bufferedReader()?.readText()

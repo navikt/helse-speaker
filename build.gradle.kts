@@ -9,7 +9,7 @@ val kotliqueryVersion = "1.9.0"
 
 plugins {
     base
-    kotlin("jvm") version "1.9.10" apply false
+    kotlin("jvm") version "1.9.21" apply false
     id("com.github.node-gradle.node") version "3.0.1"
 }
 
@@ -37,4 +37,4 @@ subprojects {
 //    dependsOn("npm_run_test")
 //}
 
-project.buildDir = File("dist")
+project.layout.buildDirectory = File("dist")

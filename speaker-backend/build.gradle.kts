@@ -3,7 +3,7 @@ import java.nio.file.Paths
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
 val micrometerVersion = "1.11.4"
-val ktorVersion = "2.3.4"
+val ktorVersion = "2.3.7"
 val jacksonVersion = "2.15.2"
 val logbackVersion: String by project
 val postgresqlVersion: String by project
@@ -13,11 +13,11 @@ val testcontainersPostgresqlVersion: String by project
 val flywayVersion: String by project
 val hikariVersion: String by project
 val kotliqueryVersion: String by project
-val rapidsAndRiversVersion = "2023093008351696055717.ffdec6aede3d"
+val rapidsAndRiversVersion = "2024010209171704183456.6d035b91ffb4"
 
 plugins {
     kotlin("jvm") apply true
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.21"
 }
 
 dependencies {
@@ -39,7 +39,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
-    implementation("no.nav.security:token-validation-ktor-v2:3.0.4")
+    implementation("no.nav.security:token-validation-ktor-v2:3.1.0")
 
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
@@ -65,7 +65,7 @@ dependencies {
         exclude("com.fasterxml.jackson.core")
     }
 
-    testImplementation("no.nav.security:mock-oauth2-server:0.5.8")
+    testImplementation("no.nav.security:mock-oauth2-server:2.1.1")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
     testImplementation("org.testcontainers:postgresql:$testcontainersPostgresqlVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
@@ -78,11 +78,11 @@ tasks {
     }
 
     compileKotlin {
-        kotlinOptions.jvmTarget = "17"
+        kotlinOptions.jvmTarget = "21"
     }
 
     compileTestKotlin {
-        kotlinOptions.jvmTarget = "17"
+        kotlinOptions.jvmTarget = "21"
     }
 
     withType<Jar> {
@@ -97,7 +97,7 @@ tasks {
             }
         }
 
-        from({ Paths.get(project(":speaker-frontend").buildDir.path) }) {
+        from({ Paths.get(project(":speaker-frontend").layout.buildDirectory.get().toString()) }) {
             into("speaker-frontend/dist")
         }
 
