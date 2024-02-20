@@ -8,7 +8,6 @@ val hikariVersion = "5.0.1"
 val kotliqueryVersion = "1.9.0"
 
 plugins {
-    base
     kotlin("jvm") version "1.9.21" apply false
     id("com.github.node-gradle.node") version "3.0.1"
 }
@@ -29,12 +28,5 @@ subprojects {
         maven("https://jitpack.io")
     }
 }
-//tasks.assemble {
-//    dependsOn("npm_run_build")
-//}
-//
-//tasks.check {
-//    dependsOn("npm_run_test")
-//}
 
 project.layout.buildDirectory = File("dist")

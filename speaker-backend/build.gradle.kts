@@ -73,16 +73,11 @@ dependencies {
 }
 
 tasks {
+    kotlin {
+        jvmToolchain(21)
+    }
     test {
         useJUnitPlatform()
-    }
-
-    compileKotlin {
-        kotlinOptions.jvmTarget = "21"
-    }
-
-    compileTestKotlin {
-        kotlinOptions.jvmTarget = "21"
     }
 
     withType<Jar> {

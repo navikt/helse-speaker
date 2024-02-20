@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 val mainClass = "no.nav.helse.speaker.AppKt"
 
 val flywayVersion: String by project
@@ -51,11 +49,11 @@ dependencies {
 }
 
 tasks {
+    kotlin {
+        jvmToolchain(21)
+    }
     test {
         useJUnitPlatform()
-    }
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "21"
     }
 
     withType<Jar> {
