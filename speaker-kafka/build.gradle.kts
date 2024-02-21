@@ -9,7 +9,7 @@ val testcontainersPostgresqlVersion: String by project
 val hikariVersion: String by project
 val kotliqueryVersion: String by project
 val cloudSqlProxyVersion = "1.15.1"
-val mockkVersion = "1.13.2"
+val mockkVersion = "1.13.9"
 val rapidsAndRiversVersion = "2024010209171704183456.6d035b91ffb4"
 
 plugins {
