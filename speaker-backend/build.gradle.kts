@@ -2,7 +2,7 @@ import java.nio.file.Paths
 
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
-val micrometerVersion = "1.11.4"
+val micrometerVersion = "1.12.3"
 val ktorVersion = "2.3.7"
 val jacksonVersion = "2.15.2"
 val logbackVersion: String by project
