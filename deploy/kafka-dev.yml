@@ -43,10 +43,6 @@ spec:
     - secret: google-sql-speaker-backend-speaker-speaker-kafka-59ac85c8
   secureLogs:
     enabled: true
-  observability:
-    autoInstrumentation:
-      enabled: true
-      runtime: java
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
