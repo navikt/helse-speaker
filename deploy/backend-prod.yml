@@ -10,6 +10,7 @@ spec:
   port: 8080
   ingresses:
     - https://speaker.intern.nav.no
+    - https://speaker.ansatt.nav.no
   liveness:
     path: /isalive
     initialDelay: 5
