@@ -39,7 +39,7 @@ spec:
     enabled: true
     path: /metrics
   kafka:
-    pool: nav-dev
+    pool: nav-prod
   secureLogs:
     enabled: true
   env:
