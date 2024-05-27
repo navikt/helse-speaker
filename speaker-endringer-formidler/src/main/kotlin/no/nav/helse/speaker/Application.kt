@@ -1,9 +1,6 @@
 package no.nav.helse.speaker
 
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
@@ -16,17 +13,24 @@ fun main() {
     RapidApplication.create(env).apply {
         register(
             object : RapidsConnection.StatusListener {
+                lateinit var job: Job
+
                 override fun onReady(rapidsConnection: RapidsConnection) {
-                    GlobalScope.launch {
-                        app(env, rapidsConnection)
-                    }
+                    job =
+                        GlobalScope.launch {
+                            app(env, rapidsConnection)
+                        }
+                }
+
+                override fun onShutdown(rapidsConnection: RapidsConnection) {
+                    job.cancel()
                 }
             },
         )
     }
 }
 
-fun app(
+suspend fun app(
     env: Map<String, String>,
     rapidsConnection: RapidsConnection,
 ) {
@@ -34,8 +38,6 @@ fun app(
     val sanityDataset = env["SANITY_DATASET"] ?: throw IllegalArgumentException("Mangler sanity dataset")
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
 
-    runBlocking {
-        sikkerlogg.info("Etablerer lytter mot Sanity")
-        sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, rapidsConnection)
-    }
+    sikkerlogg.info("Etablerer lytter mot Sanity")
+    sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, rapidsConnection)
 }
