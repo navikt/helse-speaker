@@ -56,6 +56,7 @@ internal suspend fun sanityVarselendringerListener(
         while (true) {
             incoming.collect { event ->
                 val data = event.data ?: return@collect
+                sikkerlogg.info("Mottatt melding fra Sanity")
                 try {
                     jsonReader.decodeFromString<SanityEndring>(data).result
                         .forsøkPubliserDefinisjon(iProduksjonsmiljø, rapidsConnection)

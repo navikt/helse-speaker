@@ -1,5 +1,7 @@
 val ktorClientVersion = "3.0.0-beta-1"
 val rapidsAndRiversVersion = "2024010209171704183456.6d035b91ffb4"
+val logstashVersion: String by project
+val logbackVersion: String by project
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
 plugins {
@@ -16,6 +18,9 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorClientVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorClientVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorClientVersion")
+
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
 
     api("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
 
