@@ -5,4 +5,4 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-include("speaker-frontend", "speaker-backend", "speaker-kafka", "speaker-database")
+include("speaker-frontend", "speaker-backend", "speaker-kafka", "speaker-database", "speaker-endringer-formidler")
