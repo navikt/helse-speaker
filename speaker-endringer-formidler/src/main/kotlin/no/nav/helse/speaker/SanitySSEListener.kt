@@ -96,10 +96,7 @@ data class Varseldefinisjon(
     val _rev: String,
     val tittel: String,
     val avviklet: Boolean,
-    // Ja, dette er riktig...
-    @SerialName("beskrivelse")
     val forklaring: String? = null,
-    @SerialName("forklaring")
     val handling: String? = null,
     val iProduksjon: Boolean,
     @Contextual
