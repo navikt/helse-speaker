@@ -27,7 +27,7 @@ fun main() {
                 }
             },
         )
-    }
+    }.start()
 }
 
 suspend fun app(
