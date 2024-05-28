@@ -77,7 +77,7 @@ internal fun Varseldefinisjon.forsøkPubliserDefinisjon(
             eventName = "varselkode_ny_definisjon",
             map =
                 mapOf(
-                    "varselkode" to this.varselkode.current,
+                    "varselkode" to this.varselkode,
                     "gjeldende_definisjon" to this.toKafkamelding(),
                 ),
         ).toJson(),
@@ -101,12 +101,12 @@ data class Varseldefinisjon(
     val iProduksjon: Boolean,
     @Contextual
     val _updatedAt: LocalDateTime,
-    val varselkode: Varselkode,
+    val varselkode: String,
 ) {
     fun toKafkamelding(): Map<String, Any> =
         mutableMapOf(
             "id" to UUID.nameUUIDFromBytes("$_id$_rev".toByteArray()),
-            "kode" to varselkode.current,
+            "kode" to varselkode,
             "tittel" to tittel,
             "avviklet" to avviklet,
             "opprettet" to _updatedAt,
@@ -115,8 +115,3 @@ data class Varseldefinisjon(
             compute("handling") { _, _ -> handling }
         }.toMap()
 }
-
-@Serializable
-data class Varselkode(
-    val current: String,
-)

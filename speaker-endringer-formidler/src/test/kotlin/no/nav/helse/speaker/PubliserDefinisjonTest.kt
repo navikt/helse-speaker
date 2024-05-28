@@ -95,10 +95,7 @@ class PubliserDefinisjonTest {
             handling = if (harHandling) "En handling" else null,
             iProduksjon = skruddPåIProduksjon,
             _updatedAt = LocalDateTime.now(),
-            varselkode =
-                Varselkode(
-                    "SB_EX_1",
-                ),
+            varselkode = "SB_EX_1",
         )
     }
 }
