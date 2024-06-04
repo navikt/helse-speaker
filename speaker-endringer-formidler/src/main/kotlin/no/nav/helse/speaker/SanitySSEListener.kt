@@ -13,7 +13,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.milliseconds
 
 private val jsonReader =
     Json {
@@ -51,7 +51,7 @@ internal suspend fun sanityVarselendringerListener(
         },
         showCommentEvents = false,
         showRetryEvents = false,
-        reconnectionTime = 2000.nanoseconds,
+        reconnectionTime = 5000.milliseconds,
     ) {
         while (true) {
             incoming.collect { event ->
@@ -60,6 +60,7 @@ internal suspend fun sanityVarselendringerListener(
                 try {
                     jsonReader.decodeFromString<SanityEndring>(data).result
                         .forsøkPubliserDefinisjon(iProduksjonsmiljø, rapidsConnection)
+                    sikkerlogg.info("Mottatt varseldefinisjon: $data")
                 } catch (_: SerializationException) {
                 }
             }
