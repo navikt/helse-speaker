@@ -60,6 +60,7 @@ internal suspend fun sanityVarselendringerListener(
                 .retry(5)
                 .catch {
                     sikkerlogg.error("Feil ved lesing av flow: {}", it.stackTraceToString())
+                    throw it
                 }
                 .collect { event ->
                     val data = event.data ?: return@collect
