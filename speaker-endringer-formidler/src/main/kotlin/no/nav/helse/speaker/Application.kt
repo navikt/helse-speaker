@@ -1,36 +1,26 @@
 package no.nav.helse.speaker
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 internal val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-@OptIn(DelicateCoroutinesApi::class)
 fun main() {
     val env = System.getenv()
     RapidApplication.create(env).apply {
         register(
             object : RapidsConnection.StatusListener {
-                lateinit var job: Job
-
                 override fun onReady(rapidsConnection: RapidsConnection) {
-                    job =
-                        GlobalScope.launch {
-                            app(env, rapidsConnection)
-                        }
-                }
-
-                override fun onShutdown(rapidsConnection: RapidsConnection) {
-                    job.cancel()
+                    app(env, rapidsConnection)
                 }
             },
         )
     }.start()
 }
 
-suspend fun app(
+fun app(
     env: Map<String, String>,
     rapidsConnection: RapidsConnection,
 ) {
@@ -39,5 +29,7 @@ suspend fun app(
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
 
     sikkerlogg.info("Etablerer lytter mot Sanity")
-    sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, rapidsConnection)
+    runBlocking {
+        sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, rapidsConnection)
+    }
 }
