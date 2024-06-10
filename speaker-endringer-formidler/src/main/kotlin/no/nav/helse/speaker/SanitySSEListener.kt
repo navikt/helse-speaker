@@ -5,6 +5,8 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.sse.SSE
 import io.ktor.client.plugins.sse.sse
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.retry
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
@@ -54,16 +56,22 @@ internal suspend fun sanityVarselendringerListener(
         reconnectionTime = 5000.milliseconds,
     ) {
         while (true) {
-            incoming.collect { event ->
-                val data = event.data ?: return@collect
-                sikkerlogg.info("Mottatt melding fra Sanity")
-                try {
-                    jsonReader.decodeFromString<SanityEndring>(data).result
-                        .forsøkPubliserDefinisjon(iProduksjonsmiljø, rapidsConnection)
-                    sikkerlogg.info("Mottatt varseldefinisjon: $data")
-                } catch (_: SerializationException) {
+            incoming
+                .retry(5)
+                .catch {
+                    sikkerlogg.error("Feil ved lesing av flow: {}", it.stackTraceToString())
                 }
-            }
+                .collect { event ->
+                    val data = event.data ?: return@collect
+                    sikkerlogg.info("Mottatt melding fra Sanity")
+                    try {
+                        jsonReader.decodeFromString<SanityEndring>(data).result
+                            .forsøkPubliserDefinisjon(iProduksjonsmiljø, rapidsConnection)
+                        sikkerlogg.info("Mottatt varseldefinisjon: $data")
+                    } catch (_: SerializationException) {
+                        sikkerlogg.info("Meldingen er ikke en varseldefinisjon: $data")
+                    }
+                }
         }
     }
 }
