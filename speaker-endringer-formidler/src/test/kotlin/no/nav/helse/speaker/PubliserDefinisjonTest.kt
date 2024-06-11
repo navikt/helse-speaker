@@ -1,6 +1,6 @@
 package no.nav.helse.speaker
 
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import kotlinx.serialization.json.JsonObject
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -8,85 +8,95 @@ import java.util.*
 
 class PubliserDefinisjonTest {
     private val id = UUID.randomUUID()
+    private val testsender =
+        object : Sender("", "") {
+            private val meldinger = mutableListOf<String>()
+
+            override fun send(melding: String) {
+                meldinger.add(melding)
+            }
+
+            val size get() = meldinger.size
+
+            fun assertDefinisjon(
+                harForklaring: Boolean,
+                harHandling: Boolean,
+            ) {
+                val meldingSomString = meldinger.first()
+                val meldingSomJson = meldingSomString.let { jsonReader.decodeFromString<JsonObject>(it) }
+                val melding = meldingSomString.let { jsonReader.decodeFromString<VarseldefinisjonEvent>(it) }
+                assertEquals("varselkode_ny_definisjon", melding.eventName)
+                assertEquals("SB_EX_1", melding.varselkode)
+                val gjeldendeDefinisjon = melding.gjeldendeDefinisjon
+                assertEquals("SB_EX_1", gjeldendeDefinisjon.kode)
+                assertEquals("En tittel", gjeldendeDefinisjon.tittel)
+                if (harForklaring) {
+                    assertEquals("En forklaring", gjeldendeDefinisjon.forklaring)
+                } else {
+                    assertNull(gjeldendeDefinisjon.forklaring)
+                }
+
+                if (harHandling) {
+                    assertEquals("En handling", gjeldendeDefinisjon.handling)
+                } else {
+                    assertNull(gjeldendeDefinisjon.handling)
+                }
+
+                assertEquals(false, gjeldendeDefinisjon.avviklet)
+                assertNotNull(meldingSomJson["system_participating_services"])
+                assertNotNull(meldingSomJson["@id"])
+                assertNotNull(meldingSomJson["@opprettet"])
+            }
+        }
 
     @Test
     fun `definisjon sendes ut på kafka på riktig format`() {
-        val testRapid = TestRapid()
         varseldefinisjon(skruddPåIProduksjon = false, harForklaring = true, harHandling = true)
-            .forsøkPubliserDefinisjon(false, testRapid)
-        testRapid.inspektør.assertDefinisjon(harForklaring = true, harHandling = true)
+            .forsøkPubliserDefinisjon(false, testsender)
+        testsender.assertDefinisjon(harForklaring = true, harHandling = true)
     }
 
     @Test
     fun `definisjon sendes ut på kafka på riktig format uten forklaring`() {
-        val testRapid = TestRapid()
         varseldefinisjon(skruddPåIProduksjon = false, harForklaring = false, harHandling = true)
-            .forsøkPubliserDefinisjon(false, testRapid)
-        testRapid.inspektør.assertDefinisjon(harForklaring = false, harHandling = true)
+            .forsøkPubliserDefinisjon(false, testsender)
+        testsender.assertDefinisjon(harForklaring = false, harHandling = true)
     }
 
     @Test
     fun `definisjon sendes ut på kafka på riktig format uten handling`() {
-        val testRapid = TestRapid()
         varseldefinisjon(skruddPåIProduksjon = false, harForklaring = true, harHandling = false)
-            .forsøkPubliserDefinisjon(false, testRapid)
-        testRapid.inspektør.assertDefinisjon(harForklaring = true, harHandling = false)
+            .forsøkPubliserDefinisjon(false, testsender)
+        testsender.assertDefinisjon(harForklaring = true, harHandling = false)
     }
 
     @Test
     fun `Publiser definisjon hvis ikke i produksjonsmiljø`() {
-        val testRapid = TestRapid()
         varseldefinisjon(skruddPåIProduksjon = false, harForklaring = true, harHandling = true)
-            .forsøkPubliserDefinisjon(false, testRapid)
-        assertEquals(1, testRapid.inspektør.size)
+            .forsøkPubliserDefinisjon(false, testsender)
+        assertEquals(1, testsender.size)
     }
 
     @Test
     fun `Publiser definisjon hvis i produksjonsmiljø og definisjon er togglet _på_ i produksjon`() {
-        val testRapid = TestRapid()
         varseldefinisjon(skruddPåIProduksjon = true, harForklaring = true, harHandling = true)
-            .forsøkPubliserDefinisjon(true, testRapid)
-        assertEquals(1, testRapid.inspektør.size)
+            .forsøkPubliserDefinisjon(true, testsender)
+        assertEquals(1, testsender.size)
     }
 
     @Test
     fun `Ikke publiser definisjon hvis i produksjonsmiljø og definisjon er togglet _av_ i produksjon`() {
-        val testRapid = TestRapid()
         varseldefinisjon(skruddPåIProduksjon = false, harForklaring = true, harHandling = true)
-            .forsøkPubliserDefinisjon(true, testRapid)
-        assertEquals(0, testRapid.inspektør.size)
-    }
-
-    private fun TestRapid.RapidInspector.assertDefinisjon(
-        harForklaring: Boolean,
-        harHandling: Boolean,
-    ) {
-        val melding = this.message(0)
-        assertEquals("varselkode_ny_definisjon", melding["@event_name"].asText())
-        assertEquals("SB_EX_1", melding["varselkode"].asText())
-        assertEquals("SB_EX_1", melding["gjeldende_definisjon"]["kode"].asText())
-        assertEquals("En tittel", melding["gjeldende_definisjon"]["tittel"].asText())
-        if (harForklaring) {
-            assertEquals("En forklaring", melding["gjeldende_definisjon"]["forklaring"].asText())
-        } else {
-            assertNull(melding["gjeldende_definisjon"]["forklaring"])
-        }
-
-        if (harHandling) {
-            assertEquals("En handling", melding["gjeldende_definisjon"]["handling"].asText())
-        } else {
-            assertNull(melding["gjeldende_definisjon"]["handling"])
-        }
-
-        assertEquals(false, melding["gjeldende_definisjon"]["avviklet"].asBoolean())
+            .forsøkPubliserDefinisjon(true, testsender)
+        assertEquals(0, testsender.size)
     }
 
     private fun varseldefinisjon(
         skruddPåIProduksjon: Boolean,
         harForklaring: Boolean,
         harHandling: Boolean,
-    ): Varseldefinisjon {
-        return Varseldefinisjon(
+    ): Varseldefinisjon =
+        Varseldefinisjon(
             _id = id,
             _rev = "en_versjon",
             tittel = "En tittel",
@@ -97,5 +107,4 @@ class PubliserDefinisjonTest {
             _updatedAt = LocalDateTime.now(),
             varselkode = "SB_EX_1",
         )
-    }
 }

@@ -1,8 +1,10 @@
 val ktorClientVersion = "3.0.0-beta-1"
-val rapidsAndRiversVersion = "2024010209171704183456.6d035b91ffb4"
 val logstashVersion: String by project
 val logbackVersion: String by project
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
+val kafkaVersion = "3.7.0"
+val ktorServerVersion = "2.3.11"
+val jacksonVersion = "2.17.1"
 
 plugins {
     kotlin("jvm") apply true
@@ -19,10 +21,19 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorClientVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorClientVersion")
 
+    implementation("io.ktor:ktor-server-core:$ktorServerVersion")
+    implementation("io.ktor:ktor-server-cio:$ktorServerVersion")
+    implementation("io.ktor:ktor-server-auth:$ktorServerVersion")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktorServerVersion") {
+        exclude(group = "junit")
+    }
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
 
-    api("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
+    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

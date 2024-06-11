@@ -1,40 +1,53 @@
 package no.nav.helse.speaker
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.ktor.server.application.call
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.routing
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 internal val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+internal val logg = LoggerFactory.getLogger("SpeakerEndringerFormidler")
+
+internal val objectMapper =
+    jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 fun main() {
     val env = System.getenv()
-    runBlocking {
-        val rapidConnection =
-            RapidApplication.create(env).apply {
-                register(
-                    object : RapidsConnection.StatusListener {
-                        override fun onReady(rapidsConnection: RapidsConnection) {
-                            launch {
-                                app(env, rapidsConnection)
-                            }
-                        }
-                    },
-                )
-            }
-        rapidConnection.start()
-    }
+    val sender = Kafka
+    app(env, sender)
 }
 
-suspend fun app(
+fun app(
     env: Map<String, String>,
-    rapidsConnection: RapidsConnection,
+    sender: Sender,
 ) {
     val sanityProjectId = env["SANITY_PROJECT_ID"] ?: throw IllegalArgumentException("Mangler sanity projectId")
     val sanityDataset = env["SANITY_DATASET"] ?: throw IllegalArgumentException("Mangler sanity dataset")
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
 
+    logg.info("Etablerer lytter mot Sanity")
     sikkerlogg.info("Etablerer lytter mot Sanity")
-    sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, rapidsConnection)
+    runBlocking {
+        launch {
+            sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender)
+        }
+        embeddedServer(CIO, port = 8080) {
+            routing {
+                get("/isalive") { call.respondText("ALIVE!") }
+                get("/isready") { call.respondText("READY!") }
+            }
+        }.start(wait = true)
+    }
 }

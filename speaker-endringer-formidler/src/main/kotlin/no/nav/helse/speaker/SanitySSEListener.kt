@@ -8,16 +8,14 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.retry
 import kotlinx.serialization.*
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 
-private val jsonReader =
+internal val jsonReader =
     Json {
         this.serializersModule =
             SerializersModule {
@@ -31,7 +29,7 @@ internal suspend fun sanityVarselendringerListener(
     iProduksjonsmiljø: Boolean,
     sanityProjectId: String,
     sanityDataSet: String,
-    rapidsConnection: RapidsConnection,
+    sender: Sender,
 ) {
     val client =
         HttpClient {
@@ -61,13 +59,14 @@ internal suspend fun sanityVarselendringerListener(
                 .catch {
                     sikkerlogg.error("Feil ved lesing av flow: {}", it.stackTraceToString())
                     throw it
-                }
-                .collect { event ->
+                }.collect { event ->
                     val data = event.data ?: return@collect
                     sikkerlogg.info("Mottatt melding fra Sanity")
                     try {
-                        jsonReader.decodeFromString<SanityEndring>(data).result
-                            .forsøkPubliserDefinisjon(iProduksjonsmiljø, rapidsConnection)
+                        jsonReader
+                            .decodeFromString<SanityEndring>(data)
+                            .result
+                            .forsøkPubliserDefinisjon(iProduksjonsmiljø, sender)
                         sikkerlogg.info("Mottatt varseldefinisjon: $data")
                     } catch (_: SerializationException) {
                         sikkerlogg.info("Meldingen er ikke en varseldefinisjon: $data")
@@ -79,24 +78,37 @@ internal suspend fun sanityVarselendringerListener(
 
 internal fun Varseldefinisjon.forsøkPubliserDefinisjon(
     iProduksjonsmiljø: Boolean,
-    rapidsConnection: RapidsConnection,
+    sender: Sender,
 ) {
     if (iProduksjonsmiljø && !this.iProduksjon) return
-    rapidsConnection.publish(
-        JsonMessage.newMessage(
-            eventName = "varselkode_ny_definisjon",
-            map =
-                mapOf(
-                    "varselkode" to this.varselkode,
-                    "gjeldende_definisjon" to this.toKafkamelding(),
-                ),
-        ).toJson(),
-    )
+    sender.send(this@forsøkPubliserDefinisjon.toUtgåendeMelding())
 }
 
 @Serializable
 data class SanityEndring(
     val result: Varseldefinisjon,
+)
+
+@Serializable
+data class VarseldefinisjonEvent(
+    @SerialName("@event_name")
+    val eventName: String,
+    val varselkode: String,
+    @SerialName("gjeldende_definisjon")
+    val gjeldendeDefinisjon: UtgåendeVarseldefinisjon,
+)
+
+@Serializable
+data class UtgåendeVarseldefinisjon(
+    @Contextual
+    val id: UUID,
+    val tittel: String,
+    val avviklet: Boolean,
+    val forklaring: String? = null,
+    val handling: String? = null,
+    @Contextual
+    val opprettet: LocalDateTime,
+    val kode: String,
 )
 
 @Serializable
@@ -113,15 +125,19 @@ data class Varseldefinisjon(
     val _updatedAt: LocalDateTime,
     val varselkode: String,
 ) {
-    fun toKafkamelding(): Map<String, Any> =
-        mutableMapOf(
-            "id" to UUID.nameUUIDFromBytes("$_id$_rev".toByteArray()),
-            "kode" to varselkode,
-            "tittel" to tittel,
-            "avviklet" to avviklet,
-            "opprettet" to _updatedAt,
-        ).apply {
-            compute("forklaring") { _, _ -> forklaring }
-            compute("handling") { _, _ -> handling }
-        }.toMap()
+    fun toUtgåendeMelding(): VarseldefinisjonEvent =
+        VarseldefinisjonEvent(
+            eventName = "varselkode_ny_definisjon",
+            varselkode = varselkode,
+            gjeldendeDefinisjon =
+                UtgåendeVarseldefinisjon(
+                    id = UUID.nameUUIDFromBytes("$_id$_rev".toByteArray()),
+                    kode = varselkode,
+                    tittel = tittel,
+                    avviklet = avviklet,
+                    forklaring = forklaring,
+                    handling = handling,
+                    opprettet = _updatedAt,
+                ),
+        )
 }
