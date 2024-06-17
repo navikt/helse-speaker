@@ -3,7 +3,7 @@ package no.nav.helse.speaker
 import kotlinx.serialization.json.JsonObject
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.util.*
 
 class PubliserDefinisjonTest {
@@ -104,7 +104,7 @@ class PubliserDefinisjonTest {
             forklaring = if (harForklaring) "En forklaring" else null,
             handling = if (harHandling) "En handling" else null,
             iProduksjon = skruddPåIProduksjon,
-            _updatedAt = LocalDateTime.now(),
+            _updatedAt = OffsetDateTime.now(),
             varselkode = "SB_EX_1",
         )
 }

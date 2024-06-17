@@ -43,12 +43,6 @@ spec:
   secureLogs:
     enabled: true
   env:
-    - name: KAFKA_RAPID_TOPIC
-      value: tbd.rapid.v1
-    - name: KAFKA_CONSUMER_GROUP_ID
-      value: tbd-speaker-endringer-formidler-v1
-    - name: KAFKA_RESET_POLICY
-      value: latest
     - name: SANITY_PROJECT_ID
       value: z9kr8ddn
     - name: SANITY_DATASET

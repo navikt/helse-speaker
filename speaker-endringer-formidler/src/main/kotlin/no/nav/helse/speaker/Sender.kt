@@ -21,7 +21,9 @@ abstract class Sender(
                     put("@id", "$id")
                     put("@opprettet", "$tidspunkt")
                 }
-        send(Json.encodeToString(json))
+        val utgåendeMelding = Json.encodeToString(json)
+        sikkerlogg.info("Sender melding: {}", utgåendeMelding)
+        send(utgåendeMelding)
     }
 
     private fun systemParticipatingServices(

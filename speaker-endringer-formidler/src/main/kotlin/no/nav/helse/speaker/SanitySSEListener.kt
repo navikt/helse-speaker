@@ -12,6 +12,8 @@ import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -21,6 +23,7 @@ internal val jsonReader =
             SerializersModule {
                 this.contextual(LocalDateTimeSerializer())
                 this.contextual(UUIDSerializer())
+                this.contextual(OffsetDateTimeSerializer())
             }
         ignoreUnknownKeys = true
     }
@@ -122,7 +125,7 @@ data class Varseldefinisjon(
     val handling: String? = null,
     val iProduksjon: Boolean,
     @Contextual
-    val _updatedAt: LocalDateTime,
+    val _updatedAt: OffsetDateTime,
     val varselkode: String,
 ) {
     fun toUtgåendeMelding(): VarseldefinisjonEvent =
@@ -137,7 +140,8 @@ data class Varseldefinisjon(
                     avviklet = avviklet,
                     forklaring = forklaring,
                     handling = handling,
-                    opprettet = _updatedAt,
+                    // Konverter UTC timestamp fra Sanity til LocalDateTime
+                    opprettet = _updatedAt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime(),
                 ),
         )
 }
