@@ -60,18 +60,19 @@ internal suspend fun sanityVarselendringerListener(
             incoming
                 .retry(5)
                 .catch {
-                    sikkerlogg.error("Feil ved lesing av flow: {}", it.stackTraceToString())
+                    logg.error("Feil ved lesing av flow: {}", it.stackTraceToString())
                     throw it
                 }.collect { event ->
                     val data = event.data ?: return@collect
-                    sikkerlogg.info("Mottatt melding fra Sanity")
+                    logg.info("Mottatt melding fra Sanity")
                     try {
                         jsonReader
                             .decodeFromString<SanityEndring>(data)
                             .result
                             .forsøkPubliserDefinisjon(iProduksjonsmiljø, sender)
-                        sikkerlogg.info("Mottatt varseldefinisjon: $data")
+                        logg.info("Mottatt varseldefinisjon: $data")
                     } catch (_: SerializationException) {
+                        logg.info("Meldingen er ikke en varseldefinisjon. Se sikkerlogg for data i meldingen.")
                         sikkerlogg.info("Meldingen er ikke en varseldefinisjon: $data")
                     }
                 }
@@ -83,7 +84,10 @@ internal fun Varseldefinisjon.forsøkPubliserDefinisjon(
     iProduksjonsmiljø: Boolean,
     sender: Sender,
 ) {
-    if (iProduksjonsmiljø && !this.iProduksjon) return
+    if (iProduksjonsmiljø && !this.iProduksjon) {
+        logg.info("I produksjonsmiljø og meldingen er markert \"ikke i produksjon\"")
+        return
+    }
     sender.send(this@forsøkPubliserDefinisjon.toUtgåendeMelding())
 }
 

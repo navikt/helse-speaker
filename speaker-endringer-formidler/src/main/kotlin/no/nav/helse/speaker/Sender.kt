@@ -22,7 +22,7 @@ abstract class Sender(
                     put("@opprettet", "$tidspunkt")
                 }
         val utgåendeMelding = Json.encodeToString(json)
-        sikkerlogg.info("Sender melding: {}", utgåendeMelding)
+        logg.info("Sender melding som følge av endret varseldefinisjon: {}", utgåendeMelding)
         send(utgåendeMelding)
     }
 
