@@ -31,7 +31,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Test og bygg
-        run: ./gradlew :speaker-endringer-formidler:build :speaker-endringer-formidler:build
+        run: ./gradlew :speaker-endringer-formidler:build
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
