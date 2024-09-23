@@ -55,8 +55,8 @@ internal suspend fun sanityVarselendringerListener(
                 parameters.append("includeResult", "true")
                 val lastEventId = bøtte.hentLastEventId()
                 if (lastEventId != null) {
-                    logg.info("Bruker lastEventId i kall: $lastEventId")
-                    parameters.append("lastEventId", lastEventId)
+                    logg.info("Bruker last-event-id i kall: $lastEventId")
+                    parameters.append("last-event-id", lastEventId)
                 }
             }
         },
