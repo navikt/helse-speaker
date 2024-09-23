@@ -1,6 +1,6 @@
 val postgresqlVersion = "42.7.2"
 val junitVersion = "5.10.2"
-val logbackVersion = "1.4.11"
+val logbackVersion = "1.5.8"
 val logstashVersion = "7.4"
 val testcontainersPostgresqlVersion = "1.19.5"
 val flywayVersion = "9.3.0"
