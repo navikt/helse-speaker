@@ -15,10 +15,14 @@ class GCPBøtte(private val bøttenavn: String) : Bøtte {
         private val logger = LoggerFactory.getLogger("speaker-bøtte")
         private const val FILNAVN = "last_event_id.txt"
     }
-    override fun hentLastEventId(): String = String(hentBøtte().get(FILNAVN).getContent())
+    override fun hentLastEventId(): String? = String(hentBøtte().get(FILNAVN).getContent())
+        .takeIf { it.isNotBlank() }
+        ?.also {
+            logger.info("Funnet last event id, id=$it")
+        }
 
     override fun lagreLastEventId(lastEventId: String): Boolean {
-        logger.info("Lagrer last event id i bøtta")
+        logger.info("Lagrer last event id i bøtta, id=$lastEventId")
         return lagre(lastEventId, FILNAVN)
     }
 
