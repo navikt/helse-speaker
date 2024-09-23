@@ -101,7 +101,7 @@ internal fun Varseldefinisjon.forsøkPubliserDefinisjon(
 
 @Serializable
 data class SanityEndring(
-    val id: String,
+    val eventId: String,
     val result: Varseldefinisjon,
 )
 
