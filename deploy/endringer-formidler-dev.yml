@@ -44,7 +44,7 @@ spec:
     enabled: true
   gcp:
     buckets:
-      - name: speilvendt-speaker-bucket
+      - name: speilvendt-speaker-bucket-dev
         lifecycleCondition:
           numNewerVersions: 1
           withState: ANY
@@ -53,3 +53,5 @@ spec:
       value: z9kr8ddn
     - name: SANITY_DATASET
       value: production
+    - name: BUCKET_NAME
+      value: speilvendt-speaker-bucket-dev

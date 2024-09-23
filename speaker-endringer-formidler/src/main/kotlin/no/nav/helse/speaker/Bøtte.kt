@@ -10,9 +10,8 @@ interface Bøtte {
     fun lagreLastEventId(lastEventId: String): Boolean { return false }
 }
 
-class GCPBøtte : Bøtte {
+class GCPBøtte(private val bøttenavn: String) : Bøtte {
     companion object {
-        private const val BØTTENAVN: String = "speilvendt-speaker-bucket"
         private val logger = LoggerFactory.getLogger("speaker-bøtte")
         private const val FILNAVN = "last_event_id.txt"
     }
@@ -38,6 +37,6 @@ class GCPBøtte : Bøtte {
 
     private fun hentBøtte(): Bucket {
         val storage = StorageOptions.getDefaultInstance().service
-        return storage.get(BØTTENAVN) ?: error("Fant ikke bøtta som heter $BØTTENAVN")
+        return storage.get(bøttenavn) ?: error("Fant ikke bøtta som heter $bøttenavn")
     }
 }

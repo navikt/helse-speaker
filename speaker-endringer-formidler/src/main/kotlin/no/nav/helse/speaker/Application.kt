@@ -37,12 +37,13 @@ fun app(
     val sanityProjectId = env["SANITY_PROJECT_ID"] ?: throw IllegalArgumentException("Mangler sanity projectId")
     val sanityDataset = env["SANITY_DATASET"] ?: throw IllegalArgumentException("Mangler sanity dataset")
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
+    val bøttenavn = env["BUCKET_NAME"] ?: throw IllegalArgumentException("Mangler bucket name")
 
     val scope = CoroutineScope(Job())
     scope.launch {
         logg.info("Etablerer lytter mot Sanity")
         sikkerlogg.info("Etablerer lytter mot Sanity")
-        sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, GCPBøtte())
+        sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, GCPBøtte(bøttenavn))
     }
     scope.launch {
         logg.info("Svarer på isalive og isready")
