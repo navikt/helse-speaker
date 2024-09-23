@@ -44,7 +44,7 @@ spec:
     enabled: true
   gcp:
     buckets:
-      - name: speaker-bucket
+      - name: tbd-speaker-bucket
         lifecycleCondition:
           numNewerVersions: 1
           withState: ANY
