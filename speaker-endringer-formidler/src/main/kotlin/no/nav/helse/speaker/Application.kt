@@ -10,8 +10,9 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
 internal val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -37,17 +38,21 @@ fun app(
     val sanityDataset = env["SANITY_DATASET"] ?: throw IllegalArgumentException("Mangler sanity dataset")
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
 
-    logg.info("Etablerer lytter mot Sanity")
-    sikkerlogg.info("Etablerer lytter mot Sanity")
-    runBlocking {
-        launch {
-            sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender)
-        }
+    val scope = CoroutineScope(Job())
+    scope.launch {
+        logg.info("Etablerer lytter mot Sanity")
+        sikkerlogg.info("Etablerer lytter mot Sanity")
+        sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, GCPBøtte())
+    }
+    scope.launch {
+        logg.info("Svarer på isalive og isready")
+        sikkerlogg.info("Svarer på isalive og isready")
         embeddedServer(CIO, port = 8080) {
             routing {
                 get("/isalive") { call.respondText("ALIVE!") }
                 get("/isready") { call.respondText("READY!") }
             }
         }.start(wait = true)
+
     }
 }

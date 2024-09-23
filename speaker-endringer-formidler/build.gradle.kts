@@ -5,6 +5,7 @@ val mainClass = "no.nav.helse.speaker.ApplicationKt"
 val kafkaVersion = "3.7.0"
 val ktorServerVersion = "2.3.11"
 val jacksonVersion = "2.17.1"
+val gcpBucketVersion = "2.35.0"
 
 plugins {
     kotlin("jvm") apply true
@@ -29,6 +30,8 @@ dependencies {
     }
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+
+    implementation("com.google.cloud:google-cloud-storage:$gcpBucketVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")

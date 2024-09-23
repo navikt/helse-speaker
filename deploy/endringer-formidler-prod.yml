@@ -42,6 +42,12 @@ spec:
     pool: nav-prod
   secureLogs:
     enabled: true
+  gcp:
+    buckets:
+      - name: speaker-bucket
+        lifecycleCondition:
+          numNewerVersions: 1
+          withState: ANY
   env:
     - name: SANITY_PROJECT_ID
       value: z9kr8ddn

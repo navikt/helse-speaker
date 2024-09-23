@@ -6,9 +6,11 @@ import io.ktor.client.plugins.sse.SSE
 import io.ktor.client.plugins.sse.sse
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.retry
-import kotlinx.serialization.*
-import kotlinx.serialization.json.*
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
 import java.time.LocalDateTime
@@ -33,6 +35,7 @@ internal suspend fun sanityVarselendringerListener(
     sanityProjectId: String,
     sanityDataSet: String,
     sender: Sender,
+    bøtte: Bøtte
 ) {
     val client =
         HttpClient {
@@ -50,6 +53,11 @@ internal suspend fun sanityVarselendringerListener(
             url {
                 parameters.append("query", """*[_type == "varsel"]""")
                 parameters.append("includeResult", "true")
+                val lastEventId = bøtte.hentLastEventId()
+                if (lastEventId != null) {
+                    logg.info("Bruker lastEventId i kall: $lastEventId")
+                    parameters.append("lastEventId", lastEventId)
+                }
             }
         },
         showCommentEvents = false,
@@ -58,7 +66,6 @@ internal suspend fun sanityVarselendringerListener(
     ) {
         while (true) {
             incoming
-                .retry(5)
                 .catch {
                     logg.error("Feil ved lesing av flow: {}", it.stackTraceToString())
                     throw it
@@ -66,12 +73,12 @@ internal suspend fun sanityVarselendringerListener(
                     val data = event.data ?: return@collect
                     logg.info("Mottatt melding fra Sanity")
                     try {
-                        val melding =
+                        val (id, melding) =
                             jsonReader
                                 .decodeFromString<SanityEndring>(data)
-                                .result
                         logg.info("Mottatt varseldefinisjon: $data")
                         melding.forsøkPubliserDefinisjon(iProduksjonsmiljø, sender)
+                        bøtte.lagreLastEventId(id)
                     } catch (_: SerializationException) {
                         logg.info("Meldingen er ikke en varseldefinisjon. Se sikkerlogg for data i meldingen.")
                         sikkerlogg.info("Meldingen er ikke en varseldefinisjon: $data")
@@ -94,6 +101,7 @@ internal fun Varseldefinisjon.forsøkPubliserDefinisjon(
 
 @Serializable
 data class SanityEndring(
+    val id: String,
     val result: Varseldefinisjon,
 )
 
