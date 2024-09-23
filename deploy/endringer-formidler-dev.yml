@@ -15,7 +15,7 @@ spec:
     initialDelay: 5
   readiness:
     path: isready
-    initialDelay: 5
+    initialDelay: 10
   resources:
     limits:
       cpu: 2000m
