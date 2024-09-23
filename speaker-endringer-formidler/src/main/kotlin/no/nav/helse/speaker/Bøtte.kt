@@ -12,7 +12,7 @@ interface Bøtte {
 
 class GCPBøtte : Bøtte {
     companion object {
-        private const val BØTTENAVN: String = "tbd-speaker-bucket"
+        private const val BØTTENAVN: String = "speilvendt-speaker-bucket"
         private val logger = LoggerFactory.getLogger("speaker-bøtte")
         private const val FILNAVN = "last_event_id.txt"
     }

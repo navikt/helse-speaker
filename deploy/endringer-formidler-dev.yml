@@ -44,7 +44,7 @@ spec:
     enabled: true
   gcp:
     buckets:
-      - name: tbd-speaker-bucket
+      - name: speilvendt-speaker-bucket
         lifecycleCondition:
           numNewerVersions: 1
           withState: ANY
