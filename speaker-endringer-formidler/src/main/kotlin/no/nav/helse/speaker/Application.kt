@@ -45,15 +45,12 @@ fun app(
         sikkerlogg.info("Etablerer lytter mot Sanity")
         sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, GCPBøtte(bøttenavn))
     }
-    scope.launch {
-        logg.info("Svarer på isalive og isready")
-        sikkerlogg.info("Svarer på isalive og isready")
-        embeddedServer(CIO, port = 8080) {
-            routing {
-                get("/isalive") { call.respondText("ALIVE!") }
-                get("/isready") { call.respondText("READY!") }
-            }
-        }.start(wait = true)
-
-    }
+    logg.info("Svarer på isalive og isready")
+    sikkerlogg.info("Svarer på isalive og isready")
+    embeddedServer(CIO, port = 8080) {
+        routing {
+            get("/isalive") { call.respondText("ALIVE!") }
+            get("/isready") { call.respondText("READY!") }
+        }
+    }.start(wait = true)
 }
