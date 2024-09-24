@@ -4,13 +4,17 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.ktor.server.application.ApplicationStopped
+import io.ktor.server.application.log
 import io.ktor.server.cio.CIO
+import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
 
 internal val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -41,18 +45,26 @@ fun app(
 
     logg.info("Svarer på isalive og isready")
     sikkerlogg.info("Svarer på isalive og isready")
-    val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+
+    val exceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
         logg.info("En feil har oppstått:", exception)
-        exitProcess(1)
+        coroutineContext.cancel()
     }
     val scope = CoroutineScope(Dispatchers.Default + exceptionHandler)
     scope.launch {
         sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, bøtte)
     }
-    scope.embeddedServer(CIO, port = 8080) {
+    val server = scope.embeddedServer(CIO, port = 8080) {
         routing {
             get("/isalive") { call.respondText("ALIVE!") }
             get("/isready") { call.respondText("READY!") }
         }
-    }.start(wait = true)
+        monitor.subscribe(ApplicationStopped) {
+            logg.info("Avslutter appen")
+        }
+    }
+    Runtime.getRuntime().addShutdownHook(Thread {
+        server.stop(1, 5, TimeUnit.SECONDS)
+    })
+    server.start(wait = true)
 }
