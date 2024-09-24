@@ -2,6 +2,8 @@ package no.nav.helse.speaker
 
 import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.cio.CIO
+import io.ktor.server.cio.CIOApplicationEngine
+import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -35,7 +37,7 @@ fun app(
 
     val exceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
         logg.info("En feil har oppstått:", exception)
-        coroutineContext.cancel()
+        coroutineContext.cancel(CancellationException("En feil har oppstått", exception))
     }
     val scope = CoroutineScope(Dispatchers.Default + exceptionHandler)
     scope.launch {
@@ -50,8 +52,12 @@ fun app(
             logg.info("Avslutter appen")
         }
     }
-    Runtime.getRuntime().addShutdownHook(Thread {
-        server.stop(1, 5, TimeUnit.SECONDS)
-    })
+    server.settOppShutdownHook()
     server.start(wait = true)
+}
+
+private fun EmbeddedServer<CIOApplicationEngine, CIOApplicationEngine.Configuration>.settOppShutdownHook() {
+    Runtime.getRuntime().addShutdownHook(Thread {
+        stop(1, 5, TimeUnit.SECONDS)
+    })
 }
