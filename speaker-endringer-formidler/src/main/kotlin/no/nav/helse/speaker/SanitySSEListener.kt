@@ -91,15 +91,13 @@ internal suspend fun sanityVarselendringerListener(
     client.close()
 }
 
-private fun erVelkomsthilsen(data: String): Boolean {
-    try {
-        val message = jsonReader.decodeFromString<Velkomsthilsen>(data)
-        logg.info("Mottatt mulig velkomsthilsen: {}", message)
-        return false
-    } catch (_: Exception) {
-        logg.info("Dette var ikke en velkomsthilsen: {}", data)
-        return false
-    }
+private fun erVelkomsthilsen(data: String) = try {
+    val message = Json.decodeFromString<Velkomsthilsen>(data)
+    logg.info("Mottatt velkomsthilsen: {}", message)
+    true
+} catch (_: Exception) {
+    logg.warn("Dette var ikke en kjent velkomsthilsen: {}", data)
+    false
 }
 
 internal fun Varseldefinisjon.forsøkPubliserDefinisjon(
