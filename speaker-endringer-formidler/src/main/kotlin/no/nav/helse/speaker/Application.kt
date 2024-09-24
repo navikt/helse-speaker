@@ -39,10 +39,10 @@ fun app(
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
     val bøttenavn = env["BUCKET_NAME"] ?: throw IllegalArgumentException("Mangler bucket name")
 
-    logg.info("Svarer på isalive og isready")
-    sikkerlogg.info("Svarer på isalive og isready")
     val scope = CoroutineScope(Job())
     scope.launch {
+        logg.info("Svarer på isalive og isready")
+        sikkerlogg.info("Svarer på isalive og isready")
         embeddedServer(CIO, port = 8080, parentCoroutineContext = scope.coroutineContext) {
             routing {
                 get("/isalive") { call.respondText("ALIVE!") }
