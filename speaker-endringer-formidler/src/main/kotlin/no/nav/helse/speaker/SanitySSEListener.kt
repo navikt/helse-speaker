@@ -6,6 +6,7 @@ import io.ktor.client.plugins.sse.SSE
 import io.ktor.client.plugins.sse.sse
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.retry
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -68,6 +69,10 @@ internal suspend fun sanityVarselendringerListener(
         sikkerlogg.info("Etablerer lytter mot Sanity")
 
         incoming
+            .retry(5) {
+                logg.info("Feil oppsto i flow", it)
+                true
+            }
             .catch {
                 logg.error("Feil ved lesing av flow: {}, {}", it.localizedMessage, it.printStackTrace())
                 throw it
