@@ -1,4 +1,4 @@
-val ktorClientVersion = "3.0.0-beta-1"
+val ktorClientVersion = "3.0.0-rc-1"
 val logstashVersion: String by project
 val logbackVersion: String by project
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
