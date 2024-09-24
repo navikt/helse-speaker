@@ -1,13 +1,7 @@
 package no.nav.helse.speaker
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.server.application.ApplicationStopped
-import io.ktor.server.application.log
 import io.ktor.server.cio.CIO
-import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -15,16 +9,9 @@ import io.ktor.server.routing.routing
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
-import kotlin.system.exitProcess
 
 internal val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 internal val logg = LoggerFactory.getLogger("SpeakerEndringerFormidler")
-
-internal val objectMapper =
-    jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 fun main() {
     val env = System.getenv()

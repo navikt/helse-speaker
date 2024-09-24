@@ -4,7 +4,6 @@ val logbackVersion: String by project
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 val kafkaVersion = "3.7.0"
 val ktorServerVersion = "3.0.0-rc-1"
-val jacksonVersion = "2.17.1"
 val gcpBucketVersion = "2.35.0"
 
 plugins {
@@ -28,8 +27,6 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt:$ktorServerVersion") {
         exclude(group = "junit")
     }
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     implementation("com.google.cloud:google-cloud-storage:$gcpBucketVersion")
 
