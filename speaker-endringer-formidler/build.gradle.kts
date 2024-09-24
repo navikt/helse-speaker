@@ -3,13 +3,13 @@ val logstashVersion: String by project
 val logbackVersion: String by project
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 val kafkaVersion = "3.7.0"
-val ktorServerVersion = "2.3.11"
+val ktorServerVersion = "3.0.0-rc-1"
 val jacksonVersion = "2.17.1"
 val gcpBucketVersion = "2.35.0"
 
 plugins {
     kotlin("jvm") apply true
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.21"
+    kotlin("plugin.serialization") version "2.0.20"
 }
 
 repositories {
