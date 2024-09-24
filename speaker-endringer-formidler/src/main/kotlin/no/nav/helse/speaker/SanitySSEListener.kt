@@ -64,10 +64,12 @@ internal suspend fun sanityVarselendringerListener(
         showRetryEvents = false,
         reconnectionTime = 5000.milliseconds,
     ) {
+        logg.info("Etablerer lytter mot Sanity")
+        sikkerlogg.info("Etablerer lytter mot Sanity")
         while (true) {
             incoming
                 .catch {
-                    logg.error("Feil ved lesing av flow: {}", it.stackTraceToString())
+                    logg.error("Feil ved lesing av flow: {}, {}", it.localizedMessage, it.printStackTrace())
                     throw it
                 }.collect { event ->
                     val data = event.data ?: return@collect

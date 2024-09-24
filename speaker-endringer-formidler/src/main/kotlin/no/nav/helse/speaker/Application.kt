@@ -10,6 +10,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
 internal val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -21,13 +22,13 @@ internal val objectMapper =
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-suspend fun main() {
+fun main() {
     val env = System.getenv()
     val sender = Kafka
     app(env, sender)
 }
 
-suspend fun app(
+fun app(
     env: Map<String, String>,
     sender: Sender,
 ) {
@@ -43,9 +44,8 @@ suspend fun app(
             get("/isalive") { call.respondText("ALIVE!") }
             get("/isready") { call.respondText("READY!") }
         }
-    }.start(wait = false)
-
-    logg.info("Etablerer lytter mot Sanity")
-    sikkerlogg.info("Etablerer lytter mot Sanity")
-    sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, GCPBøtte(bøttenavn))
+        launch {
+            sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, GCPBøtte(bøttenavn))
+        }
+    }.start(wait = true)
 }
