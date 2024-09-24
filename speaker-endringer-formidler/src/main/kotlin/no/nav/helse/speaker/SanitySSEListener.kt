@@ -96,7 +96,6 @@ private fun erVelkomsthilsen(data: String) = try {
     logg.info("Mottatt velkomsthilsen: {}", message)
     true
 } catch (_: Exception) {
-    logg.warn("Dette var ikke en kjent velkomsthilsen: {}", data)
     false
 }
 
