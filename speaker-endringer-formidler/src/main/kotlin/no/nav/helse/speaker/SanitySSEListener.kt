@@ -66,32 +66,32 @@ internal suspend fun sanityVarselendringerListener(
     ) {
         logg.info("Etablerer lytter mot Sanity")
         sikkerlogg.info("Etablerer lytter mot Sanity")
-        while (true) {
-            incoming
-                .catch {
-                    logg.error("Feil ved lesing av flow: {}, {}", it.localizedMessage, it.printStackTrace())
-                    throw it
-                }.collect { event ->
-                    val data = event.data ?: return@collect
-                    if (erVelkomsthilsen(data)) return@collect
-                    logg.info("Mottatt melding fra Sanity")
-                    try {
-                        val (id, melding) =
-                            jsonReader
-                                .decodeFromString<SanityEndring>(data)
-                        logg.info("Mottatt varseldefinisjon: $data")
-                        melding.forsøkPubliserDefinisjon(iProduksjonsmiljø, sender)
-                        bøtte.lagreLastEventId(id)
-                    } catch (_: SerializationException) {
-                        logg.info("Meldingen er ikke en varseldefinisjon. Se sikkerlogg for data i meldingen.")
-                        sikkerlogg.info("Meldingen er ikke en varseldefinisjon: $data")
-                    }
+
+        incoming
+            .catch {
+                logg.error("Feil ved lesing av flow: {}, {}", it.localizedMessage, it.printStackTrace())
+                throw it
+            }.collect { event ->
+                val data = event.data ?: return@collect
+                if (erVelkomsthilsen(data)) return@collect
+                logg.info("Mottatt melding fra Sanity")
+                try {
+                    val (id, melding) =
+                        jsonReader
+                            .decodeFromString<SanityEndring>(data)
+                    logg.info("Mottatt varseldefinisjon: $data")
+                    melding.forsøkPubliserDefinisjon(iProduksjonsmiljø, sender)
+                    bøtte.lagreLastEventId(id)
+                } catch (_: SerializationException) {
+                    logg.info("Meldingen er ikke en varseldefinisjon. Se sikkerlogg for data i meldingen.")
+                    sikkerlogg.info("Meldingen er ikke en varseldefinisjon: $data")
                 }
-        }
+            }
     }
+    client.close()
 }
 
-fun erVelkomsthilsen(data: String): Boolean {
+private fun erVelkomsthilsen(data: String): Boolean {
     try {
         val message = jsonReader.decodeFromString<Velkomsthilsen>(data)
         logg.info("Mottatt mulig velkomsthilsen: {}", message)
