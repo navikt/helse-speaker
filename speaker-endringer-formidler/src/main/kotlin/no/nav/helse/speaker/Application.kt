@@ -10,10 +10,19 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
 internal val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 internal val logg = LoggerFactory.getLogger("SpeakerEndringerFormidler")
+
+fun main() {
+    val env = System.getenv()
+    val sender = Kafka
+    app(env, sender)
+}
 
 internal val objectMapper =
     jacksonObjectMapper()
@@ -21,13 +30,7 @@ internal val objectMapper =
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-suspend fun main() {
-    val env = System.getenv()
-    val sender = Kafka
-    app(env, sender)
-}
-
-suspend fun app(
+fun app(
     env: Map<String, String>,
     sender: Sender,
 ) {
@@ -38,14 +41,19 @@ suspend fun app(
 
     logg.info("Svarer på isalive og isready")
     sikkerlogg.info("Svarer på isalive og isready")
-    embeddedServer(CIO, port = 8080) {
-        routing {
-            get("/isalive") { call.respondText("ALIVE!") }
-            get("/isready") { call.respondText("READY!") }
-        }
-    }.start(wait = false)
+    val scope = CoroutineScope(Job())
+    scope.launch {
+        embeddedServer(CIO, port = 8080, parentCoroutineContext = scope.coroutineContext) {
+            routing {
+                get("/isalive") { call.respondText("ALIVE!") }
+                get("/isready") { call.respondText("READY!") }
+            }
+        }.start(wait = false)
+    }
 
-    logg.info("Etablerer lytter mot Sanity")
-    sikkerlogg.info("Etablerer lytter mot Sanity")
-    sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, GCPBøtte(bøttenavn))
+    scope.launch {
+        logg.info("Etablerer lytter mot Sanity")
+        sikkerlogg.info("Etablerer lytter mot Sanity")
+        sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, GCPBøtte(bøttenavn))
+    }
 }
