@@ -1,1 +1,0 @@
-update varselkode set avviklet = true where kode = 'RV_RV_1';

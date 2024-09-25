@@ -9,11 +9,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/speaker-backend" />
-            <option value="$PROJECT_DIR$/speaker-database" />
-            <option value="$PROJECT_DIR$/speaker-endringer-formidler" />
-            <option value="$PROJECT_DIR$/speaker-frontend" />
-            <option value="$PROJECT_DIR$/speaker-kafka" />
           </set>
         </option>
       </GradleProjectSettings>
