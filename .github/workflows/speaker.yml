@@ -6,7 +6,7 @@ on:
     paths:
       - 'deploy/dev.yml'
       - 'deploy/prod.yml'
-      - 'src'
+      - 'src/**'
       - 'build.gradle.kts'
       - '.github/workflows/speaker.yml'
       - 'Dockerfile'
