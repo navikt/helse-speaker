@@ -13,8 +13,11 @@ class GCPBøtte(private val bøttenavn: String) : Bøtte {
     companion object {
         private const val FILNAVN = "last_event_id.txt"
     }
-    override fun hentLastEventId(): String? = String(hentBøtte().get(FILNAVN).getContent())
-        .takeIf { it.isNotBlank() }
+    override fun hentLastEventId(): String? = hentBøtte()
+        .get(FILNAVN)
+        ?.getContent()
+        ?.let { String(it) }
+        ?.takeIf { it.isNotBlank() }
         ?.also {
             logg.info("Funnet last event id, id=$it")
         }
