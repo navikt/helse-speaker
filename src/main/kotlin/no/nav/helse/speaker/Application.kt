@@ -1,5 +1,6 @@
 package no.nav.helse.speaker
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.cio.CIO
 import io.ktor.server.cio.CIOApplicationEngine
@@ -32,6 +33,7 @@ fun app(
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
 
     logg.info("Svarer på isalive og isready")
+    var up = false
 
     val exceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
         logg.info("En feil har oppstått:", exception)
@@ -39,11 +41,16 @@ fun app(
     }
     val scope = CoroutineScope(Dispatchers.Default + exceptionHandler)
     scope.launch {
+        up = true
         sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, bøtte)
+        up = false // lytteren returnerte og klienten er derfor ikke lenger kjørende
     }
     val server = scope.embeddedServer(CIO, port = 8080) {
         routing {
-            get("/isalive") { call.respondText("ALIVE!") }
+            get("/isalive") {
+                if (up) call.respondText("ALIVE!")
+                else call.respondText("NOT ALIVE!", status = HttpStatusCode.ServiceUnavailable)
+            }
             get("/isready") { call.respondText("READY!") }
         }
         monitor.subscribe(ApplicationStopped) {
