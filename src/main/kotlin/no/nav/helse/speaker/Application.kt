@@ -12,7 +12,6 @@ import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
-internal val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 internal val logg = LoggerFactory.getLogger("Speaker")
 
 fun main() {
@@ -33,7 +32,6 @@ fun app(
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
 
     logg.info("Svarer på isalive og isready")
-    sikkerlogg.info("Svarer på isalive og isready")
 
     val exceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
         logg.info("En feil har oppstått:", exception)

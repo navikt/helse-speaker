@@ -2,7 +2,6 @@ package no.nav.helse.speaker
 
 import com.google.cloud.storage.Bucket
 import com.google.cloud.storage.StorageOptions
-import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 
 interface Bøtte {
@@ -12,23 +11,22 @@ interface Bøtte {
 
 class GCPBøtte(private val bøttenavn: String) : Bøtte {
     companion object {
-        private val logger = LoggerFactory.getLogger("speaker-bøtte")
         private const val FILNAVN = "last_event_id.txt"
     }
     override fun hentLastEventId(): String? = String(hentBøtte().get(FILNAVN).getContent())
         .takeIf { it.isNotBlank() }
         ?.also {
-            logger.info("Funnet last event id, id=$it")
+            logg.info("Funnet last event id, id=$it")
         }
 
     override fun lagreLastEventId(lastEventId: String): Boolean {
-        logger.info("Lagrer last event id i bøtta, id=$lastEventId")
+        logg.info("Lagrer last event id i bøtta, id=$lastEventId")
         return lagre(lastEventId, FILNAVN)
     }
 
     private fun lagre(tekst: String, filnavn: String): Boolean {
         val bøtte = hentBøtte()
-        val blob = bøtte.get(filnavn)
+        val blob = bøtte.get(filnavn) ?: null
         if (blob == null) {
             bøtte.create(filnavn, tekst.encodeToByteArray(), "text/plain")
         } else {

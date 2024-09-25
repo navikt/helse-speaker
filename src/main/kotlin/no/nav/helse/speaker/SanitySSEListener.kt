@@ -1,6 +1,8 @@
 package no.nav.helse.speaker
 
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.cio.endpoint
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.sse.SSE
 import io.ktor.client.plugins.sse.sse
@@ -39,10 +41,16 @@ internal suspend fun sanityVarselendringerListener(
     bøtte: Bøtte
 ) {
     val client =
-        HttpClient {
+        HttpClient(CIO) {
+            engine {
+                endpoint {
+                    this.connectAttempts = Int.MAX_VALUE
+                }
+            }
             install(SSE) {
                 showCommentEvents()
                 showRetryEvents()
+                reconnectionTime = 5000.milliseconds
             }
             install(ContentNegotiation) {
                 json()
@@ -66,8 +74,6 @@ internal suspend fun sanityVarselendringerListener(
         reconnectionTime = 5000.milliseconds,
     ) {
         logg.info("Etablerer lytter mot Sanity")
-        sikkerlogg.info("Etablerer lytter mot Sanity")
-
         incoming
             .retry(5) {
                 logg.info("Feil oppsto i flow", it)
@@ -88,11 +94,11 @@ internal suspend fun sanityVarselendringerListener(
                     melding.forsøkPubliserDefinisjon(iProduksjonsmiljø, sender)
                     bøtte.lagreLastEventId(id)
                 } catch (_: SerializationException) {
-                    logg.info("Meldingen er ikke en varseldefinisjon. Se sikkerlogg for data i meldingen.")
-                    sikkerlogg.info("Meldingen er ikke en varseldefinisjon: $data")
+                    logg.info("Meldingen er ikke en varseldefinisjon. $data")
                 }
             }
     }
+    logg.info("Client lukkes")
     client.close()
 }
 
