@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Start local app" type="CompoundRunConfigurationType">
-    <toRun name="Continuous build" type="GradleRunConfiguration" />
-    <toRun name="Start app" type="JetRunConfigurationType" />
-    <toRun name="Start frontend" type="js.build_tools.npm" />
-    <method v="2" />
-  </configuration>
-</component>
