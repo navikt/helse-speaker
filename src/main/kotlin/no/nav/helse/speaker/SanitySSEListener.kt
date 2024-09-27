@@ -80,7 +80,7 @@ internal suspend fun sanityVarselendringerListener(
                 true
             }
             .catch {
-                logg.error("Feil ved lesing av flow: {}, {}", it.localizedMessage, it.printStackTrace())
+                logg.error("Feil ved lesing av flow: {}", it.localizedMessage)
                 throw it
             }.collect { event ->
                 val data = event.data ?: return@collect
