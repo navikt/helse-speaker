@@ -7,6 +7,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.sse.SSE
 import io.ktor.client.plugins.sse.sse
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.retry
 import kotlinx.serialization.Contextual
@@ -21,6 +22,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 internal val jsonReader =
     Json {
@@ -76,7 +78,8 @@ internal suspend fun sanityVarselendringerListener(
         logg.info("Etablerer lytter mot Sanity")
         incoming
             .retry(5) {
-                logg.info("Feil oppsto i flow", it)
+                logg.info("Feil oppsto i flow: ${it.localizedMessage}", it)
+                delay(15.seconds)
                 true
             }
             .catch {

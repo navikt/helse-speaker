@@ -36,7 +36,7 @@ fun app(
     var up = false
 
     val exceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
-        logg.info("En feil har oppstått:", exception)
+        logg.info("En feil har oppstått: ${exception.localizedMessage}", exception)
         coroutineContext.cancel(CancellationException("En feil har oppstått", exception))
     }
     val scope = CoroutineScope(Dispatchers.Default + exceptionHandler)
