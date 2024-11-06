@@ -71,9 +71,9 @@ internal suspend fun sanityVarselendringerListener(
                 }
             }
         },
-        showCommentEvents = false,
-        showRetryEvents = false,
-        reconnectionTime = 5000.milliseconds,
+        showCommentEvents = true,
+        showRetryEvents = true,
+        reconnectionTime = 10000.milliseconds,
     ) {
         logg.info("Etablerer lytter mot Sanity")
         incoming
