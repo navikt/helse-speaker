@@ -35,10 +35,11 @@ fun app(
     logg.info("Svarer på isalive og isready")
     var up = false
 
-    val exceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
-        logg.info("En feil har oppstått: ${exception.localizedMessage}", exception)
-        coroutineContext.cancel(CancellationException("En feil har oppstått", exception))
-    }
+    val exceptionHandler =
+        CoroutineExceptionHandler { coroutineContext, exception ->
+            logg.error("En feil har oppstått: ${exception.localizedMessage}", exception)
+            coroutineContext.cancel(CancellationException("En feil har oppstått", exception))
+        }
     val scope = CoroutineScope(Dispatchers.Default + exceptionHandler)
     scope.launch {
         up = true
