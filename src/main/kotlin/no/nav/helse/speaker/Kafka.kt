@@ -35,6 +35,6 @@ internal object Kafka : Sender(
     private val producer = KafkaProducer(properties, StringSerializer(), StringSerializer())
 
     override fun send(melding: String) {
-        producer.send(ProducerRecord("tbd.rapid.v1", melding))
+        producer.send(ProducerRecord("tbd.rapid.v1", melding)).get()
     }
 }
