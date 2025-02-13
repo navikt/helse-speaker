@@ -1,10 +1,10 @@
 val ktorClientVersion = "3.1.0"
 val ktorServerVersion = "3.1.0"
-val logbackVersion = "1.5.8"
-val logstashVersion = "7.4"
-val kafkaVersion = "3.7.0"
-val gcpBucketVersion = "2.35.0"
-val junitVersion = "5.11.1"
+val logbackVersion = "1.5.16"
+val logstashVersion = "8.0"
+val kafkaVersion = "3.7.1"
+val gcpBucketVersion = "2.48.2"
+val junitVersion = "5.11.4"
 
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
