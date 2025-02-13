@@ -21,7 +21,6 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.util.*
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 internal val jsonReader =
@@ -52,7 +51,8 @@ internal suspend fun sanityVarselendringerListener(
             install(SSE) {
                 showCommentEvents()
                 showRetryEvents()
-                reconnectionTime = 5000.milliseconds
+                maxReconnectionAttempts = 5
+                reconnectionTime = 5.seconds
             }
             install(ContentNegotiation) {
                 json()
@@ -71,9 +71,6 @@ internal suspend fun sanityVarselendringerListener(
                 }
             }
         },
-        showCommentEvents = true,
-        showRetryEvents = true,
-        reconnectionTime = 10000.milliseconds,
     ) {
         logg.info("Etablerer lytter mot Sanity")
         incoming

@@ -1,5 +1,5 @@
-val ktorClientVersion = "3.0.0"
-val ktorServerVersion = "3.0.0"
+val ktorClientVersion = "3.1.0"
+val ktorServerVersion = "3.1.0"
 val logbackVersion = "1.5.8"
 val logstashVersion = "7.4"
 val kafkaVersion = "3.7.0"
