@@ -1,16 +1,16 @@
-val ktorClientVersion = "3.1.0"
-val ktorServerVersion = "3.1.0"
-val logbackVersion = "1.5.16"
+val ktorClientVersion = "3.1.1"
+val ktorServerVersion = "3.1.1"
+val logbackVersion = "1.5.18"
 val logstashVersion = "8.0"
-val kafkaVersion = "3.7.1"
-val gcpBucketVersion = "2.48.2"
-val junitVersion = "5.11.4"
+val kafkaVersion = "3.9.0"
+val gcpBucketVersion = "2.50.0"
+val junitVersion = "5.12.1"
 
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
 plugins {
-    kotlin("jvm") version "2.0.20"
-    kotlin("plugin.serialization") version "2.0.20"
+    kotlin("jvm") version "2.1.20"
+    kotlin("plugin.serialization") version "2.1.20"
 }
 
 repositories {
@@ -40,6 +40,7 @@ dependencies {
 
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.ktor:ktor-client-mock:$ktorClientVersion")
 }
 
