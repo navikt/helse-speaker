@@ -42,8 +42,6 @@ jobs:
         with:
           team: tbd
           dockerfile: Dockerfile
-          cache_from: type=gha
-          cache_to: type=gha,mode=max
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
 
