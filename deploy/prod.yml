@@ -55,3 +55,7 @@ spec:
       value: production
     - name: BUCKET_NAME
       value: speaker-bucket-prod
+  observability:
+    logging:
+      destinations:
+        - id: elastic
