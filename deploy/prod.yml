@@ -35,6 +35,9 @@ spec:
         - host: apicdn.sanity.io
         - host: z9kr8ddn.apicdn.sanity.io
         - host: cdn.sanity.io
+      rules:
+        - application: logging
+          namespace: nais-system
   prometheus:
     enabled: true
     path: /metrics
