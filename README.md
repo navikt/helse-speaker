@@ -9,10 +9,8 @@ Downstream leses og caches disse av Spesialist, som igjen server tekstene til Sp
 ## Oppgradering av gradle wrapper
 Finn nyeste versjon av gradle her: https://gradle.org/releases/
 
+Kjør denne to ganger (ja, den må kjøres to ganger 🤷, bare se [dokumentasjonen til Gradle](https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:upgrading_wrapper)):
 ```./gradlew wrapper --gradle-version $gradleVersjon```
-
-Husk å oppdater gradle versjon i build.gradle.kts filen
-```gradleVersion = "$gradleVersjon"```
 
 ## Henvendelser
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
