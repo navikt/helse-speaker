@@ -17,10 +17,9 @@ internal val logg = LoggerFactory.getLogger("Speaker")
 
 fun main() {
     val env = System.getenv()
-    val bøttenavn = env["BUCKET_NAME"] ?: throw IllegalArgumentException("Mangler bucket name")
-    val sender = Kafka
+    val bøttenavn = env.requiredValue("BUCKET_NAME")
 
-    app(env, sender, GCPBøtte(bøttenavn))
+    app(env, Kafka, GCPBøtte(bøttenavn))
 }
 
 fun app(
@@ -28,8 +27,8 @@ fun app(
     sender: Sender,
     bøtte: Bøtte
 ) {
-    val sanityProjectId = env["SANITY_PROJECT_ID"] ?: throw IllegalArgumentException("Mangler sanity projectId")
-    val sanityDataset = env["SANITY_DATASET"] ?: throw IllegalArgumentException("Mangler sanity dataset")
+    val sanityProjectId = env.requiredValue("SANITY_PROJECT_ID")
+    val sanityDataset = env.requiredValue("SANITY_DATASET")
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
 
     logg.info("Svarer på isalive og isready")
@@ -60,6 +59,10 @@ fun app(
     }
     server.settOppShutdownHook()
     server.start(wait = true)
+}
+
+fun Map<String, String>.requiredValue(key: String) = requireNotNull(get(key)) {
+    "Key $key mangler i miljøvariablene"
 }
 
 private fun EmbeddedServer<CIOApplicationEngine, CIOApplicationEngine.Configuration>.settOppShutdownHook() {
