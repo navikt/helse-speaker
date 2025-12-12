@@ -1,16 +1,16 @@
-val ktorClientVersion = "3.2.1"
-val ktorServerVersion = "3.2.1"
-val logbackVersion = "1.5.18"
+val ktorClientVersion = "3.3.3"
+val ktorServerVersion = "3.3.3"
+val logbackVersion = "1.5.21"
 val logstashVersion = "8.1"
-val kafkaVersion = "3.9.1"
-val gcpBucketVersion = "2.53.2"
-val junitVersion = "5.12.1"
+val kafkaVersion = "4.1.1"
+val gcpBucketVersion = "2.60.0"
+val junitVersion = "6.0.1"
 
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
 plugins {
-    kotlin("jvm") version "2.2.0"
-    kotlin("plugin.serialization") version "2.2.0"
+    kotlin("jvm") version "2.2.21"
+    kotlin("plugin.serialization") version "2.2.21"
 }
 
 repositories {
