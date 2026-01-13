@@ -4,7 +4,7 @@ val logbackVersion = "1.5.21"
 val logstashVersion = "9.0"
 val kafkaVersion = "4.1.1"
 val gcpBucketVersion = "2.60.0"
-val junitVersion = "6.0.1"
+val junitVersion = "6.0.2"
 
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
