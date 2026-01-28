@@ -43,8 +43,6 @@ spec:
     path: /metrics
   kafka:
     pool: nav-dev
-  secureLogs:
-    enabled: true
   gcp:
     buckets:
       - name: speaker-bucket-dev
