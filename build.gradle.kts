@@ -2,7 +2,7 @@ val ktorClientVersion = "3.3.3"
 val ktorServerVersion = "3.3.3"
 val logbackVersion = "1.5.21"
 val logstashVersion = "9.0"
-val kafkaVersion = "4.1.1"
+val kafkaVersion = "4.2.0"
 val gcpBucketVersion = "2.60.0"
 val junitVersion = "6.0.1"
 
