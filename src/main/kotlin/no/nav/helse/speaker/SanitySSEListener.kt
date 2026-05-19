@@ -83,7 +83,11 @@ internal suspend fun sanityVarselendringerListener(
                 logg.error("Feil ved lesing av flow: {}", it.localizedMessage, it)
                 throw it
             }.collect { event ->
-                val data = event.data ?: return@collect
+                val data = event.data
+                if (data == null) {
+                    logg.info("Hva er dette?: $event")
+                    return@collect
+                }
                 if (erVelkomsthilsen(data)) return@collect
                 logg.info("Mottatt melding fra Sanity")
                 try {
