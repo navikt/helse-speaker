@@ -16,6 +16,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
 import java.time.LocalDateTime
@@ -88,6 +91,7 @@ internal suspend fun sanityVarselendringerListener(
             }.collect { event ->
                 val data = event.data ?: return@collect // Det kommer jevnlig heartbeat-meldinger eller noe lignende (men ingen feilmeldinger, så vidt vi kunne se
                 if (erVelkomsthilsen(data)) return@collect
+                if (erDraft(data)) return@collect
                 logg.info("Mottatt melding fra Sanity")
                 try {
                     val (id, melding) =
@@ -109,6 +113,15 @@ private fun erVelkomsthilsen(data: String) = try {
     val message = Json.decodeFromString<Velkomsthilsen>(data)
     logg.info("Mottatt velkomsthilsen: {}", message)
     true
+} catch (_: Exception) {
+    false
+}
+
+private fun erDraft(data: String) = try {
+    val message = Json.decodeFromString<JsonObject>(data)
+    val result = message["result"] ?: return false
+    val idFinnesOgStarterMedDraft = result.jsonObject["_id"]?.jsonPrimitive?.content?.startsWith("drafts.")
+    idFinnesOgStarterMedDraft ?: false
 } catch (_: Exception) {
     false
 }
