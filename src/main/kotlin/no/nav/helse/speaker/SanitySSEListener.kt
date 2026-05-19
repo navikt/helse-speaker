@@ -6,6 +6,7 @@ import io.ktor.client.engine.cio.endpoint
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.sse.SSE
 import io.ktor.client.plugins.sse.sse
+import io.ktor.client.request.bearerAuth
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
@@ -38,6 +39,7 @@ internal suspend fun sanityVarselendringerListener(
     iProduksjonsmiljø: Boolean,
     sanityProjectId: String,
     sanityDataSet: String,
+    sanityReadDatasetsToken: String,
     sender: Sender,
     bøtte: Bøtte
 ) {
@@ -59,11 +61,12 @@ internal suspend fun sanityVarselendringerListener(
             }
         }
     client.sse(
-        urlString = """https://$sanityProjectId.api.sanity.io/v2021-06-07/data/listen/$sanityDataSet""",
+        urlString = """https://$sanityProjectId.api.sanity.io/v2026-05-19/data/listen/$sanityDataSet""",
         request = {
             url {
                 parameters.append("query", """*[_type == "varsel"]""")
                 parameters.append("includeResult", "true")
+                bearerAuth(sanityReadDatasetsToken)
                 val lastEventId = bøtte.hentLastEventId()
                 if (lastEventId != null) {
                     logg.info("Bruker lastEventId i kall: $lastEventId")

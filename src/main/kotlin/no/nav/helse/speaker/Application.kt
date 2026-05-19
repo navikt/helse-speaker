@@ -29,6 +29,7 @@ fun app(
 ) {
     val sanityProjectId = env.requiredValue("SANITY_PROJECT_ID")
     val sanityDataset = env.requiredValue("SANITY_DATASET")
+    val sanityReadDatasetsToken = env.requiredValue("SANITY_READ_DATASETS_TOKEN")
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
 
     logg.info("Svarer på isalive og isready")
@@ -42,7 +43,7 @@ fun app(
     val scope = CoroutineScope(Dispatchers.Default + exceptionHandler)
     scope.launch {
         up = true
-        sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sender, bøtte)
+        sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sanityReadDatasetsToken, sender, bøtte)
         up = false // lytteren returnerte og klienten er derfor ikke lenger kjørende
     }
     val server = scope.embeddedServer(CIO, port = 8080) {
