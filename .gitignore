@@ -3,5 +3,6 @@
 .idea
 .kotlin
 build
+out
 
 !/.idea/codeStyles/*.xml
