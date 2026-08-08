@@ -10,7 +10,7 @@ val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
 plugins {
     kotlin("jvm") version "2.2.21"
-    kotlin("plugin.serialization") version "2.2.21"
+    kotlin("plugin.serialization") version "2.3.0"
 }
 
 repositories {
