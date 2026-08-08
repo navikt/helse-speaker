@@ -9,7 +9,7 @@ val junitVersion = "6.0.1"
 val mainClass = "no.nav.helse.speaker.ApplicationKt"
 
 plugins {
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm") version "2.3.0"
     kotlin("plugin.serialization") version "2.2.21"
 }
 
