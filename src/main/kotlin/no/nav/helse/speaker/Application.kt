@@ -12,6 +12,7 @@ import io.ktor.server.routing.routing
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal val logg = LoggerFactory.getLogger("Speaker")
 
@@ -33,7 +34,7 @@ fun app(
     val iProduksjonsmiljø = env["NAIS_CLUSTER_NAME"] == "prod-gcp"
 
     logg.info("Svarer på isalive og isready")
-    var up = false
+    val up = AtomicBoolean(false)
 
     val exceptionHandler =
         CoroutineExceptionHandler { coroutineContext, exception ->
@@ -42,14 +43,17 @@ fun app(
         }
     val scope = CoroutineScope(Dispatchers.Default + exceptionHandler)
     scope.launch {
-        up = true
-        sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sanityReadDatasetsToken, sender, bøtte)
-        up = false // lytteren returnerte og klienten er derfor ikke lenger kjørende
+        up.set(true)
+        try {
+            sanityVarselendringerListener(iProduksjonsmiljø, sanityProjectId, sanityDataset, sanityReadDatasetsToken, sender, bøtte)
+        } finally {
+            up.set(false)
+        }
     }
     val server = scope.embeddedServer(CIO, port = 8080) {
         routing {
             get("/isalive") {
-                if (up) call.respondText("ALIVE!")
+                if (up.get()) call.respondText("ALIVE!")
                 else call.respondText("NOT ALIVE!", status = HttpStatusCode.ServiceUnavailable)
             }
             get("/isready") { call.respondText("READY!") }

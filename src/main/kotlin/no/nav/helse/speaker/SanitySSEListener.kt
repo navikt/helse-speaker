@@ -2,15 +2,16 @@ package no.nav.helse.speaker
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.engine.cio.endpoint
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.sse.SSE
 import io.ktor.client.plugins.sse.sse
 import io.ktor.client.request.bearerAuth
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.retry
+import kotlinx.coroutines.isActive
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -22,6 +23,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.util.*
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 internal val jsonReader =
@@ -45,10 +47,9 @@ internal suspend fun sanityVarselendringerListener(
 ) {
     val client =
         HttpClient(CIO) {
-            engine {
-                endpoint {
-                    this.connectAttempts = Int.MAX_VALUE
-                }
+            install(HttpTimeout) {
+                connectTimeoutMillis = 10_000
+                socketTimeoutMillis = 120_000
             }
             install(SSE) {
                 showCommentEvents()
@@ -60,49 +61,59 @@ internal suspend fun sanityVarselendringerListener(
                 json()
             }
         }
-    client.sse(
-        urlString = """https://$sanityProjectId.api.sanity.io/v2026-05-19/data/listen/$sanityDataSet""",
-        request = {
-            url {
-                parameters.append("query", """*[_type == "varsel" && !(_id in path("drafts.**"))]""")
-                parameters.append("includeResult", "true")
-                bearerAuth(sanityReadDatasetsToken)
-                val lastEventId = bøtte.hentLastEventId()
-                if (lastEventId != null) {
-                    logg.info("Bruker lastEventId i kall: $lastEventId")
-                    parameters.append("lastEventId", lastEventId)
+    try {
+        keepListening {
+            client.sse(
+                urlString = """https://$sanityProjectId.api.sanity.io/v2026-05-19/data/listen/$sanityDataSet""",
+                request = {
+                    url {
+                        parameters.append("query", """*[_type == "varsel" && !(_id in path("drafts.**"))]""")
+                        parameters.append("includeResult", "true")
+                        bearerAuth(sanityReadDatasetsToken)
+                        val lastEventId = bøtte.hentLastEventId()
+                        if (lastEventId != null) {
+                            logg.info("Bruker lastEventId i kall: $lastEventId")
+                            parameters.append("lastEventId", lastEventId)
+                        }
+                    }
+                },
+            ) {
+                logg.info("Etablerer lytter mot Sanity")
+                incoming.collect { event ->
+                    val data = event.data ?: return@collect // Sanity sender også meldinger uten data.
+                    if (erVelkomsthilsen(data)) return@collect
+                    logg.info("Mottatt melding fra Sanity")
+                    try {
+                        val (id, melding) =
+                            jsonReader
+                                .decodeFromString<SanityEndring>(data)
+                        logg.info("Mottatt varseldefinisjon: $data")
+                        melding.forsøkPubliserDefinisjon(iProduksjonsmiljø, sender)
+                        bøtte.lagreLastEventId(id)
+                    } catch (_: SerializationException) {
+                        logg.info("Meldingen er ikke en varseldefinisjon. $data")
+                    }
                 }
             }
-        },
-    ) {
-        logg.info("Etablerer lytter mot Sanity")
-        incoming
-            .retry(5) {
-                logg.info("Feil oppsto i flow: ${it.localizedMessage}", it)
-                delay(15.seconds)
-                true
-            }
-            .catch {
-                logg.error("Feil ved lesing av flow: {}", it.localizedMessage, it)
-                throw it
-            }.collect { event ->
-                val data = event.data ?: return@collect // Det kommer jevnlig heartbeat-meldinger eller noe lignende (men ingen feilmeldinger, så vidt vi kunne se
-                if (erVelkomsthilsen(data)) return@collect
-                logg.info("Mottatt melding fra Sanity")
-                try {
-                    val (id, melding) =
-                        jsonReader
-                            .decodeFromString<SanityEndring>(data)
-                    logg.info("Mottatt varseldefinisjon: $data")
-                    melding.forsøkPubliserDefinisjon(iProduksjonsmiljø, sender)
-                    bøtte.lagreLastEventId(id)
-                } catch (_: SerializationException) {
-                    logg.info("Meldingen er ikke en varseldefinisjon. $data")
-                }
-            }
+        }
+    } finally {
+        logg.info("Client lukkes")
+        client.close()
     }
-    logg.info("Client lukkes")
-    client.close()
+}
+
+internal suspend fun keepListening(delayBeforeReconnect: Duration = 5.seconds, listen: suspend () -> Unit) {
+    while (currentCoroutineContext().isActive) {
+        try {
+            listen()
+            logg.warn("Sanity-lytteren ble avsluttet uten feil. Kobler til på nytt")
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logg.error("Sanity-lytteren feilet. Kobler til på nytt", e)
+        }
+        delay(delayBeforeReconnect)
+    }
 }
 
 private fun erVelkomsthilsen(data: String) = try {

@@ -3,14 +3,11 @@
 
 ## Beskrivelse
 
-App som lytter på SSE apiet til Sanity og publiserer varseldefinisjoner til Kafka.
+App som lytter på SSE-API-et til Sanity og publiserer varseldefinisjoner til Kafka.
 Downstream leses og caches disse av Spesialist, som igjen server tekstene til Speil.
 
-## Oppgradering av gradle wrapper
-Finn nyeste versjon av gradle her: https://gradle.org/releases/
-
-Kjør denne to ganger (ja, den må kjøres to ganger 🤷, bare se [dokumentasjonen til Gradle](https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:upgrading_wrapper)):
-```./gradlew wrapper --gradle-version $gradleVersjon```
+Lytteren kobler til på nytt når SSE-tilkoblingen avsluttes, med eller uten feil.
+Feil logges før nytt forsøk. `/isalive` svarer med 503 hvis lytteren avsluttes uventet.
 
 ## Henvendelser
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
