@@ -1,73 +1,25 @@
-val ktorClientVersion = "3.3.3"
-val ktorServerVersion = "3.3.3"
-val logbackVersion = "1.5.21"
-val logstashVersion = "9.0"
-val kafkaVersion = "4.2.0"
-val gcpBucketVersion = "2.60.0"
-val junitVersion = "6.0.1"
-
-val mainClass = "no.nav.helse.speaker.ApplicationKt"
-
 plugins {
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.serialization") version "2.2.21"
+    alias(libs.plugins.sykepenger.deployable)
+    alias(libs.plugins.kotlin.serialization)
 }
 
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
+sykepengerDeployable {
+    mainClass = "no.nav.helse.speaker.ApplicationKt"
 }
 
 dependencies {
-    implementation("io.ktor:ktor-client-core:$ktorClientVersion")
-    implementation("io.ktor:ktor-client-cio:$ktorClientVersion")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktorClientVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorClientVersion")
-
-    implementation("io.ktor:ktor-server-core:$ktorServerVersion")
-    implementation("io.ktor:ktor-server-cio:$ktorServerVersion")
-    implementation("io.ktor:ktor-server-auth:$ktorServerVersion")
-    implementation("io.ktor:ktor-server-auth-jwt:$ktorServerVersion") {
+    implementation(libs.bundles.ktor.client)
+    implementation(libs.bundles.ktor.server)
+    implementation(libs.ktor.server.auth.jwt) {
         exclude(group = "junit")
     }
 
-    implementation("com.google.cloud:google-cloud-storage:$gcpBucketVersion")
+    implementation(libs.google.cloud.storage)
 
-    implementation("ch.qos.logback:logback-classic:$logbackVersion")
-    implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
+    implementation(libs.logback.classic)
+    implementation(libs.logstash.logback.encoder)
 
-    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
+    implementation(libs.kafka.clients)
 
-    testImplementation(platform("org.junit:junit-bom:$junitVersion"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("io.ktor:ktor-client-mock:$ktorClientVersion")
-}
-
-tasks {
-    kotlin {
-        jvmToolchain(21)
-    }
-    test {
-        useJUnitPlatform()
-    }
-
-    withType<Jar> {
-        archiveBaseName.set("app")
-
-        manifest {
-            attributes["Main-Class"] = mainClass
-            attributes["Class-Path"] =
-                configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                    it.name
-                }
-        }
-
-        doLast {
-            configurations.runtimeClasspath.get().forEach {
-                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-                if (!file.exists()) it.copyTo(file)
-            }
-        }
-    }
+    testImplementation(libs.ktor.client.mock)
 }

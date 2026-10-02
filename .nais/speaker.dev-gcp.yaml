@@ -1,0 +1,15 @@
+spec:
+  resources:
+    requests:
+      cpu: 5m
+  kafka:
+    pool: nav-dev
+  gcp:
+    buckets:
+      - name: speaker-bucket-dev
+        lifecycleCondition:
+          numNewerVersions: 1
+          withState: ANY
+  env:
+    - name: BUCKET_NAME
+      value: speaker-bucket-dev

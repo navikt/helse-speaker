@@ -1,0 +1,39 @@
+[versions]
+# Må følge Kotlin-versjonen som no.nav.sykepenger.kotlin-pluginen bruker
+kotlin = "2.4.20"
+ktor = "3.3.3"
+sykepengerGradlePlugins = "20261001.1830"
+
+[libraries]
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+ktor-serialization-kotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
+ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+
+google-cloud-storage = "com.google.cloud:google-cloud-storage:2.60.0"
+kafka-clients = "org.apache.kafka:kafka-clients:4.2.0"
+logback-classic = "ch.qos.logback:logback-classic:1.5.21"
+logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:9.0"
+
+[bundles]
+ktor-client = [
+    "ktor-client-cio",
+    "ktor-client-contentNegotiation",
+    "ktor-client-core",
+    "ktor-serialization-kotlinxJson"
+]
+ktor-server = [
+    "ktor-server-auth",
+    "ktor-server-cio",
+    "ktor-server-core"
+]
+
+[plugins]
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+sykepenger-deployable = { id = "no.nav.sykepenger.deployable", version.ref = "sykepengerGradlePlugins" }

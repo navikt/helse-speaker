@@ -1,8 +1,6 @@
+.gradle/
+.idea/
+.kotlin/
+build/
+out/
 .DS_Store
-.gradle
-.idea
-.kotlin
-build
-out
-
-!/.idea/codeStyles/*.xml

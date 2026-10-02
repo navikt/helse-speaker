@@ -1,5 +1,5 @@
 # Speaker
-![Bygg og deploy app](https://github.com/navikt/helse-speaker/workflows/Speaker/badge.svg)
+![Bygg og deploy app](https://github.com/navikt/helse-speaker/actions/workflows/main.yml/badge.svg)
 
 ## Beskrivelse
 
