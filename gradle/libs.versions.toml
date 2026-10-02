@@ -16,7 +16,7 @@ ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = 
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 
-google-cloud-storage = "com.google.cloud:google-cloud-storage:2.60.0"
+google-cloud-storage = "com.google.cloud:google-cloud-storage:2.74.0"
 kafka-clients = "org.apache.kafka:kafka-clients:4.2.0"
 logback-classic = "ch.qos.logback:logback-classic:1.5.21"
 logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:9.0"
