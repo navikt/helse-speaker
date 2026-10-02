@@ -1,7 +1,7 @@
 [versions]
 # Må følge Kotlin-versjonen som no.nav.sykepenger.kotlin-pluginen bruker
 kotlin = "2.4.20"
-ktor = "3.3.3"
+ktor = "3.6.0"
 sykepengerGradlePlugins = "20261001.1830"
 
 [libraries]
