@@ -26,7 +26,7 @@ fun main() {
 fun app(
     env: Map<String, String>,
     sender: Sender,
-    bøtte: Bøtte
+    bøtte: Bøtte,
 ) {
     val sanityProjectId = env.requiredValue("SANITY_PROJECT_ID")
     val sanityDataset = env.requiredValue("SANITY_DATASET")
@@ -50,28 +50,35 @@ fun app(
             up.set(false)
         }
     }
-    val server = scope.embeddedServer(CIO, port = 8080) {
-        routing {
-            get("/isalive") {
-                if (up.get()) call.respondText("ALIVE!")
-                else call.respondText("NOT ALIVE!", status = HttpStatusCode.ServiceUnavailable)
+    val server =
+        scope.embeddedServer(CIO, port = 8080) {
+            routing {
+                get("/isalive") {
+                    if (up.get()) {
+                        call.respondText("ALIVE!")
+                    } else {
+                        call.respondText("NOT ALIVE!", status = HttpStatusCode.ServiceUnavailable)
+                    }
+                }
+                get("/isready") { call.respondText("READY!") }
             }
-            get("/isready") { call.respondText("READY!") }
+            monitor.subscribe(ApplicationStopped) {
+                logg.info("Avslutter appen")
+            }
         }
-        monitor.subscribe(ApplicationStopped) {
-            logg.info("Avslutter appen")
-        }
-    }
     server.settOppShutdownHook()
     server.start(wait = true)
 }
 
-fun Map<String, String>.requiredValue(key: String) = requireNotNull(get(key)) {
-    "Key $key mangler i miljøvariablene"
-}
+fun Map<String, String>.requiredValue(key: String) =
+    requireNotNull(get(key)) {
+        "Key $key mangler i miljøvariablene"
+    }
 
 private fun EmbeddedServer<CIOApplicationEngine, CIOApplicationEngine.Configuration>.settOppShutdownHook() {
-    Runtime.getRuntime().addShutdownHook(Thread {
-        stop(1, 5, TimeUnit.SECONDS)
-    })
+    Runtime.getRuntime().addShutdownHook(
+        Thread {
+            stop(1, 5, TimeUnit.SECONDS)
+        },
+    )
 }

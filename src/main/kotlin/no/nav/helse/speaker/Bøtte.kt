@@ -6,28 +6,36 @@ import java.nio.ByteBuffer
 
 interface Bøtte {
     fun hentLastEventId(): String? = null
-    fun lagreLastEventId(lastEventId: String): Boolean { return false }
+
+    fun lagreLastEventId(lastEventId: String): Boolean = false
 }
 
-class GCPBøtte(private val bøttenavn: String) : Bøtte {
+class GCPBøtte(
+    private val bøttenavn: String,
+) : Bøtte {
     companion object {
         private const val FILNAVN = "last_event_id.txt"
     }
-    override fun hentLastEventId(): String? = hentBøtte()
-        .get(FILNAVN)
-        ?.getContent()
-        ?.let { String(it) }
-        ?.takeIf { it.isNotBlank() }
-        ?.also {
-            logg.info("Funnet last event id, id=$it")
-        }
+
+    override fun hentLastEventId(): String? =
+        hentBøtte()
+            .get(FILNAVN)
+            ?.getContent()
+            ?.let { String(it) }
+            ?.takeIf { it.isNotBlank() }
+            ?.also {
+                logg.info("Funnet last event id, id=$it")
+            }
 
     override fun lagreLastEventId(lastEventId: String): Boolean {
         logg.info("Lagrer last event id i bøtta, id=$lastEventId")
         return lagre(lastEventId, FILNAVN)
     }
 
-    private fun lagre(tekst: String, filnavn: String): Boolean {
+    private fun lagre(
+        tekst: String,
+        filnavn: String,
+    ): Boolean {
         val bøtte = hentBøtte()
         val blob = bøtte.get(filnavn) ?: null
         if (blob == null) {

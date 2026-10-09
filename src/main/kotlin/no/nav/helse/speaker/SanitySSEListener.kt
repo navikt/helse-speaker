@@ -43,7 +43,7 @@ internal suspend fun sanityVarselendringerListener(
     sanityDataSet: String,
     sanityReadDatasetsToken: String,
     sender: Sender,
-    bøtte: Bøtte
+    bøtte: Bøtte,
 ) {
     val client =
         HttpClient(CIO) {
@@ -102,7 +102,10 @@ internal suspend fun sanityVarselendringerListener(
     }
 }
 
-internal suspend fun keepListening(delayBeforeReconnect: Duration = 5.seconds, listen: suspend () -> Unit) {
+internal suspend fun keepListening(
+    delayBeforeReconnect: Duration = 5.seconds,
+    listen: suspend () -> Unit,
+) {
     while (currentCoroutineContext().isActive) {
         try {
             listen()
@@ -116,13 +119,14 @@ internal suspend fun keepListening(delayBeforeReconnect: Duration = 5.seconds, l
     }
 }
 
-private fun erVelkomsthilsen(data: String) = try {
-    val message = Json.decodeFromString<Velkomsthilsen>(data)
-    logg.info("Mottatt velkomsthilsen: {}", message)
-    true
-} catch (_: Exception) {
-    false
-}
+private fun erVelkomsthilsen(data: String) =
+    try {
+        val message = Json.decodeFromString<Velkomsthilsen>(data)
+        logg.info("Mottatt velkomsthilsen: {}", message)
+        true
+    } catch (_: Exception) {
+        false
+    }
 
 internal fun Varseldefinisjon.forsøkPubliserDefinisjon(
     iProduksjonsmiljø: Boolean,
