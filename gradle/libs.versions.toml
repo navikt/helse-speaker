@@ -1,6 +1,6 @@
 [versions]
 # Må følge Kotlin-versjonen som no.nav.sykepenger.kotlin-pluginen bruker
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 ktor = "3.6.0"
 sykepengerGradlePlugins = "20261013.1718"
 
